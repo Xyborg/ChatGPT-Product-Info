@@ -10,13 +10,12 @@ This script creates a modal interface within ChatGPT that allows you to search f
 
 ## Features
 
-- **🔍 Product Search**: Search for any product using natural language queries
-- **📊 Comprehensive Results**: Get product details, reviews, ratings, and merchant offers
-- **🎯 Review Analysis**: Sentiment analysis with positive/negative/neutral breakdown
-- **🔗 Citation Links**: Direct links to source websites and reviews
-- **📱 Responsive Design**: Clean, modern interface that works on all screen sizes
-- **🔐 Auto Authentication**: Automatically fetches your ChatGPT session token
-- **⚡ Real-time Results**: Live streaming of search results as they come in
+- **Product Search**: Search for any product using natural language queries
+- **Comprehensive Results**: Get product details, reviews, ratings, and merchant offers
+- **Review Analysis**: Sentiment analysis with positive/negative/neutral breakdown
+- **Citation Links**: Direct links to source websites and reviews
+- **Auto Authentication**: Automatically fetches your ChatGPT session token
+- **Real-time Results**: Live streaming of search results as they come in
 
 ## How to Use
 
@@ -69,6 +68,8 @@ Try these search queries to see the power of the tool:
 - **Sentiment Breakdown**: Visual representation of positive/negative/neutral reviews
 - **Review Themes**: Common topics mentioned across reviews
 - **Source Citations**: Direct links to original review sources
+
+![ChatGPT Product Info Search Reviews Interface](chatgpt-product-info-reviews.png)
 
 ### Additional Data
 - **Product Overview**: AI rationale explaining the product category
