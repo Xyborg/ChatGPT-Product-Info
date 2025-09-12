@@ -29,11 +29,18 @@ This script creates a modal interface within ChatGPT that allows you to search f
 
 ## Demo
 
+### Single Product Search
+
 https://github.com/user-attachments/assets/b5472c48-1cd9-496b-b120-3fd548582f9f
+
+### Multi-Product Search
+
+
 
 ## Features
 
 - **Product Search**: Search for any product using natural language queries
+- 🆕 **Multi Product Search**: Search for and compare multiple products in a single query
 - **Comprehensive Results**: Get product details, reviews, ratings, and merchant offers
 - **Review Analysis**: Sentiment analysis with positive/negative/neutral breakdown
 - **Citation Links**: Direct links to source websites and reviews

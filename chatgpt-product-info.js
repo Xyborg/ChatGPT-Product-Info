@@ -100,12 +100,85 @@
                     flex-direction: column;
                     overflow: hidden;
                 ">
-                    <div style="
-                        padding: 16px 20px;
+                    <div id="search-area" style="
+                        position: relative;
+                        padding: 20px;
                         border-bottom: 1px solid #e9ecef;
                         background: white;
+                        transition: all 0.3s ease;
                     ">
-                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <!-- Collapse/Expand Button - positioned absolutely -->
+                        <div id="collapse-toggle" style="
+                            display: none;
+                            position: absolute;
+                            top: 8px;
+                            right: 20px;
+                            cursor: pointer;
+                            color: #007bff;
+                            font-size: 12px;
+                            font-weight: 500;
+                            transition: all 0.2s ease;
+                            border-radius: 4px;
+                            padding: 4px 8px;
+                            background: rgba(0, 123, 255, 0.1);
+                            border: 1px solid rgba(0, 123, 255, 0.2);
+                            z-index: 10;
+                        ">
+                            <span id="collapse-text">▲ Hide</span>
+                        </div>
+                        
+                        <div id="search-controls">
+                        <!-- Multi-product toggle -->
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px 0;">
+                            <label style="
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                font-size: 14px;
+                                color: #495057;
+                                font-weight: 500;
+                                cursor: pointer;
+                            ">
+                                <div style="
+                                    position: relative;
+                                    width: 44px;
+                                    height: 24px;
+                                    background: #dee2e6;
+                                    border-radius: 12px;
+                                    transition: background 0.3s ease;
+                                    cursor: pointer;
+                                " id="toggle-background">
+                                    <input type="checkbox" id="multi-product-toggle" style="
+                                        position: absolute;
+                                        opacity: 0;
+                                        width: 100%;
+                                        height: 100%;
+                                        margin: 0;
+                                        cursor: pointer;
+                                    " />
+                                    <div style="
+                                        position: absolute;
+                                        top: 2px;
+                                        left: 2px;
+                                        width: 20px;
+                                        height: 20px;
+                                        background: white;
+                                        border-radius: 50%;
+                                        transition: transform 0.3s ease;
+                                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                    " id="toggle-slider"></div>
+                                </div>
+                                Multi-product search
+                            </label>
+                            <div style="
+                                font-size: 12px;
+                                color: #6c757d;
+                                font-style: italic;
+                            ">Search multiple products at once</div>
+                        </div>
+                        
+                        <!-- Single product input -->
+                        <div id="single-product-input" style="display: flex; gap: 12px; margin-bottom: 12px;">
                             <input type="text" id="search-query" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" style="
                                 flex: 1;
                                 padding: 8px 12px;
@@ -126,6 +199,42 @@
                                 white-space: nowrap;
                             ">Search</button>
                         </div>
+                        
+                        <!-- Multi product input -->
+                        <div id="multi-product-input" style="display: none; margin-bottom: 12px;">
+                            <textarea id="multi-search-query" placeholder="Enter product names, one per line:&#10;iPhone 17 Pro&#10;Samsung Galaxy S25&#10;Google Pixel 9" style="
+                                width: 100%;
+                                min-height: 100px;
+                                padding: 8px 12px;
+                                border: 1px solid #dee2e6;
+                                border-radius: 4px;
+                                font-size: 14px;
+                                box-sizing: border-box;
+                                resize: vertical;
+                                font-family: inherit;
+                                margin-bottom: 8px;
+                            "></textarea>
+                            <div style="display: flex; gap: 12px;">
+                                <button id="multi-search-btn" style="
+                                    background: #007bff;
+                                    color: white;
+                                    border: none;
+                                    padding: 8px 16px;
+                                    border-radius: 4px;
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                    cursor: pointer;
+                                    white-space: nowrap;
+                                ">Search All Products</button>
+                                <div style="
+                                    font-size: 12px;
+                                    color: #6c757d;
+                                    align-self: center;
+                                    font-style: italic;
+                                ">Results will be shown in a table format</div>
+                            </div>
+                        </div>
+                        </div> <!-- End search-controls -->
                         
                         <!-- Hidden token field for status display -->
                         <input type="password" id="auth-token" placeholder="Token will be fetched automatically" readonly style="
@@ -235,9 +344,19 @@
         const modal = document.getElementById('chatgpt-product-search-modal');
         const closeBtn = document.getElementById('close-modal-btn');
         const searchBtn = document.getElementById('search-btn');
+        const multiSearchBtn = document.getElementById('multi-search-btn');
         const searchQuery = document.getElementById('search-query');
+        const multiSearchQuery = document.getElementById('multi-search-query');
         const authToken = document.getElementById('auth-token');
         const resultsContainer = document.getElementById('results-container');
+        const multiProductToggle = document.getElementById('multi-product-toggle');
+        const toggleBackground = document.getElementById('toggle-background');
+        const toggleSlider = document.getElementById('toggle-slider');
+        const singleProductInput = document.getElementById('single-product-input');
+        const multiProductInput = document.getElementById('multi-product-input');
+        const collapseToggle = document.getElementById('collapse-toggle');
+        const collapseText = document.getElementById('collapse-text');
+        const searchControls = document.getElementById('search-controls');
 
         // Close modal functionality
         closeBtn.addEventListener('click', () => {
@@ -258,8 +377,71 @@
             }
         });
 
+        // Toggle functionality
+        multiProductToggle.addEventListener('change', () => {
+            const isMultiMode = multiProductToggle.checked;
+            
+            if (isMultiMode) {
+                // Switch to multi-product mode
+                singleProductInput.style.display = 'none';
+                multiProductInput.style.display = 'block';
+                toggleBackground.style.background = '#007bff';
+                toggleSlider.style.transform = 'translateX(20px)';
+            } else {
+                // Switch to single-product mode
+                singleProductInput.style.display = 'flex';
+                multiProductInput.style.display = 'none';
+                toggleBackground.style.background = '#dee2e6';
+                toggleSlider.style.transform = 'translateX(0px)';
+            }
+        });
+
+        // Collapse/Expand functionality
+        collapseToggle.addEventListener('click', () => {
+            const isCollapsed = searchControls.style.display === 'none';
+            
+            if (isCollapsed) {
+                // Expand
+                searchControls.style.display = 'block';
+                collapseText.textContent = '▲ Hide';
+                collapseToggle.style.background = 'rgba(0, 123, 255, 0.1)';
+                collapseToggle.style.border = '1px solid rgba(0, 123, 255, 0.2)';
+                collapseToggle.style.color = '#007bff';
+            } else {
+                // Collapse
+                searchControls.style.display = 'none';
+                collapseText.textContent = '▼ Show';
+                collapseToggle.style.background = 'rgba(40, 167, 69, 0.1)';
+                collapseToggle.style.border = '1px solid rgba(40, 167, 69, 0.2)';
+                collapseToggle.style.color = '#28a745';
+            }
+        });
+
+        // Add hover effects to collapse toggle
+        collapseToggle.addEventListener('mouseenter', () => {
+            const isCollapsed = searchControls.style.display === 'none';
+            if (isCollapsed) {
+                collapseToggle.style.background = 'rgba(40, 167, 69, 0.2)';
+                collapseToggle.style.transform = 'scale(1.05)';
+            } else {
+                collapseToggle.style.background = 'rgba(0, 123, 255, 0.2)';
+                collapseToggle.style.transform = 'scale(1.05)';
+            }
+        });
+
+        collapseToggle.addEventListener('mouseleave', () => {
+            const isCollapsed = searchControls.style.display === 'none';
+            if (isCollapsed) {
+                collapseToggle.style.background = 'rgba(40, 167, 69, 0.1)';
+            } else {
+                collapseToggle.style.background = 'rgba(0, 123, 255, 0.1)';
+            }
+            collapseToggle.style.transform = 'scale(1)';
+        });
+
         // Search functionality
         searchBtn.addEventListener('click', performSearch);
+        multiSearchBtn.addEventListener('click', performMultiSearch);
 
         // Enter key support
         searchQuery.addEventListener('keydown', (e) => {
@@ -270,6 +452,14 @@
 
         // Initialize token status
         initializeTokenStatus();
+    }
+
+    // Function to show the collapse toggle after results are displayed
+    function showCollapseToggle() {
+        const collapseToggle = document.getElementById('collapse-toggle');
+        if (collapseToggle) {
+            collapseToggle.style.display = 'block';
+        }
     }
 
     async function performSearch() {
@@ -331,6 +521,110 @@
         } finally {
             searchBtn.disabled = false;
             searchBtn.textContent = 'Search';
+            // Show collapse toggle after results are displayed
+            showCollapseToggle();
+        }
+    }
+
+    async function performMultiSearch() {
+        const multiSearchQuery = document.getElementById('multi-search-query');
+        const multiSearchBtn = document.getElementById('multi-search-btn');
+        const resultsContainer = document.getElementById('results-container');
+        
+        if (!multiSearchQuery || !multiSearchBtn || !resultsContainer) {
+            alert('Modal elements not found. Please try again.');
+            return;
+        }
+        
+        const queries = multiSearchQuery.value.trim().split('\n').filter(q => q.trim());
+        
+        if (queries.length === 0) {
+            alert('Please enter at least one product name');
+            return;
+        }
+        
+        if (queries.length > 10) {
+            alert('Maximum 10 products allowed at once to avoid rate limiting');
+            return;
+        }
+        
+        // Get token automatically
+        let token;
+        try {
+            token = await getAutomaticToken();
+        } catch (error) {
+            alert('Failed to get authentication token. Please make sure you\'re logged in to ChatGPT.');
+            return;
+        }
+        
+        // Show loading state
+        multiSearchBtn.disabled = true;
+        multiSearchBtn.textContent = 'Searching...';
+        resultsContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <div style="
+                    display: inline-block;
+                    width: 32px;
+                    height: 32px;
+                    border: 3px solid #f3f3f3;
+                    border-top: 3px solid #667eea;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin-bottom: 10px;
+                "></div>
+                <p>Searching ${queries.length} products...</p>
+                <div id="progress-status" style="font-size: 14px; color: #999; margin-top: 10px;">
+                    Starting searches...
+                </div>
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+        
+        const results = [];
+        const progressStatus = document.getElementById('progress-status');
+        
+        try {
+            // Search products one by one
+            for (let i = 0; i < queries.length; i++) {
+                const query = queries[i].trim();
+                if (progressStatus) {
+                    progressStatus.textContent = `Searching "${query}" (${i + 1}/${queries.length})...`;
+                }
+                
+                try {
+                    const result = await searchProduct(query, token);
+                    results.push({
+                        query: query,
+                        success: true,
+                        data: result
+                    });
+                } catch (error) {
+                    results.push({
+                        query: query,
+                        success: false,
+                        error: error.message
+                    });
+                }
+                
+                // Add a small delay between requests to be respectful
+                if (i < queries.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+            
+            displayMultiResults(results);
+        } catch (error) {
+            displayError(error.message);
+        } finally {
+            multiSearchBtn.disabled = false;
+            multiSearchBtn.textContent = 'Search All Products';
+            // Show collapse toggle after results are displayed
+            showCollapseToggle();
         }
     }
 
@@ -913,7 +1207,7 @@
             return;
         }
         
-        if (!data || (!data.reviews.length && !data.products.length)) {
+        if (!data || (!data.reviews.length && !data.products.length && !data.productLinks.length)) {
             resultsContainer.innerHTML = `
                 <div style="
                     background: #fef2f2;
@@ -944,11 +1238,32 @@
                 ">Results for "${query}"</div>
                 <div style="display: flex; gap: 16px; font-size: 14px; color: #6c757d;">
                     <span>${data.summary.total_reviews} reviews</span>
-                    <span>${data.summary.total_products} products, and ${data.summary.total_product_links} citation links</span>
+                    <span>${data.summary.total_products} products</span>
+                    <span>${data.summary.total_product_links} citation links</span>
                     <span>${data.summary.review_themes.length} themes</span>
                 </div>
             </div>
         `;
+
+        // Show message when we have links but no reviews or products
+        if (data.productLinks.length > 0 && data.reviews.length === 0 && data.products.length === 0) {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <div style="
+                        background: #fff3cd;
+                        border: 1px solid #ffeaa7;
+                        border-radius: 6px;
+                        padding: 12px;
+                        margin: 0 12px;
+                        color: #856404;
+                        font-size: 13px;
+                    ">
+                        <div style="font-weight: 600; margin-bottom: 4px;">⚠️ Limited Information Available</div>
+                        <div>ChatGPT found ${data.productLinks.length} relevant link(s) for this product, but no detailed reviews or product information were retrieved. You can check the citation links below for more information.</div>
+                    </div>
+                </div>
+            `;
+        }
         
         if (data.rationale && data.rationale.trim()) {
             html += `
@@ -1201,6 +1516,423 @@
         
         resultsContainer.innerHTML = html;
     }
+
+    function displayMultiResults(results) {
+        const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) {
+            console.error('Results container not found');
+            return;
+        }
+        
+        const successfulResults = results.filter(r => r.success);
+        const failedResults = results.filter(r => !r.success);
+        
+        let html = `
+            <div style="
+                padding: 12px;
+                margin-bottom: 16px;
+                border-bottom: 1px solid #e9ecef;
+            ">
+                <div style="
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: #495057;
+                    margin-bottom: 8px;
+                ">Multi-Product Search Results</div>
+                <div style="display: flex; gap: 16px; font-size: 14px; color: #6c757d;">
+                    <span>${successfulResults.length}/${results.length} products found</span>
+                    ${failedResults.length > 0 ? `<span style="color: #dc3545;">${failedResults.length} failed</span>` : ''}
+                </div>
+            </div>
+        `;
+
+        if (failedResults.length > 0) {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <div style="
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #dc3545;
+                        margin-bottom: 8px;
+                        padding: 0 12px;
+                    ">Search Errors</div>
+                    <div style="
+                        background: #f8d7da;
+                        border: 1px solid #f5c6cb;
+                        border-radius: 4px;
+                        padding: 12px;
+                        margin: 0 12px;
+                        color: #721c24;
+                        font-size: 13px;
+                    ">
+                        ${failedResults.map(r => `<div><strong>${r.query}:</strong> ${r.error}</div>`).join('<br>')}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (successfulResults.length === 0) {
+            html += `
+                <div style="
+                    text-align: center;
+                    padding: 60px 40px;
+                    color: #6c757d;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 20px; opacity: 0.7;">❌</div>
+                    <h3 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #495057;">No Results Found</h3>
+                    <p style="margin: 0; font-size: 16px; line-height: 1.5;">None of the products could be found. Please try different search terms.</p>
+                </div>
+            `;
+            resultsContainer.innerHTML = html;
+            return;
+        }
+
+        // Create comparison table
+        html += `
+            <div style="margin-bottom: 20px;">
+                <div style="
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #495057;
+                    margin-bottom: 12px;
+                    padding: 0 12px;
+                ">Product Comparison Table</div>
+                
+                <div style="overflow-x: auto; margin: 0 12px;">
+                    <table style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        background: white;
+                        border: 1px solid #e9ecef;
+                        border-radius: 6px;
+                        overflow: hidden;
+                        font-size: 13px;
+                    ">
+                        <thead>
+                            <tr style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                                <th style="
+                                    padding: 12px 8px;
+                                    text-align: left;
+                                    font-weight: 600;
+                                    color: #495057;
+                                    border-right: 1px solid #e9ecef;
+                                    min-width: 150px;
+                                ">Product</th>
+                                <th style="
+                                    padding: 12px 8px;
+                                    text-align: center;
+                                    font-weight: 600;
+                                    color: #495057;
+                                    border-right: 1px solid #e9ecef;
+                                    min-width: 80px;
+                                ">Reviews</th>
+                                <th style="
+                                    padding: 12px 8px;
+                                    text-align: center;
+                                    font-weight: 600;
+                                    color: #495057;
+                                    border-right: 1px solid #e9ecef;
+                                    min-width: 120px;
+                                ">Sentiment</th>
+                                <th style="
+                                    padding: 12px 8px;
+                                    text-align: left;
+                                    font-weight: 600;
+                                    color: #495057;
+                                    border-right: 1px solid #e9ecef;
+                                    min-width: 200px;
+                                ">Top Themes</th>
+                                <th style="
+                                    padding: 12px 8px;
+                                    text-align: center;
+                                    font-weight: 600;
+                                    color: #495057;
+                                    min-width: 80px;
+                                ">Links</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+        successfulResults.forEach((result, index) => {
+            const data = result.data;
+            
+            // Calculate sentiment distribution
+            const sentimentCounts = data.reviews.reduce((acc, review) => {
+                acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                return acc;
+            }, {});
+            
+            const totalReviews = data.reviews.length;
+            const positiveCount = sentimentCounts.positive || 0;
+            const neutralCount = sentimentCounts.neutral || 0;
+            const negativeCount = sentimentCounts.negative || 0;
+            
+            const positivePercent = totalReviews > 0 ? Math.round((positiveCount / totalReviews) * 100) : 0;
+            const neutralPercent = totalReviews > 0 ? Math.round((neutralCount / totalReviews) * 100) : 0;
+            const negativePercent = totalReviews > 0 ? Math.round((negativeCount / totalReviews) * 100) : 0;
+            
+            // Get top 3 themes
+            const topThemes = data.summary.review_themes.slice(0, 3);
+            
+            html += `
+                <tr style="
+                    border-bottom: 1px solid #f8f9fa;
+                    ${index % 2 === 0 ? 'background: #fdfdfd;' : 'background: white;'}
+                ">
+                    <td style="
+                        padding: 12px 8px;
+                        border-right: 1px solid #e9ecef;
+                        vertical-align: top;
+                    ">
+                        <div style="
+                            font-weight: 600;
+                            color: #007bff;
+                            margin-bottom: 4px;
+                            cursor: pointer;
+                        " data-product-index="${index}" class="product-name-link">${result.query}</div>
+                        ${data.rationale ? `<div style="
+                            color: #6c757d;
+                            font-size: 11px;
+                            line-height: 1.3;
+                            max-height: 60px;
+                            overflow: hidden;
+                        ">${data.rationale.substring(0, 120)}${data.rationale.length > 120 ? '...' : ''}</div>` : ''}
+                    </td>
+                    <td style="
+                        padding: 12px 8px;
+                        text-align: center;
+                        border-right: 1px solid #e9ecef;
+                        vertical-align: top;
+                    ">
+                        <div style="font-weight: 600; color: #495057;">${totalReviews}</div>
+                        <div style="font-size: 11px; color: #6c757d;">reviews</div>
+                    </td>
+                    <td style="
+                        padding: 12px 8px;
+                        text-align: center;
+                        border-right: 1px solid #e9ecef;
+                        vertical-align: top;
+                    ">
+                        ${totalReviews > 0 ? `
+                            <div style="
+                                display: flex;
+                                background: #f8f9fa;
+                                border-radius: 4px;
+                                overflow: hidden;
+                                width: 60px;
+                                height: 6px;
+                                margin: 0 auto 4px auto;
+                                border: 1px solid #e9ecef;
+                            ">
+                                ${positiveCount > 0 ? `<div style="
+                                    background: #28a745;
+                                    width: ${positivePercent}%;
+                                    height: 100%;
+                                " title="${positiveCount} positive"></div>` : ''}
+                                ${neutralCount > 0 ? `<div style="
+                                    background: #ffc107;
+                                    width: ${neutralPercent}%;
+                                    height: 100%;
+                                " title="${neutralCount} neutral"></div>` : ''}
+                                ${negativeCount > 0 ? `<div style="
+                                    background: #dc3545;
+                                    width: ${negativePercent}%;
+                                    height: 100%;
+                                " title="${negativeCount} negative"></div>` : ''}
+                            </div>
+                            <div style="
+                                font-size: 10px;
+                                color: #6c757d;
+                                line-height: 1.2;
+                            ">
+                                <span style="color: #28a745;">●</span>${positivePercent}%
+                                ${neutralCount > 0 ? `<br><span style="color: #ffc107;">●</span>${neutralPercent}%` : ''}
+                                ${negativeCount > 0 ? `<br><span style="color: #dc3545;">●</span>${negativePercent}%` : ''}
+                            </div>
+                        ` : '<span style="color: #6c757d; font-size: 11px;">No reviews</span>'}
+                    </td>
+                    <td style="
+                        padding: 12px 8px;
+                        border-right: 1px solid #e9ecef;
+                        vertical-align: top;
+                    ">
+                        ${topThemes.length > 0 ? topThemes.map(theme => `
+                            <span style="
+                                display: inline-block;
+                                background: #e9ecef;
+                                color: #495057;
+                                padding: 2px 6px;
+                                border-radius: 8px;
+                                font-size: 10px;
+                                margin: 1px 2px 1px 0;
+                            ">${theme}</span>
+                        `).join('') : '<span style="color: #6c757d; font-size: 11px;">No themes</span>'}
+                        ${data.summary.review_themes.length > 3 ? `<span style="color: #6c757d; font-size: 10px;">+${data.summary.review_themes.length - 3} more</span>` : ''}
+                    </td>
+                    <td style="
+                        padding: 12px 8px;
+                        text-align: center;
+                        vertical-align: top;
+                    ">
+                        <div style="font-weight: 600; color: #495057;">${data.productLinks.length}</div>
+                        <div style="font-size: 11px; color: #6c757d;">links</div>
+                        ${(data.reviews.length > 0 || data.products.length > 0 || data.rationale || data.reviewSummary) ? `
+                            <button data-product-index="${index}" class="view-details-btn" style="
+                                background: #007bff;
+                                color: white;
+                                border: none;
+                                padding: 2px 6px;
+                                border-radius: 3px;
+                                font-size: 10px;
+                                cursor: pointer;
+                                margin-top: 4px;
+                            ">View</button>
+                        ` : data.productLinks.length > 0 ? `
+                            <button data-product-index="${index}" class="view-details-btn" style="
+                                background: #ffc107;
+                                color: #212529;
+                                border: none;
+                                padding: 2px 6px;
+                                border-radius: 3px;
+                                font-size: 10px;
+                                cursor: pointer;
+                                margin-top: 4px;
+                            ">Links</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        // Add detailed results section (initially hidden)
+        html += `
+            <div id="detailed-results" style="display: none;">
+                <div style="
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #495057;
+                    margin-bottom: 12px;
+                    padding: 0 12px;
+                ">Detailed Product Information</div>
+                <div id="detailed-content"></div>
+            </div>
+        `;
+
+        resultsContainer.innerHTML = html;
+
+        // Store results for detailed view
+        window.multiSearchResults = successfulResults;
+
+        // Add event listeners for product details links
+        const productNameLinks = document.querySelectorAll('.product-name-link');
+        productNameLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-product-index'));
+                showProductDetails(index);
+            });
+        });
+
+        const viewDetailsBtns = document.querySelectorAll('.view-details-btn');
+        viewDetailsBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-product-index'));
+                showProductDetails(index);
+            });
+        });
+    }
+
+    // Function to show detailed product information
+    window.showProductDetails = function(index) {
+        const detailedResults = document.getElementById('detailed-results');
+        const detailedContent = document.getElementById('detailed-content');
+        
+        if (!window.multiSearchResults || !detailedResults || !detailedContent) {
+            return;
+        }
+
+        const result = window.multiSearchResults[index];
+        if (!result) {
+            return;
+        }
+
+        const productName = result.query;
+
+        // Display the single product result using existing function
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = '';
+        
+        // Use the existing displayResults function but capture its output
+        const originalContainer = document.getElementById('results-container');
+        const tempId = 'temp-results-container';
+        tempContainer.id = tempId;
+        document.body.appendChild(tempContainer);
+        
+        // Temporarily replace the results container
+        const originalGetElementById = document.getElementById;
+        document.getElementById = function(id) {
+            if (id === 'results-container') {
+                return tempContainer;
+            }
+            return originalGetElementById.call(document, id);
+        };
+        
+        displayResults(result.data, result.query);
+        
+        // Restore original function
+        document.getElementById = originalGetElementById;
+        
+        // Move the content to detailed view
+        detailedContent.innerHTML = `
+            <div style="
+                background: #f8f9fa;
+                padding: 12px;
+                margin-bottom: 16px;
+                border-radius: 6px;
+                border-left: 4px solid #007bff;
+            ">
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <h3 style="margin: 0; color: #495057;">Detailed view: ${productName}</h3>
+                    <button class="close-details-btn" style="
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        padding: 4px 8px;
+                        border-radius: 3px;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">Close</button>
+                </div>
+            </div>
+            ${tempContainer.innerHTML}
+        `;
+        
+        // Clean up
+        document.body.removeChild(tempContainer);
+        
+        // Add event listener for close button
+        const closeBtn = detailedContent.querySelector('.close-details-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                detailedResults.style.display = 'none';
+            });
+        }
+
+        // Show detailed results
+        detailedResults.style.display = 'block';
+        detailedResults.scrollIntoView({ behavior: 'smooth' });
+    };
 
     function displayError(message) {
         const resultsContainer = document.getElementById('results-container');
