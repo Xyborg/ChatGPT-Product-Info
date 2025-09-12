@@ -1,12 +1,44 @@
 // ChatGPT Product Info Search
-// Paste this entire script into ChatGPT's browser console and it will open a modal
+// Paste this entire script into ChatGPT's browser console and it will create a floating button
 
 (function() {
-    // Remove existing modal if present
+    // Remove existing modal and button if present
     const existingModal = document.getElementById('chatgpt-product-search-modal');
+    const existingButton = document.getElementById('openProductSearchModalBtn');
     if (existingModal) {
         existingModal.remove();
     }
+    if (existingButton) {
+        existingButton.remove();
+    }
+
+    // Add floating button styles
+    const floatingButtonCSS = `
+        #openProductSearchModalBtn {
+            position: fixed;
+            right: 20px;
+            top: 40%;
+            transform: translateY(-50%);
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 9990;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        #openProductSearchModalBtn:hover {
+            background-color: #0056b3;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    `;
 
     // Create modal HTML
     const modalHTML = `
@@ -188,47 +220,68 @@
         </div>
     `;
 
-    // Inject modal into page
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    // Function to create and show modal
+    function createModal() {
+        // Remove existing modal if present
+        const existingModal = document.getElementById('chatgpt-product-search-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
 
-    // Get modal elements
-    const modal = document.getElementById('chatgpt-product-search-modal');
-    const closeBtn = document.getElementById('close-modal-btn');
-    const searchBtn = document.getElementById('search-btn');
-    const searchQuery = document.getElementById('search-query');
-    const authToken = document.getElementById('auth-token');
-    const resultsContainer = document.getElementById('results-container');
+        // Inject modal into page
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-    // Close modal functionality
-    closeBtn.addEventListener('click', () => {
-        modal.remove();
-    });
+        // Get modal elements
+        const modal = document.getElementById('chatgpt-product-search-modal');
+        const closeBtn = document.getElementById('close-modal-btn');
+        const searchBtn = document.getElementById('search-btn');
+        const searchQuery = document.getElementById('search-query');
+        const authToken = document.getElementById('auth-token');
+        const resultsContainer = document.getElementById('results-container');
 
-    // Close on outside click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        // Close modal functionality
+        closeBtn.addEventListener('click', () => {
             modal.remove();
-        }
-    });
+        });
 
-    // Close on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            modal.remove();
-        }
-    });
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
 
-    // Search functionality
-    searchBtn.addEventListener('click', performSearch);
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+            }
+        });
 
-    // Enter key support
-    searchQuery.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
+        // Search functionality
+        searchBtn.addEventListener('click', performSearch);
+
+        // Enter key support
+        searchQuery.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Initialize token status
+        initializeTokenStatus();
+    }
 
     async function performSearch() {
+        const searchQuery = document.getElementById('search-query');
+        const searchBtn = document.getElementById('search-btn');
+        const resultsContainer = document.getElementById('results-container');
+        
+        if (!searchQuery || !searchBtn || !resultsContainer) {
+            alert('Modal elements not found. Please try again.');
+            return;
+        }
+        
         const query = searchQuery.value.trim();
         
         if (!query) {
@@ -793,6 +846,12 @@
     }
 
     function displayResults(data, query) {
+        const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) {
+            console.error('Results container not found');
+            return;
+        }
+        
         if (!data || (!data.reviews.length && !data.products.length)) {
             resultsContainer.innerHTML = `
                 <div style="
@@ -1083,6 +1142,13 @@
     }
 
     function displayError(message) {
+        const resultsContainer = document.getElementById('results-container');
+        if (!resultsContainer) {
+            console.error('Results container not found');
+            alert(`Search Error: ${message}`);
+            return;
+        }
+        
         resultsContainer.innerHTML = `
             <div style="
                 background: #fef2f2;
@@ -1103,6 +1169,11 @@
     async function initializeTokenStatus() {
         const tokenInput = document.getElementById('auth-token');
         const authStatus = document.getElementById('auth-status');
+        
+        if (!tokenInput || !authStatus) {
+            console.error('Token status elements not found');
+            return;
+        }
         
         try {
             const response = await fetch("/api/auth/session");
@@ -1149,7 +1220,24 @@
         }
     }
 
-    // Initialize token status
-    initializeTokenStatus();
+    // Function to create floating button
+    function createFloatingButton() {
+        const button = document.createElement('button');
+        button.id = 'openProductSearchModalBtn';
+        button.innerHTML = '🛍️';
+        button.title = 'Open ChatGPT Product Info Search';
+        document.body.appendChild(button);
+        return button;
+    }
+
+    // Add styles to the page
+    const styleSheet = document.createElement("style");
+    styleSheet.type = "text/css";
+    styleSheet.innerText = floatingButtonCSS;
+    document.head.appendChild(styleSheet);
+
+    // Create floating button and add click handler
+    const floatingButton = createFloatingButton();
+    floatingButton.addEventListener('click', createModal);
 
 })();
