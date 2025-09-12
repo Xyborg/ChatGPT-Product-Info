@@ -2,11 +2,15 @@
 
 This is a browser script that unlocks ChatGPT's internal product search API to fetch detailed product information, reviews, and comparisons directly within ChatGPT's interface.
 
-![ChatGPT Product Info Search Interface](chatgpt-product-info.png)
+![ChatGPT Product Info Search Interface](assets/chatgpt-product-info.png)
 
 ## Overview
 
 This script creates a modal interface within ChatGPT that allows you to search for product information, reviews, and detailed comparisons by leveraging ChatGPT's internal product search API. It automatically handles authentication and presents results in an organized, easy-to-read format.
+
+## Demo
+
+https://raw.githubusercontent.com/Xyborg/ChatGPT-Product-Info/refs/heads/main/assets/chatgpt-product-info.mov
 
 ## Features
 
@@ -69,7 +73,7 @@ Try these search queries to see the power of the tool:
 - **Review Themes**: Common topics mentioned across reviews
 - **Source Citations**: Direct links to original review sources
 
-![ChatGPT Product Info Search Reviews Interface](chatgpt-product-info-reviews.png)
+![ChatGPT Product Info Search Reviews Interface](assets/chatgpt-product-info-reviews.png)
 
 ### Additional Data
 - **Product Overview**: AI rationale explaining the product category
