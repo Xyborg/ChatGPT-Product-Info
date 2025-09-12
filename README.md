@@ -10,7 +10,7 @@ This script creates a modal interface within ChatGPT that allows you to search f
 
 ## Demo
 
-https://raw.githubusercontent.com/Xyborg/ChatGPT-Product-Info/refs/heads/main/assets/chatgpt-product-info.mov
+https://github.com/user-attachments/assets/b5472c48-1cd9-496b-b120-3fd548582f9f
 
 ## Features
 
