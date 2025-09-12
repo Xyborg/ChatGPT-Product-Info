@@ -144,6 +144,13 @@ The API returns structured data including:
 - **It wont mess with your chat history**: This won't create new chats, so you won't see it in your history.
 - **Open source**: Full code is available for inspection
 
+## Additional Resources
+
+Learn more about ChatGPT's product discovery capabilities:
+
+- **[Help ChatGPT discover your products](https://openai.com/chatgpt/search-product-discovery)** - Official guide for businesses on how to make their products discoverable in ChatGPT Search
+- **[Improved Shopping Results from ChatGPT Search, and How Product Results are Selected](https://help.openai.com/en/articles/11128490-improved-shopping-results-from-chatgpt-search)** - Detailed explanation of how ChatGPT selects and ranks product results
+
 ## Contributing
 
 Feel free to submit issues, feature requests, or pull requests on GitHub!
