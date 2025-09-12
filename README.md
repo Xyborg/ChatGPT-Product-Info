@@ -144,6 +144,18 @@ The API returns structured data including:
 - **It wont mess with your chat history**: This won't create new chats, so you won't see it in your history.
 - **Open source**: Full code is available for inspection
 
+## 🚀 Want to Improve Your AI Visibility?
+
+If you're a business owner or marketer, you might be wondering: **"How do I get MY products to show up in ChatGPT search results?"**
+
+[**Try Finseo**](https://www.finseo.ai/?ref=gptproductsearch) - The next-gen AI SEO platform that helps you:
+- **Track your brand visibility** across ChatGPT, Claude, Perplexity, and other AI platforms
+- **Monitor what AI says** about your business and products
+- **Get actionable recommendations** to improve your presence in AI search results
+- **Stay ahead of competitors** in the AI search landscape
+
+*Perfect complement to this product search tool - see what others are finding, then optimize your own products to be discovered!*
+
 ## Additional Resources
 
 Learn more about ChatGPT's product discovery capabilities:
