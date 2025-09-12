@@ -16,7 +16,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgb(230 237 248 / 80%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -74,7 +74,7 @@
                         background: white;
                     ">
                         <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                            <input type="text" id="search-query" placeholder="Search query (e.g., iPhone 15, Nike shoes)" style="
+                            <input type="text" id="search-query" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" style="
                                 flex: 1;
                                 padding: 8px 12px;
                                 border: 1px solid #dee2e6;
@@ -182,7 +182,7 @@
                     font-size: 14px;
                     z-index: 10001;
                 ">
-                    Created by <a href="https://www.martinaberastegue.com/" target="_blank" rel="noopener noreferrer">Martin Aberastegue (@Xyborg)</a> | Do you want to improve your AI Visibility? <strong><a href="https://www.finseo.ai/?ref=gptproductsearch" target="_blank" rel="noopener noreferrer">Try Finseo!</a></strong>
+                    Created by <a href="https://www.martinaberastegue.com/" target="_blank" rel="noopener noreferrer">Martin Aberastegue (@Xyborg)</a>
                 </div>
             </div>
         </div>
