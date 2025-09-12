@@ -4,6 +4,25 @@ This is a browser script that unlocks ChatGPT's internal product search API to f
 
 ![ChatGPT Product Info Search Interface](assets/chatgpt-product-info.png)
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Demo](#demo)
+- [Features](#features)
+- [How to Use](#how-to-use)
+- [Search Examples](#search-examples)
+- [What You'll Get](#what-youll-get)
+- [Technical Details](#technical-details)
+- [Browser Compatibility](#browser-compatibility)
+- [Requirements](#requirements)
+- [Troubleshooting](#troubleshooting)
+- [Privacy & Security](#privacy--security)
+- [Want to Improve Your AI Visibility?](#want-to-improve-your-ai-visibility)
+- [Additional Resources](#additional-resources)
+- [Contributing](#contributing)
+- [Author](#author)
+- [License](#license)
+
 ## Overview
 
 This script creates a modal interface within ChatGPT that allows you to search for product information, reviews, and detailed comparisons by leveraging ChatGPT's internal product search API. It automatically handles authentication and presents results in an organized, easy-to-read format.
@@ -144,7 +163,7 @@ The API returns structured data including:
 - **It wont mess with your chat history**: This won't create new chats, so you won't see it in your history.
 - **Open source**: Full code is available for inspection
 
-## 🚀 Want to Improve Your AI Visibility?
+## Want to Improve Your AI Visibility?
 
 If you're a business owner or marketer, you might be wondering: **"How do I get MY products to show up in ChatGPT search results?"**
 
