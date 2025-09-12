@@ -528,6 +528,9 @@
                     title: data.v.title || ''
                 });
                 
+                // Remove any existing product link with the same URL to avoid duplicates
+                const existingLinkIndex = productLinks.findIndex(link => link.url === data.v.url);
+                
                 // Capture ALL grouped_citation objects as product links
                 const productLink = {
                     title: data.v.title || '',
@@ -535,7 +538,14 @@
                     snippet: data.v.snippet || '',
                     source: extractDomainFromUrl(data.v.url)
                 };
-                productLinks.push(productLink);
+                
+                if (existingLinkIndex >= 0) {
+                    // Update existing link with potentially better title
+                    productLinks[existingLinkIndex] = productLink;
+                } else {
+                    // Add new link
+                    productLinks.push(productLink);
+                }
             }
             
             // Handle direct rationale patches
@@ -568,6 +578,9 @@
                             title: patch.v.title || ''
                         });
                         
+                        // Remove any existing product link with the same URL to avoid duplicates
+                        const existingLinkIndex = productLinks.findIndex(link => link.url === patch.v.url);
+                        
                         // Capture ALL grouped_citation objects as product links
                         const productLink = {
                             title: patch.v.title || '',
@@ -575,36 +588,75 @@
                             snippet: patch.v.snippet || '',
                             source: extractDomainFromUrl(patch.v.url)
                         };
-                        productLinks.push(productLink);
+                        
+                        if (existingLinkIndex >= 0) {
+                            // Update existing link with potentially better title
+                            productLinks[existingLinkIndex] = productLink;
+                        } else {
+                            // Add new link
+                            productLinks.push(productLink);
+                        }
                     }
                     
-                    // Handle individual grouped_citation property updates (like URL changes)
+                    // Handle individual grouped_citation property updates (like URL and title changes)
                     if (patch.p && patch.p.startsWith('/grouped_citation/') && patch.o === 'replace' && patch.v) {
                         
-                        // If this is a URL update, create/update the product link
+                        // Find or create the latest citation entry
+                        let latestCiteKey = null;
+                        let maxCiteNum = -1;
+                        
+                        // Find the highest numbered citation
+                        for (const [key, value] of citations.entries()) {
+                            if (key.startsWith('turn0search')) {
+                                const num = parseInt(key.replace('turn0search', ''));
+                                if (num > maxCiteNum) {
+                                    maxCiteNum = num;
+                                    latestCiteKey = key;
+                                }
+                            }
+                        }
+                        
+                        // If no citation exists yet, create one
+                        if (!latestCiteKey) {
+                            latestCiteKey = `turn0search${eventIndex}`;
+                            citations.set(latestCiteKey, {});
+                        }
+                        
+                        // Update the citation with the new property
+                        const existingCitation = citations.get(latestCiteKey) || {};
+                        
                         if (patch.p === '/grouped_citation/url') {
-                            // Find existing citations and update them, or create new one
-                            const existingCite = Array.from(citations.entries()).find(([key, value]) => 
-                                key.startsWith('turn0search')
-                            );
-                            
-                            const citeKey = existingCite ? existingCite[0] : `turn0search${eventIndex++}`;
-                            
-                            // Update or create citation
-                            const existingCitation = citations.get(citeKey) || {};
-                            citations.set(citeKey, {
+                            citations.set(latestCiteKey, {
                                 ...existingCitation,
                                 url: patch.v
                             });
+                        } else if (patch.p === '/grouped_citation/title') {
+                            citations.set(latestCiteKey, {
+                                ...existingCitation,
+                                title: patch.v
+                            });
+                        }
+                        
+                        // Update or add product link if we have both URL and title
+                        const updatedCitation = citations.get(latestCiteKey);
+                        if (updatedCitation.url) {
+                            // Remove any existing product link with the same URL to avoid duplicates
+                            const existingLinkIndex = productLinks.findIndex(link => link.url === updatedCitation.url);
                             
-                            // Add as product link (URL update often means better/final URL)
                             const productLink = {
-                                title: existingCitation.title || 'Product Link',
-                                url: patch.v,
+                                title: updatedCitation.title || 'Product Link',
+                                url: updatedCitation.url,
                                 snippet: '',
-                                source: extractDomainFromUrl(patch.v)
+                                source: extractDomainFromUrl(updatedCitation.url)
                             };
-                            productLinks.push(productLink);
+                            
+                            if (existingLinkIndex >= 0) {
+                                // Update existing link
+                                productLinks[existingLinkIndex] = productLink;
+                            } else {
+                                // Add new link
+                                productLinks.push(productLink);
+                            }
                         }
                     }
                     
@@ -642,15 +694,24 @@
                             title: patch.v.title || ''
                         });
                         
+                        // Remove any existing product link with the same URL to avoid duplicates
+                        const existingLinkIndex = productLinks.findIndex(link => link.url === patch.v.url);
+                        
                         // Capture ALL grouped_citation objects as product links
-                        // Always add since grouped_citation can be updated with better URLs
                         const productLink = {
                             title: patch.v.title || '',
                             url: patch.v.url,
                             snippet: patch.v.snippet || '',
                             source: extractDomainFromUrl(patch.v.url)
                         };
-                        productLinks.push(productLink);
+                        
+                        if (existingLinkIndex >= 0) {
+                            // Update existing link with potentially better title
+                            productLinks[existingLinkIndex] = productLink;
+                        } else {
+                            // Add new link
+                            productLinks.push(productLink);
+                        }
                     }
                     
                     // Capture rationale patches
