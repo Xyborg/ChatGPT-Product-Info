@@ -1686,6 +1686,18 @@
                 console.log(`Removed ${queries.length - uniqueQueries.length} duplicate queries`);
             }
             
+            // If only one unique query remains, treat as single product search
+            if (uniqueQueries.length === 1) {
+                console.log('Only one unique query found, switching to single product search');
+                const singleQuery = document.getElementById('search-query');
+                if (singleQuery) {
+                    singleQuery.value = uniqueQueries[0];
+                    // Trigger single search instead
+                    await performSearch();
+                    return;
+                }
+            }
+            
             if (uniqueQueries.length > 10) {
                 alert('Maximum 10 products allowed at once to avoid rate limiting');
                 return;
