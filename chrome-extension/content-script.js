@@ -117,6 +117,18 @@
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
                             ">📋 History</button>
+                            <button id="reports-tab" class="tab-button" style="
+                                flex: 1;
+                                padding: 12px 20px;
+                                border: none;
+                                background: #f8f9fa;
+                                color: #6c757d;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                border-bottom: 2px solid transparent;
+                                transition: all 0.2s ease;
+                            ">📊 Reports</button>
                         </div>
                         
                         <div id="search-area" style="
@@ -408,6 +420,55 @@
                                 <div id="history-list"></div>
                             </div>
                         </div>
+                        
+                        <!-- Reports Container -->
+                        <div id="reports-container" style="
+                            flex: 1;
+                            overflow-y: auto;
+                            padding: 20px;
+                            display: none;
+                        ">
+                            <div id="reports-welcome-state" style="
+                                text-align: center; 
+                                padding: 60px 40px; 
+                                color: #6c757d;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100%;
+                                min-height: 300px;
+                            ">
+                                <div style="
+                                    font-size: 48px;
+                                    margin-bottom: 20px;
+                                    opacity: 0.7;
+                                ">📊</div>
+                                <h3 style="
+                                    margin: 0 0 12px 0;
+                                    font-size: 20px;
+                                    font-weight: 600;
+                                    color: #495057;
+                                ">Reports & Analytics</h3>
+                                <p style="
+                                    margin: 0 0 24px 0;
+                                    font-size: 16px;
+                                    line-height: 1.5;
+                                    max-width: 400px;
+                                ">Your reports will appear here. Start searching to build your analytics!</p>
+                            </div>
+                            <div id="reports-content" style="display: none;">
+                                <div style="
+                                    display: grid;
+                                    grid-template-columns: 1fr 1fr;
+                                    gap: 32px;
+                                    margin-bottom: 20px;
+                                ">
+                                    <div id="review-sources-table"></div>
+                                    <div id="citation-sources-table"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Fixed Footer -->
@@ -551,19 +612,86 @@
             });
 
             // Tab switching functionality
+            console.log('=== SETTING UP TABS ===');
             const searchTab = document.getElementById('search-tab');
             const historyTab = document.getElementById('history-tab');
+            const reportsTab = document.getElementById('reports-tab');
+            
+            console.log('Tab elements found:', {
+                searchTab: !!searchTab,
+                historyTab: !!historyTab, 
+                reportsTab: !!reportsTab
+            });
             const searchArea = document.getElementById('search-area');
             const resultsContainerTab = document.getElementById('results-container');
             const historyContainer = document.getElementById('history-container');
+            const reportsContainer = document.getElementById('reports-container');
 
             searchTab.addEventListener('click', () => {
                 switchTab('search');
+                // Hide reports container and reset reports tab
+                const reportsContainer = document.getElementById('reports-container');
+                if (reportsContainer) reportsContainer.style.display = 'none';
+                if (reportsTab) {
+                    reportsTab.style.background = '#f8f9fa';
+                    reportsTab.style.color = '#6c757d';
+                    reportsTab.style.borderBottom = '2px solid transparent';
+                    reportsTab.classList.remove('active-tab');
+                }
             });
 
             historyTab.addEventListener('click', () => {
                 switchTab('history');
                 loadHistory();
+                // Hide reports container and reset reports tab
+                const reportsContainer = document.getElementById('reports-container');
+                if (reportsContainer) reportsContainer.style.display = 'none';
+                if (reportsTab) {
+                    reportsTab.style.background = '#f8f9fa';
+                    reportsTab.style.color = '#6c757d';
+                    reportsTab.style.borderBottom = '2px solid transparent';
+                    reportsTab.classList.remove('active-tab');
+                }
+            });
+
+            reportsTab.addEventListener('click', () => {
+                console.log('=== REPORTS TAB CLICKED ===');
+                // Reset all tabs first
+                [searchTab, historyTab, reportsTab].forEach(t => {
+                    if (t) {
+                        t.style.background = '#f8f9fa';
+                        t.style.color = '#6c757d';
+                        t.style.borderBottom = '2px solid transparent';
+                        t.classList.remove('active-tab');
+                    }
+                });
+                
+                // Set reports tab as active
+                reportsTab.style.background = 'white';
+                reportsTab.style.color = '#495057';
+                reportsTab.style.borderBottom = '2px solid #007bff';
+                reportsTab.classList.add('active-tab');
+                
+                // Hide all containers
+                const searchArea = document.getElementById('search-area');
+                const resultsContainer = document.getElementById('results-container');
+                const historyContainer = document.getElementById('history-container');
+                const reportsContainer = document.getElementById('reports-container');
+                
+                if (searchArea) searchArea.style.display = 'none';
+                if (resultsContainer) resultsContainer.style.display = 'none';
+                if (historyContainer) historyContainer.style.display = 'none';
+                
+                // Show reports container
+                if (reportsContainer) {
+                    reportsContainer.style.display = 'block';
+                    console.log('Reports container shown, display:', reportsContainer.style.display);
+                } else {
+                    console.log('ERROR: Reports container not found!');
+                }
+                
+                // Load the reports data
+                loadReports();
             });
 
             // History functionality
@@ -584,6 +712,135 @@
             // Initialize token status
             initializeTokenStatus();
         }
+
+        function switchTab(tab) {
+            console.log('=== SWITCHING TO TAB:', tab, '===');
+            const searchTab = document.getElementById('search-tab');
+            const historyTab = document.getElementById('history-tab');
+            const reportsTab = document.getElementById('reports-tab');
+            const searchArea = document.getElementById('search-area');
+            const resultsContainer = document.getElementById('results-container');
+            const historyContainer = document.getElementById('history-container');
+            const reportsContainer = document.getElementById('reports-container');
+            
+            console.log('Found elements in switchTab:', {
+                searchTab: !!searchTab,
+                historyTab: !!historyTab,
+                reportsTab: !!reportsTab,
+                searchArea: !!searchArea,
+                resultsContainer: !!resultsContainer,
+                historyContainer: !!historyContainer,
+                reportsContainer: !!reportsContainer
+            });
+
+            // Reset all tabs
+            [searchTab, historyTab, reportsTab].forEach(t => {
+                if (t) {
+                    t.style.background = '#f8f9fa';
+                    t.style.color = '#6c757d';
+                    t.style.borderBottom = '2px solid transparent';
+                    t.classList.remove('active-tab');
+                }
+            });
+
+            // Hide all containers
+            console.log('Hiding all containers...');
+            [searchArea, resultsContainer, historyContainer, reportsContainer].forEach(c => {
+                if (c) {
+                    console.log('Hiding container:', c.id);
+                    c.style.display = 'none';
+                }
+            });
+
+            if (tab === 'search') {
+                searchTab.style.background = 'white';
+                searchTab.style.color = '#495057';
+                searchTab.style.borderBottom = '2px solid #007bff';
+                searchTab.classList.add('active-tab');
+                
+                if (searchArea) searchArea.style.display = 'block';
+                if (resultsContainer) resultsContainer.style.display = 'block';
+            } else if (tab === 'history') {
+                historyTab.style.background = 'white';
+                historyTab.style.color = '#495057';
+                historyTab.style.borderBottom = '2px solid #007bff';
+                historyTab.classList.add('active-tab');
+                
+                if (historyContainer) historyContainer.style.display = 'block';
+            } else if (tab === 'reports') {
+                console.log('Setting reports tab as active');
+                reportsTab.style.background = 'white';
+                reportsTab.style.color = '#495057';
+                reportsTab.style.borderBottom = '2px solid #007bff';
+                reportsTab.classList.add('active-tab');
+                
+                if (reportsContainer) {
+                    console.log('Showing reports container');
+                    reportsContainer.style.display = 'block';
+                } else {
+                    console.log('ERROR: Reports container not found!');
+                }
+            }
+        }
+
+        function loadReports() {
+            console.log('=== LOADING REPORTS ===');
+            
+            const history = loadSearchHistory();
+            const reportsWelcomeState = document.getElementById('reports-welcome-state');
+            const reportsContent = document.getElementById('reports-content');
+            const reviewSourcesTable = document.getElementById('review-sources-table');
+            const citationSourcesTable = document.getElementById('citation-sources-table');
+
+            console.log('Elements found:', {
+                reportsWelcomeState: !!reportsWelcomeState,
+                reportsContent: !!reportsContent,
+                reviewSourcesTable: !!reviewSourcesTable,
+                citationSourcesTable: !!citationSourcesTable
+            });
+
+            if (history.length === 0) {
+                console.log('No history, showing welcome state');
+                if (reportsWelcomeState) reportsWelcomeState.style.display = 'flex';
+                if (reportsContent) reportsContent.style.display = 'none';
+                return;
+            }
+
+            console.log('History found:', history.length, 'items');
+            if (reportsWelcomeState) reportsWelcomeState.style.display = 'none';
+            if (reportsContent) reportsContent.style.display = 'block';
+            
+
+            // Generate the reports
+            const reviewSources = generateReviewSourcesReport(history);
+            const citationSources = generateCitationSourcesReport(history);
+
+            console.log('Generated reports:', {
+                reviewSources: reviewSources.length,
+                citationSources: citationSources.length
+            });
+
+            // Display the tables
+            if (reviewSourcesTable) {
+                const reviewHTML = generateReviewSourcesHTML(reviewSources);
+                console.log('Review HTML length:', reviewHTML.length);
+                reviewSourcesTable.innerHTML = reviewHTML;
+            }
+            if (citationSourcesTable) {
+                const citationHTML = generateCitationSourcesHTML(citationSources);
+                console.log('Citation HTML length:', citationHTML.length);
+                citationSourcesTable.innerHTML = citationHTML;
+            }
+
+            console.log('Reports loaded successfully');
+        }
+
+        // Global function for direct onclick access
+        window.switchTabToReports = function() {
+            console.log('=== GLOBAL SWITCH TO REPORTS ===');
+            switchTab('reports');
+            loadReports();
+        };
 
         // Function to show the collapse toggle after results are displayed
         function showCollapseToggle() {
@@ -636,6 +893,433 @@
                 localStorage.removeItem('chatgpt-product-search-history');
                 loadHistory();
             }
+        }
+
+        // Reports and Analytics Functions
+        function generateReports() {
+            const history = loadSearchHistory();
+            if (history.length === 0) {
+                alert('No search history available for reports.');
+                return;
+            }
+
+            // Debug: Log full data structure
+            console.log('=== FULL HISTORY DEBUG ===');
+            console.log('Total history items:', history.length);
+            
+            history.forEach((item, index) => {
+                console.log(`\n--- Item ${index + 1}: "${item.query}" ---`);
+                console.log('Results structure:', Object.keys(item.results || {}));
+                
+                if (item.results) {
+                    if (item.results.productLinks) {
+                        console.log('ProductLinks count:', item.results.productLinks.length);
+                        console.log('First productLink:', item.results.productLinks[0]);
+                    }
+                    if (item.results.citations) {
+                        console.log('Citations count:', item.results.citations.length);
+                        console.log('First citation:', item.results.citations[0]);
+                    }
+                    if (item.results.reviews) {
+                        console.log('Reviews count:', item.results.reviews.length);
+                    }
+                    
+                    // Check for any other properties that might contain URLs
+                    Object.keys(item.results).forEach(key => {
+                        if (Array.isArray(item.results[key]) && item.results[key].length > 0) {
+                            const firstItem = item.results[key][0];
+                            if (firstItem && typeof firstItem === 'object' && firstItem.url) {
+                                console.log(`Found URLs in ${key}:`, item.results[key].length, 'items');
+                            }
+                        }
+                    });
+                }
+            });
+
+            const reports = {
+                reviewSources: generateReviewSourcesReport(history),
+                citationSources: generateCitationSourcesReport(history)
+            };
+
+            displayReportsModal(reports);
+        }
+
+        function generateReviewSourcesReport(history) {
+            const sourceCounts = new Map();
+            const sourceDetails = new Map();
+
+            console.log('Analyzing history for review sources:', history.length, 'items');
+
+            function addDomain(url, title, query, date) {
+                if (url) {
+                    const domain = extractDomainFromUrl(url);
+                    sourceCounts.set(domain, (sourceCounts.get(domain) || 0) + 1);
+                    
+                    if (!sourceDetails.has(domain)) {
+                        sourceDetails.set(domain, {
+                            domain: domain,
+                            sampleTitle: title || 'No title',
+                            firstSeen: date,
+                            queries: new Set()
+                        });
+                    }
+                    sourceDetails.get(domain).queries.add(query);
+                    console.log('Added review domain:', domain, 'count:', sourceCounts.get(domain));
+                }
+            }
+
+            history.forEach(item => {
+                console.log('Processing item for reviews:', item.query);
+                
+                // Check reviews only (single searches)
+                if (item.results && item.results.reviews) {
+                    console.log('Found reviews:', item.results.reviews.length);
+                    item.results.reviews.forEach(review => {
+                        addDomain(review.url, review.title, item.query, item.date);
+                    });
+                }
+
+                // Check multiResults (multi-product searches)
+                if (item.results && item.results.multiResults) {
+                    console.log('Found multiResults for reviews:', item.results.multiResults.length);
+                    item.results.multiResults.forEach(multiResult => {
+                        if (multiResult.data && multiResult.data.reviews) {
+                            multiResult.data.reviews.forEach(review => {
+                                addDomain(review.url, review.title, item.query, item.date);
+                            });
+                        }
+                    });
+                }
+            });
+
+            console.log('Final review domain counts:', Array.from(sourceCounts.entries()));
+
+            // Sort by count and convert to array
+            const sortedSources = Array.from(sourceCounts.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map(([domain, count]) => ({
+                    domain,
+                    count,
+                    ...sourceDetails.get(domain),
+                    queries: Array.from(sourceDetails.get(domain).queries)
+                }));
+
+            return sortedSources;
+        }
+
+        function generateCitationSourcesReport(history) {
+            const citationsBySource = new Map();
+
+            function addCitation(url, title, query, date, snippet) {
+                if (url) {
+                    const domain = extractDomainFromUrl(url);
+                    if (!citationsBySource.has(domain)) {
+                        citationsBySource.set(domain, []);
+                    }
+                    citationsBySource.get(domain).push({
+                        title: title || 'No title',
+                        url: url,
+                        query: query,
+                        date: date,
+                        snippet: snippet || ''
+                    });
+                    console.log('Added citation domain:', domain);
+                }
+            }
+
+            history.forEach(item => {
+                console.log('Processing item for citations:', item.query);
+                
+                // Check single search citations only
+                if (item.results && item.results.citations) {
+                    console.log('Found citations:', item.results.citations.length);
+                    item.results.citations.forEach(citation => {
+                        addCitation(citation.url, citation.title, item.query, item.date, citation.snippet);
+                    });
+                }
+
+                // Check single search productLinks only
+                if (item.results && item.results.productLinks) {
+                    console.log('Found productLinks as citations:', item.results.productLinks.length);
+                    item.results.productLinks.forEach(link => {
+                        addCitation(link.url, link.title, item.query, item.date, link.snippet);
+                    });
+                }
+
+                // Check multiResults for citations and productLinks only (no reviews)
+                if (item.results && item.results.multiResults) {
+                    console.log('Found multiResults for citations:', item.results.multiResults.length);
+                    item.results.multiResults.forEach(multiResult => {
+                        if (multiResult.data) {
+                            // Check citations in multiResult
+                            if (multiResult.data.citations) {
+                                multiResult.data.citations.forEach(citation => {
+                                    addCitation(citation.url, citation.title, item.query, item.date, citation.snippet);
+                                });
+                            }
+                            // Check productLinks in multiResult
+                            if (multiResult.data.productLinks) {
+                                multiResult.data.productLinks.forEach(link => {
+                                    addCitation(link.url, link.title, item.query, item.date, link.snippet);
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+
+            console.log('Final citation domain counts:', Array.from(citationsBySource.keys()));
+
+            // Convert to array and sort by citation count
+            const sortedCitations = Array.from(citationsBySource.entries())
+                .map(([domain, citations]) => ({
+                    domain,
+                    citationCount: citations.length,
+                    citations: citations.sort((a, b) => new Date(b.date) - new Date(a.date))
+                }))
+                .sort((a, b) => b.citationCount - a.citationCount);
+
+            return sortedCitations;
+        }
+
+        function generateSearchTrendsReport(history) {
+            const trends = {
+                totalSearches: history.length,
+                dateRange: {
+                    first: history[history.length - 1]?.date || 'N/A',
+                    last: history[0]?.date || 'N/A'
+                },
+                searchTypes: new Map(),
+                averageResultsPerSearch: 0
+            };
+
+            let totalResults = 0;
+
+            history.forEach(item => {
+                // Count search types
+                const type = item.searchType || 'unknown';
+                trends.searchTypes.set(type, (trends.searchTypes.get(type) || 0) + 1);
+
+                // Count results
+                let resultCount = 0;
+                if (item.results) {
+                    if (item.results.citations) resultCount += item.results.citations.length;
+                    if (item.results.productLinks) resultCount += item.results.productLinks.length;
+                    if (item.results.reviews) resultCount += item.results.reviews.length;
+                }
+                totalResults += resultCount;
+            });
+
+            trends.averageResultsPerSearch = history.length > 0 ? (totalResults / history.length).toFixed(1) : 0;
+
+            // Convert maps to sorted arrays
+            trends.searchTypes = Array.from(trends.searchTypes.entries()).sort((a, b) => b[1] - a[1]);
+
+            return trends;
+        }
+
+        function displayReportsModal(reports) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            `;
+
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 12px;
+                max-width: 90vw;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                position: relative;
+            `;
+
+            modalContent.innerHTML = `
+                <div style="padding: 24px; border-bottom: 1px solid #e9ecef;">
+                    <h2 style="margin: 0; color: #212529; display: flex; align-items: center; gap: 12px;">
+                        📊 Search Analytics Reports
+                        <button id="closeReportsModal" style="
+                            margin-left: auto;
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                            color: #6c757d;
+                            padding: 0;
+                            width: 32px;
+                            height: 32px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: 6px;
+                        " title="Close">×</button>
+                    </h2>
+                </div>
+                <div style="padding: 24px;">
+                    ${generateReportsHTML(reports)}
+                </div>
+            `;
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Close modal functionality
+            modal.querySelector('#closeReportsModal').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        function generateReportsHTML(reports) {
+            return `
+                <div style="display: grid; gap: 32px;">
+                    ${generateReviewSourcesHTML(reports.reviewSources)}
+                    ${generateCitationSourcesHTML(reports.citationSources)}
+                </div>
+            `;
+        }
+
+        function generateReviewSourcesHTML(reviewSources) {
+            return `
+                <div>
+                    <h3 style="margin: 0 0 16px 0; color: #495057;">Top Review Sources Domains</h3>
+                    <table style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: 1px solid #e9ecef;
+                    ">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reviewSources.map((source, index) => `
+                                <tr style="border-bottom: 1px solid #f8f9fa;">
+                                    <td style="padding: 12px; font-weight: bold;">${index + 1}</td>
+                                    <td style="padding: 12px;">${source.domain}</td>
+                                    <td style="padding: 12px; text-align: right; font-weight: bold;">${source.count}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function generateCitationSourcesHTML(citationSources) {
+            return `
+                <div>
+                    <h3 style="margin: 0 0 16px 0; color: #495057;">Top Citations Sources Domains</h3>
+                    <table style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        border: 1px solid #e9ecef;
+                    ">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${citationSources.map((source, index) => `
+                                <tr style="border-bottom: 1px solid #f8f9fa;">
+                                    <td style="padding: 12px; font-weight: bold;">${index + 1}</td>
+                                    <td style="padding: 12px;">${source.domain}</td>
+                                    <td style="padding: 12px; text-align: right; font-weight: bold;">${source.citationCount}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function generateSearchTrendsHTML(trends) {
+            return `
+                <div>
+                    <h3 style="margin: 0 0 16px 0; color: #495057; display: flex; align-items: center; gap: 8px;">
+                        📈 Search Trends & Statistics
+                    </h3>
+                    <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 16px;
+                            border-radius: 8px;
+                            border: 1px solid #e9ecef;
+                        ">
+                            <h4 style="margin: 0 0 12px 0; color: #495057;">📊 Overview</h4>
+                            <div style="display: grid; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Total Searches:</span>
+                                    <strong>${trends.totalSearches}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Avg Results/Search:</span>
+                                    <strong>${trends.averageResultsPerSearch}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Date Range:</span>
+                                    <strong>${new Date(trends.dateRange.first).toLocaleDateString()} - ${new Date(trends.dateRange.last).toLocaleDateString()}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 16px;
+                            border-radius: 8px;
+                            border: 1px solid #e9ecef;
+                        ">
+                            <h4 style="margin: 0 0 12px 0; color: #495057;">🔍 Search Types</h4>
+                            <div style="display: grid; gap: 6px;">
+                                ${trends.searchTypes.map(([type, count]) => `
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="text-transform: capitalize;">${type}:</span>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="
+                                                background: #e9ecef;
+                                                height: 6px;
+                                                width: 60px;
+                                                border-radius: 3px;
+                                                overflow: hidden;
+                                            ">
+                                                <div style="
+                                                    background: #28a745;
+                                                    height: 100%;
+                                                    width: ${(count / trends.totalSearches) * 100}%;
+                                                "></div>
+                                            </div>
+                                            <strong>${count}</strong>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            `;
         }
 
         function deleteHistoryItem(itemId) {
