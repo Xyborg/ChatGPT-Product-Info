@@ -53,3 +53,7 @@ node_modules/
 # Temporary folders
 tmp/
 temp/
+
+# Chrome extension
+chrome-extension.crx
+chrome-extension.pem
