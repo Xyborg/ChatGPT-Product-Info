@@ -1,6 +1,6 @@
 # ChatGPT Product Info Search 🔍
 
-A powerful Chrome extension and browser script that unlocks ChatGPT's internal product search API to fetch detailed product information, reviews, and comparisons directly within ChatGPT's interface.
+A powerful **Chrome extension** and browser script that **unlocks ChatGPT's internal product search API** to **fetch detailed product information, reviews, and comparisons** directly within ChatGPT's interface.
 
 ![ChatGPT Product Info Search Interface](assets/chatgpt-product-info.png)
 
