@@ -1321,15 +1321,31 @@
                 console.log(`Link ${index + 1}:`, link.url, 'title:', link.title);
             });
             
+            // Remove exact duplicates (same title AND url) while preserving different sources
+            const deduplicatedLinks = [];
+            const seenCombinations = new Set();
+            
+            productLinks.forEach(link => {
+                const key = `${link.title}|||${link.url}`;
+                if (!seenCombinations.has(key)) {
+                    seenCombinations.add(key);
+                    deduplicatedLinks.push(link);
+                } else {
+                    console.log('Removing duplicate citation:', link.title, link.url);
+                }
+            });
+            
+            console.log(`Deduplication: ${productLinks.length} -> ${deduplicatedLinks.length} citations`);
+            
             return {
                 products: products,
-                productLinks: productLinks, // Add detected product links
+                productLinks: deduplicatedLinks, // Use deduplicated product links
                 reviews: reviews,
                 rationale: rationaleObj.text || null,
                 reviewSummary: summaryObj.text || null, // Add the built summary
                 summary: {
                     total_products: products.length,
-                    total_product_links: productLinks.length,
+                    total_product_links: deduplicatedLinks.length,
                     total_reviews: reviews.length,
                     unique_merchants: uniqueMerchants.size,
                     review_themes: reviewThemes
@@ -1930,6 +1946,57 @@
             }
 
             if (data.summary.review_themes.length > 0) {
+                // Function to determine theme sentiment and color (same as in multi-results)
+                function getThemeColor(theme, reviews) {
+                    if (!reviews || reviews.length === 0) {
+                        return { background: '#f8f9fa', color: '#6c757d' }; // neutral gray
+                    }
+                    
+                    // Find reviews that mention this theme
+                    const themeReviews = reviews.filter(review => 
+                        review.theme && review.theme.toLowerCase() === theme.toLowerCase()
+                    );
+                    
+                    if (themeReviews.length === 0) {
+                        // If no direct theme match, analyze overall sentiment
+                        const sentimentCounts = reviews.reduce((acc, review) => {
+                            acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                            return acc;
+                        }, {});
+                        
+                        const totalReviews = reviews.length;
+                        const positivePercent = (sentimentCounts.positive || 0) / totalReviews;
+                        const negativePercent = (sentimentCounts.negative || 0) / totalReviews;
+                        
+                        if (positivePercent > 0.6) {
+                            return { background: '#d1f2d1', color: '#2d5a2d' }; // light green
+                        } else if (negativePercent > 0.6) {
+                            return { background: '#f8d7da', color: '#721c24' }; // light red  
+                        } else {
+                            return { background: '#fff3cd', color: '#856404' }; // light yellow
+                        }
+                    }
+                    
+                    // Calculate sentiment for theme-specific reviews
+                    const themeSentimentCounts = themeReviews.reduce((acc, review) => {
+                        acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    const themeTotal = themeReviews.length;
+                    const positivePercent = (themeSentimentCounts.positive || 0) / themeTotal;
+                    const negativePercent = (themeSentimentCounts.negative || 0) / themeTotal;
+                    
+                    // Determine color based on dominant sentiment
+                    if (positivePercent > negativePercent && positivePercent > 0.5) {
+                        return { background: '#d1f2d1', color: '#2d5a2d' }; // light green for positive
+                    } else if (negativePercent > positivePercent && negativePercent > 0.5) {
+                        return { background: '#f8d7da', color: '#721c24' }; // light red for negative
+                    } else {
+                        return { background: '#fff3cd', color: '#856404' }; // light yellow for neutral/mixed
+                    }
+                }
+
                 html += `
                     <div style="margin-bottom: 20px;">
                         <div style="
@@ -1940,15 +2007,17 @@
                             padding: 0 12px;
                         ">Themes</div>
                         <div style="display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px;">
-                            ${data.summary.review_themes.map(theme => 
-                                `<span style="
-                                    background: #e9ecef;
-                                    color: #495057;
+                            ${data.summary.review_themes.map(theme => {
+                                const colors = getThemeColor(theme, data.reviews);
+                                return `<span style="
+                                    background: ${colors.background};
+                                    color: ${colors.color};
                                     padding: 4px 8px;
                                     border-radius: 12px;
                                     font-size: 12px;
-                                ">${theme}</span>`
-                            ).join('')}
+                                    border: 1px solid ${colors.background === '#d1f2d1' ? '#c3e6cb' : colors.background === '#f8d7da' ? '#f5c6cb' : '#ffeaa7'};
+                                ">${theme}</span>`;
+                            }).join('')}
                         </div>
                     </div>
                 `;
@@ -2115,6 +2184,57 @@
                 // Get top 3 themes
                 const topThemes = data.summary.review_themes.slice(0, 3);
                 
+                // Function to determine theme sentiment and color
+                function getThemeColor(theme, reviews) {
+                    if (!reviews || reviews.length === 0) {
+                        return { background: '#f8f9fa', color: '#6c757d' }; // neutral gray
+                    }
+                    
+                    // Find reviews that mention this theme
+                    const themeReviews = reviews.filter(review => 
+                        review.theme && review.theme.toLowerCase() === theme.toLowerCase()
+                    );
+                    
+                    if (themeReviews.length === 0) {
+                        // If no direct theme match, analyze overall sentiment
+                        const sentimentCounts = reviews.reduce((acc, review) => {
+                            acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                            return acc;
+                        }, {});
+                        
+                        const totalReviews = reviews.length;
+                        const positivePercent = (sentimentCounts.positive || 0) / totalReviews;
+                        const negativePercent = (sentimentCounts.negative || 0) / totalReviews;
+                        
+                        if (positivePercent > 0.6) {
+                            return { background: '#d1f2d1', color: '#2d5a2d' }; // light green
+                        } else if (negativePercent > 0.6) {
+                            return { background: '#f8d7da', color: '#721c24' }; // light red  
+                        } else {
+                            return { background: '#fff3cd', color: '#856404' }; // light yellow
+                        }
+                    }
+                    
+                    // Calculate sentiment for theme-specific reviews
+                    const themeSentimentCounts = themeReviews.reduce((acc, review) => {
+                        acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    const themeTotal = themeReviews.length;
+                    const positivePercent = (themeSentimentCounts.positive || 0) / themeTotal;
+                    const negativePercent = (themeSentimentCounts.negative || 0) / themeTotal;
+                    
+                    // Determine color based on dominant sentiment
+                    if (positivePercent > negativePercent && positivePercent > 0.5) {
+                        return { background: '#d1f2d1', color: '#2d5a2d' }; // light green for positive
+                    } else if (negativePercent > positivePercent && negativePercent > 0.5) {
+                        return { background: '#f8d7da', color: '#721c24' }; // light red for negative
+                    } else {
+                        return { background: '#fff3cd', color: '#856404' }; // light yellow for neutral/mixed
+                    }
+                }
+                
                 html += `
                     <tr style="
                         border-bottom: 1px solid #f8f9fa;
@@ -2197,17 +2317,21 @@
                             border-right: 1px solid #e9ecef;
                             vertical-align: top;
                         ">
-                            ${topThemes.length > 0 ? topThemes.map(theme => `
+                            ${topThemes.length > 0 ? topThemes.map(theme => {
+                                const colors = getThemeColor(theme, data.reviews);
+                                return `
                                 <span style="
                                     display: inline-block;
-                                    background: #e9ecef;
-                                    color: #495057;
+                                    background: ${colors.background};
+                                    color: ${colors.color};
                                     padding: 2px 6px;
                                     border-radius: 8px;
                                     font-size: 10px;
                                     margin: 1px 2px 1px 0;
+                                    border: 1px solid ${colors.background === '#d1f2d1' ? '#c3e6cb' : colors.background === '#f8d7da' ? '#f5c6cb' : '#ffeaa7'};
                                 ">${theme}</span>
-                            `).join('') : '<span style="color: #6c757d; font-size: 11px;">No themes</span>'}
+                                `;
+                            }).join('') : '<span style="color: #6c757d; font-size: 11px;">No themes</span>'}
                             ${data.summary.review_themes.length > 3 ? `<span style="color: #6c757d; font-size: 10px;">+${data.summary.review_themes.length - 3} more</span>` : ''}
                         </td>
                         <td style="
