@@ -1180,6 +1180,17 @@
             }
         }
 
+        function getFaviconUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                const domain = urlObj.protocol + '//' + urlObj.hostname;
+                return `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(domain)}&size=16`;
+            } catch (e) {
+                // Fallback for invalid URLs
+                return `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(url)}&size=16`;
+            }
+        }
+
         // Function to create floating button
         function createFloatingButton() {
             const button = document.createElement('button');
@@ -1804,6 +1815,14 @@
                                     margin-bottom: 6px;
                                     gap: 8px;
                                 ">
+                                    <img src="${getFaviconUrl(link.url)}" 
+                                         alt="Site favicon" 
+                                         style="
+                                             width: 16px;
+                                             height: 16px;
+                                             flex-shrink: 0;
+                                         " 
+                                         onerror="this.style.display='none'" />
                                     <span style="
                                         font-weight: 600;
                                         color: #007bff;
@@ -1915,6 +1934,14 @@
                                         margin-bottom: 8px;
                                         gap: 8px;
                                     ">
+                                        ${review.url ? `<img src="${getFaviconUrl(review.url)}" 
+                                                             alt="Site favicon" 
+                                                             style="
+                                                                 width: 16px;
+                                                                 height: 16px;
+                                                                 flex-shrink: 0;
+                                                             " 
+                                                             onerror="this.style.display='none'" />` : ''}
                                         <span style="font-weight: 500; color: #495057; font-size: 14px;">${review.source}</span>
                                         ${review.url ? `<a href="${review.url}" target="_blank" style="
                                             color: #6c757d;
@@ -2150,7 +2177,7 @@
                                         color: #495057;
                                         border-right: 1px solid #e9ecef;
                                         min-width: 200px;
-                                    ">Top Themes</th>
+                                    ">Themes</th>
                                     <th style="
                                         padding: 12px 8px;
                                         text-align: center;
@@ -2181,8 +2208,8 @@
                 const neutralPercent = totalReviews > 0 ? Math.round((neutralCount / totalReviews) * 100) : 0;
                 const negativePercent = totalReviews > 0 ? Math.round((negativeCount / totalReviews) * 100) : 0;
                 
-                // Get top 3 themes
-                const topThemes = data.summary.review_themes.slice(0, 3);
+                // Get all themes instead of just top 3
+                const topThemes = data.summary.review_themes;
                 
                 // Function to determine theme sentiment and color
                 function getThemeColor(theme, reviews) {
@@ -2332,7 +2359,6 @@
                                 ">${theme}</span>
                                 `;
                             }).join('') : '<span style="color: #6c757d; font-size: 11px;">No themes</span>'}
-                            ${data.summary.review_themes.length > 3 ? `<span style="color: #6c757d; font-size: 10px;">+${data.summary.review_themes.length - 3} more</span>` : ''}
                         </td>
                         <td style="
                             padding: 12px 8px;
