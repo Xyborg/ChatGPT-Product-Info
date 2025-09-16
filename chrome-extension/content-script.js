@@ -1670,12 +1670,23 @@
             
             const queries = multiSearchQuery.value.trim().split('\n').filter(q => q.trim());
             
-            if (queries.length === 0) {
+            // Remove duplicates (case-insensitive) to avoid unnecessary requests
+            const uniqueQueries = [...new Set(queries.map(q => q.toLowerCase()))].map(lowerQuery => {
+                // Find the original case version of this query
+                return queries.find(originalQuery => originalQuery.toLowerCase() === lowerQuery);
+            });
+            
+            if (uniqueQueries.length === 0) {
                 alert('Please enter at least one product name');
                 return;
             }
             
-            if (queries.length > 10) {
+            // Show info if duplicates were removed
+            if (queries.length > uniqueQueries.length) {
+                console.log(`Removed ${queries.length - uniqueQueries.length} duplicate queries`);
+            }
+            
+            if (uniqueQueries.length > 10) {
                 alert('Maximum 10 products allowed at once to avoid rate limiting');
                 return;
             }
@@ -1695,7 +1706,7 @@
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
                     <div class="loading-spinner"></div>
-                    <p>Searching ${queries.length} products...</p>
+                    <p>Searching ${uniqueQueries.length} products...</p>
                     <div id="progress-status" style="font-size: 14px; color: #999; margin-top: 10px;">
                         Starting searches...
                     </div>
@@ -1707,10 +1718,10 @@
             
             try {
                 // Search products one by one
-                for (let i = 0; i < queries.length; i++) {
-                    const query = queries[i].trim();
+                for (let i = 0; i < uniqueQueries.length; i++) {
+                    const query = uniqueQueries[i].trim();
                     if (progressStatus) {
-                        progressStatus.textContent = `Searching "${query}" (${i + 1}/${queries.length})...`;
+                        progressStatus.textContent = `Searching "${query}" (${i + 1}/${uniqueQueries.length})...`;
                     }
                     
                     try {
@@ -1729,7 +1740,7 @@
                     }
                     
                     // Add a small delay between requests to be respectful
-                    if (i < queries.length - 1) {
+                    if (i < uniqueQueries.length - 1) {
                         await new Promise(resolve => setTimeout(resolve, 1000));
                     }
                 }
@@ -1737,7 +1748,7 @@
                 displayMultiResults(results);
                 
                 // Save successful multi-search to history
-                const queriesText = queries.join('\n');
+                const queriesText = uniqueQueries.join('\n');
                 const combinedResults = {
                     summary: {
                         total_reviews: results.reduce((acc, r) => acc + (r.success ? (r.data.summary?.total_reviews || 0) : 0), 0),
