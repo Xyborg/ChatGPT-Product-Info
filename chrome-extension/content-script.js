@@ -1215,7 +1215,12 @@
                             ${reviewSources.map((source, index) => `
                                 <tr style="border-bottom: 1px solid #f8f9fa;">
                                     <td style="padding: 12px; font-weight: bold;">${index + 1}</td>
-                                    <td style="padding: 12px;">${source.domain}</td>
+                                    <td style="padding: 12px;">
+                                        <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
+                                            <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
+                                            ${source.domain}
+                                        </a>
+                                    </td>
                                     <td style="padding: 12px; text-align: right; font-weight: bold;">${source.count}</td>
                                 </tr>
                             `).join('')}
@@ -1245,7 +1250,12 @@
                             ${citationSources.map((source, index) => `
                                 <tr style="border-bottom: 1px solid #f8f9fa;">
                                     <td style="padding: 12px; font-weight: bold;">${index + 1}</td>
-                                    <td style="padding: 12px;">${source.domain}</td>
+                                    <td style="padding: 12px;">
+                                        <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
+                                            <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
+                                            ${source.domain}
+                                        </a>
+                                    </td>
                                     <td style="padding: 12px; text-align: right; font-weight: bold;">${source.citationCount}</td>
                                 </tr>
                             `).join('')}
