@@ -4,13 +4,21 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 
 ## Features
 
+### Core Search Features
 - 🔍 **Single Product Search**: Search for individual products and get detailed reviews
 - 📊 **Multi-Product Comparison**: Compare multiple products side-by-side in a table format  
-- 📋 **Search History**: Automatically save all your searches and easily reopen them later
 - 🎯 **Sentiment Analysis**: Visual sentiment breakdown of reviews (positive/neutral/negative)
 - 🔗 **Citation Links**: Direct links to source websites for more information
 - 🏷️ **Review Themes**: Categorized review themes for easy browsing
+
+### Chrome Extension Features
+- 📋 **Search History**: Automatically save all your searches and easily reopen them later (up to 50 searches)
+- 📊 **Basic Reports**: View simple reports on review sources and citation sources from your search history
+- 🛍️ **Floating Button**: Always-visible product search button on ChatGPT pages
+- 🔧 **Popup Interface**: Quick access and status checking from Chrome toolbar
 - 📱 **Responsive UI**: Clean, modern interface that works seamlessly with ChatGPT
+- 🔄 **Auto-Save**: All successful searches automatically saved to local history
+- 🔍 **History Filtering**: Search through your saved searches with built-in filter
 
 ## Installation
 
@@ -29,14 +37,20 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 
 ## How to Use
 
+### Getting Started
 1. **Make sure you're logged in** to ChatGPT (https://chatgpt.com)
-2. **Click the extension icon** in your Chrome toolbar
-3. **Click "Open Product Search"** to launch the search interface
-4. **Search for products** like:
-   - "iPhone 17 Pro camera quality"
-   - "Nike Air Max running shoes"
-   - "MacBook Air M3 performance"
-   - "Tesla Model 3 reviews"
+2. **Access the search interface** using either:
+   - Click the extension icon in your Chrome toolbar → "Open Product Search"
+   - Click the floating 🛍️ button on any ChatGPT page
+3. **Start searching** for products using natural language queries
+
+### Search Examples
+Try searching for:
+- "iPhone 17 Pro camera quality"
+- "Nike Air Max running shoes" 
+- "MacBook Air M3 performance"
+- "Tesla Model 3 reviews"
+- "best wireless headphones 2024"
 
 ### Single Product Search
 - Enter any product name or specific query
@@ -57,25 +71,32 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 - **Delete** individual searches or clear all history
 - History is stored locally in your browser (up to 50 most recent searches)
 
+### Basic Reports
+- Click the "📊 Reports" tab to view simple analytics from your search history
+- **Review Sources Report**: See which websites have provided reviews in your searches
+- **Citation Sources Report**: View the sources that have been cited across your searches
+- Reports are generated from your local search history and processed locally
+
 ## Why This Works as a Chrome Extension
 
 Unlike the original bookmarklet, this Chrome extension has several advantages:
 
-### ✅ **No CORS Issues**
+### **No CORS Issues**
 - Extensions can make cross-origin requests to ChatGPT's API without restrictions
 - No browser security blocks or CORS errors
 
-### ✅ **Better Security**
+### **Better Security & Reliability**
 - No need to paste code into the console repeatedly
 - Proper extension sandboxing and permissions
-
-### ✅ **Persistent & Reliable**
 - Always available on ChatGPT pages
 - Auto-updates through Chrome's extension system
 - No need to re-inject code manually
 
-### ✅ **Enhanced User Experience**
-- Proper toolbar icon and popup interface
+### **Enhanced User Experience**
+- Floating 🛍️ button for instant access
+- Proper toolbar icon and popup interface with status checking
+- Persistent search history with filtering and management
+- Basic reports on search sources
 - Better error handling and status indicators
 - Seamless integration with ChatGPT's interface
 
@@ -83,26 +104,31 @@ Unlike the original bookmarklet, this Chrome extension has several advantages:
 
 ### Permissions Required
 - `activeTab`: To interact with the current ChatGPT tab
-- `storage`: To save user preferences (future feature)
+- `storage`: To save search history and user preferences locally
 - `https://chatgpt.com/*`: To access ChatGPT's API and inject content
 
 ### Architecture
-- **Content Script**: Injects the search interface into ChatGPT pages
-- **Popup**: Provides status and controls from the extension toolbar
-- **Manifest V3**: Uses the latest Chrome extension standards
+- **Content Script**: Injects the search interface and floating button into ChatGPT pages
+- **Popup**: Provides status checking and quick access controls from the extension toolbar
+- **Local Storage**: Manages search history and user data locally (no external servers)
+- **Manifest V3**: Uses the latest Chrome extension standards for security and performance
 
 ### API Access
 The extension uses ChatGPT's internal product search API:
-- Automatically fetches authentication tokens from your session
+- Automatically fetches authentication tokens from your existing session
 - Makes requests to `https://chatgpt.com/backend-api/search/product_info`
 - Parses streaming responses for real-time results
+- Handles authentication errors gracefully with user feedback
 
 ## Privacy & Security
 
-- **No data collection**: The extension doesn't collect or store any personal data
-- **Local processing**: All searches are processed locally in your browser
-- **Secure authentication**: Uses your existing ChatGPT session tokens
+- **No data collection**: The extension doesn't collect or store any personal data externally
+- **Local processing**: All searches and history are processed and stored locally in your browser
+- **Secure authentication**: Uses your existing ChatGPT session tokens (no passwords stored)
 - **No external servers**: Communicates only with ChatGPT's official API
+- **Local storage only**: Search history and preferences stored in browser's local storage
+- **No tracking**: No analytics, telemetry, or user behavior tracking
+- **Open source**: Full code available for security review and transparency
 
 ## Development
 

@@ -1,12 +1,15 @@
 # ChatGPT Product Info Search 🔍
 
-This is a browser script that unlocks ChatGPT's internal product search API to fetch detailed product information, reviews, and comparisons directly within ChatGPT's interface.
+A powerful Chrome extension and browser script that unlocks ChatGPT's internal product search API to fetch detailed product information, reviews, and comparisons directly within ChatGPT's interface.
 
 ![ChatGPT Product Info Search Interface](assets/chatgpt-product-info.png)
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Installation](#installation)
+  - [Chrome Extension (Recommended)](#chrome-extension-recommended)
+  - [Browser Script](#browser-script)
 - [Demo](#demo)
 - [Features](#features)
 - [How to Use](#how-to-use)
@@ -25,7 +28,37 @@ This is a browser script that unlocks ChatGPT's internal product search API to f
 
 ## Overview
 
-This script creates a modal interface within ChatGPT that allows you to search for product information, reviews, and detailed comparisons by leveraging ChatGPT's internal product search API. It automatically handles authentication and presents results in an organized, easy-to-read format.
+This project provides two ways to access ChatGPT's internal product search API: a Chrome extension (recommended) and a browser script. Both create a modal interface within ChatGPT that allows you to search for product information, reviews, and detailed comparisons. They automatically handle authentication and present results in an organized, easy-to-read format.
+
+## Installation
+
+### Chrome Extension (Recommended)
+
+The Chrome extension provides the best experience with enhanced features and reliability.
+
+#### From Source (Developer Mode)
+1. **Download/Clone** this repository
+2. **Open Chrome** and navigate to `chrome://extensions/`
+3. **Enable Developer Mode** (toggle in top-right corner)
+4. **Click "Load unpacked"** and select the `chrome-extension` folder
+5. **Navigate to ChatGPT** (https://chatgpt.com) and log in
+6. **Click the extension icon** in your toolbar or look for the floating 🛍️ button on ChatGPT
+
+#### From Chrome Web Store
+*Coming soon - extension will be submitted to the Chrome Web Store*
+
+#### Chrome Extension Features
+- ✅ **No CORS Issues**: Extensions can make cross-origin requests without restrictions
+- ✅ **Floating Button**: Always visible 🛍️ button on ChatGPT pages
+- ✅ **Popup Interface**: Clean status indicator and quick access controls
+- ✅ **Search History**: Persistent search history with filtering and management
+- ✅ **Auto-Updates**: Automatic updates through Chrome's extension system
+- ✅ **Better Security**: No need to paste code into console repeatedly
+- ✅ **Enhanced UX**: Proper error handling and status indicators
+
+### Browser Script
+
+For users who prefer not to install extensions or use other browsers.
 
 ## Demo
 
@@ -39,17 +72,53 @@ https://github.com/user-attachments/assets/9e661765-098e-48c6-ac1b-dc3f4c3e725e
 
 ## Features
 
-- **Product Search**: Search for any product using natural language queries
-- 🆕 **Multi Product Search**: Search for and compare multiple products in a single query
-- **Comprehensive Results**: Get product details, reviews, ratings, and merchant offers
-- **Review Analysis**: Sentiment analysis with positive/negative/neutral breakdown
-- **Citation Links**: Direct links to source websites and reviews
+### Core Features
+- 🔍 **Single Product Search**: Search for individual products and get detailed reviews
+- 📊 **Multi-Product Comparison**: Compare multiple products side-by-side in a table format
+- 📋 **Search History**: Automatically save all your searches and easily reopen them later (Chrome extension)
+- 🎯 **Sentiment Analysis**: Visual sentiment breakdown of reviews (positive/neutral/negative)
+- 🔗 **Citation Links**: Direct links to source websites for more information
+- 🏷️ **Review Themes**: Categorized review themes for easy browsing
+- 📱 **Responsive UI**: Clean, modern interface that works seamlessly with ChatGPT
+
+### Advanced Features
 - **Auto Authentication**: Automatically fetches your ChatGPT session token
 - **Real-time Results**: Live streaming of search results as they come in
+- **Comprehensive Results**: Get product details, reviews, ratings, and merchant offers
+- **Review Analysis**: AI-generated summaries with sentiment breakdown
 
 ## How to Use
 
-### Method 1: Browser Console (Recommended)
+### Chrome Extension (Recommended)
+
+1. **Make sure you're logged in** to ChatGPT (https://chatgpt.com)
+2. **Click the extension icon** in your Chrome toolbar to check status
+3. **Click "Open Product Search"** or use the floating 🛍️ button on ChatGPT
+4. **Search for products** using natural language queries
+5. **Use tabs** to switch between Search, History, and Reports
+
+#### Single Product Search
+- Enter any product name or specific query
+- Get detailed reviews, sentiment analysis, and citation links
+- View product overview and review summaries
+
+#### Multi-Product Search
+- Toggle "Multi-product search" mode
+- Enter multiple product names (one per line)
+- Compare products in a convenient table format
+- Click "View" to see detailed information for any product
+
+#### Search History
+- All successful searches are automatically saved to your history
+- Click the "📋 History" tab to view your search history
+- **Reopen** any previous search to view the results again
+- **Filter** your history using the search box
+- **Delete** individual searches or clear all history
+- History is stored locally in your browser (up to 50 most recent searches)
+
+### Browser Script
+
+#### Method 1: Browser Console
 
 1. **Open ChatGPT** in your browser and make sure you're logged in
 2. **Open Developer Tools**:
@@ -61,7 +130,7 @@ https://github.com/user-attachments/assets/9e661765-098e-48c6-ac1b-dc3f4c3e725e
 5. **Paste and press Enter** - the modal will appear immediately
 6. **Start searching** for products!
 
-### Method 2: Bookmarklet
+#### Method 2: Bookmarklet
 
 Due to CORS restrictions, you'll need to create a proper bookmarklet using a bookmarklet generator:
 
@@ -147,28 +216,59 @@ The API returns structured data including:
 
 ## Troubleshooting
 
-### "Failed to get authentication token"
+### Chrome Extension Issues
+
+#### Extension Not Working
+- Make sure you're on https://chatgpt.com (not chat.openai.com)
+- Refresh the ChatGPT page after installing the extension
+- Check that you're logged in to ChatGPT
+- Verify the extension is enabled in chrome://extensions/
+
+#### Popup Shows "Not Ready"
+- Navigate to ChatGPT first
+- Refresh the ChatGPT page
+- Make sure the extension is enabled in chrome://extensions/
+
+#### Floating Button Not Visible
+- Check if you're on the correct ChatGPT domain
+- Refresh the page
+- Look for the 🛍️ button in the bottom-right area of the page
+
+### General Issues
+
+#### "Failed to get authentication token"
 - Make sure you're logged in to ChatGPT
 - Refresh the ChatGPT page and try again
 - Check that you're on the correct chatgpt.com domain
 
-### "No results found"
+#### "No results found"
 - Try different search terms
 - Use more specific product names
 - Include brand or product names in your search
 
-### Modal doesn't appear
+#### Modal doesn't appear (Browser Script)
 - Make sure JavaScript is enabled
 - Check browser console for errors
 - Try refreshing the page and running the script again
 
 ## Privacy & Security
 
+### Chrome Extension
+- **No data collection**: The extension doesn't collect or store any personal data
+- **Local processing**: All searches are processed locally in your browser
+- **Secure authentication**: Uses your existing ChatGPT session tokens
+- **No external servers**: Communicates only with ChatGPT's official API
+- **Local storage only**: Search history is stored locally in your browser
+
+### Browser Script
 - **No data collection**: The script runs entirely in your browser
 - **Uses your session**: Leverages your existing ChatGPT authentication
 - **No external servers**: All requests go directly to ChatGPT's API
-- **It wont mess with your chat history**: This won't create new chats, so you won't see it in your history.
+- **No chat history impact**: This won't create new chats, so you won't see it in your history
+
+### Both Methods
 - **Open source**: Full code is available for inspection
+- **Secure by design**: No third-party data sharing or analytics
 
 ## Want to Improve Your AI Visibility?
 
@@ -197,6 +297,8 @@ Feel free to submit issues, feature requests, or pull requests on GitHub!
 
 Created by [Martin Aberastegue (@Xyborg)](https://www.martinaberastegue.com/)
 
+*Originally developed as a browser script, now enhanced with a full-featured Chrome extension for better reliability and user experience.*
+
 ## License
 
 MIT License - feel free to modify and use as needed!
@@ -204,3 +306,5 @@ MIT License - feel free to modify and use as needed!
 ---
 
 **Note**: This tool uses ChatGPT's internal API and is intended for educational and personal use. Please respect ChatGPT's terms of service.
+
+**Recommendation**: Use the Chrome extension for the best experience with persistent history, enhanced UI, and automatic updates.
