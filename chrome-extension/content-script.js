@@ -42,6 +42,11 @@
                 z-index: 10000;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             ">
+                <style>
+                    .table-row-hover:hover {
+                        background-color: #fffbf0 !important;
+                    }
+                </style>
                 <div style="
                     background: white;
                     width: 90%;
@@ -463,6 +468,9 @@
                                     grid-template-columns: 1fr 1fr;
                                     gap: 32px;
                                     margin-bottom: 20px;
+                                    max-width: 1200px;
+                                    margin: 0 auto 20px auto;
+                                    justify-content: center;
                                 ">
                                     <div id="citation-sources-table"></div>
                                     <div id="review-sources-table"></div>
@@ -831,6 +839,7 @@
                 console.log('Review HTML length:', reviewHTML.length);
                 reviewSourcesTable.innerHTML = reviewHTML;
             }
+
 
             console.log('Reports loaded successfully');
         }
@@ -1213,7 +1222,7 @@
                         </thead>
                         <tbody>
                             ${reviewSources.map((source, index) => `
-                                <tr style="border-bottom: 1px solid #f8f9fa;">
+                                <tr style="border-bottom: 1px solid #f8f9fa; transition: background-color 0.2s ease;" class="table-row-hover">
                                     <td style="padding: 6px 12px; font-weight: bold;">${index + 1}</td>
                                     <td style="padding: 6px 12px;">
                                         <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
@@ -1248,7 +1257,7 @@
                         </thead>
                         <tbody>
                             ${citationSources.map((source, index) => `
-                                <tr style="border-bottom: 1px solid #f8f9fa;">
+                                <tr style="border-bottom: 1px solid #f8f9fa; transition: background-color 0.2s ease;" class="table-row-hover">
                                     <td style="padding: 6px 12px; font-weight: bold;">${index + 1}</td>
                                     <td style="padding: 6px 12px;">
                                         <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
