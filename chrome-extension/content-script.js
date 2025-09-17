@@ -5373,8 +5373,21 @@
         function createFloatingButton() {
             const button = document.createElement('button');
             button.id = 'openProductSearchModalBtn';
-            button.innerHTML = '🛍️';
             button.title = 'Open ChatGPT Product Info Research';
+            const iconBase = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+                ? chrome.runtime.getURL('icons/logobubble.svg')
+                : null;
+
+            if (iconBase) {
+                const iconImg = document.createElement('img');
+                iconImg.src = iconBase;
+                iconImg.alt = 'ChatGPT Product Info';
+                iconImg.style.pointerEvents = 'none';
+                button.appendChild(iconImg);
+            } else {
+                button.textContent = '🛍️';
+                button.classList.add('icon-fallback');
+            }
             document.body.appendChild(button);
             return button;
         }
@@ -5434,16 +5447,6 @@
                     authStatus.style.borderColor = "#f5c6cb";
                 }
             }
-        }
-
-        // Function to create floating button
-        function createFloatingButton() {
-            const button = document.createElement('button');
-            button.id = 'openProductSearchModalBtn';
-            button.innerHTML = '🛍️';
-            button.title = 'Open ChatGPT Product Info Research';
-            document.body.appendChild(button);
-            return button;
         }
 
         // Parse product info from API response

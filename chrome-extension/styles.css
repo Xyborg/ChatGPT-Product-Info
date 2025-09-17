@@ -2,16 +2,16 @@
 
 #openProductSearchModalBtn {
     position: fixed;
-    right: 20px;
-    top: 40%;
-    transform: translateY(-50%);
-    background-color: #007bff;
-    color: white;
+    right: 30px;
+    bottom: 100px;
+    transform: none;
+    background-color: #fef3c7;
+    color: #b45309;
     border: none;
     border-radius: 50%;
     width: 60px;
     height: 60px;
-    font-size: 24px;
+    font-size: 0;
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     cursor: pointer;
     z-index: 9990;
@@ -21,8 +21,18 @@
     transition: all 0.3s ease;
 }
 
+#openProductSearchModalBtn img {
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+}
+
+#openProductSearchModalBtn.icon-fallback {
+    font-size: 24px;
+}
+
 #openProductSearchModalBtn:hover {
-    background-color: #0056b3;
+    background-color: #fde68a;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
