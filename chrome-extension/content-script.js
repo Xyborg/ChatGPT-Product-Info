@@ -1341,42 +1341,36 @@
                 // CRITICAL: Completely hide and clear analysis content when switching to history
                 if (reportsContainer) {
                     reportsContainer.style.display = 'none';
-                    reportsContainer.style.visibility = 'hidden';
                     console.log('HISTORY TAB: Hidden reports container');
                     
                     // Clear all analysis content from the DOM
                     const analysisContent = reportsContainer.querySelector('#analysis-content');
                     if (analysisContent) {
                         analysisContent.style.display = 'none';
-                        analysisContent.style.visibility = 'hidden';
                         console.log('HISTORY TAB: Hidden analysis content in reports container');
                     }
                 }
-                
+
                 // Also ensure no analysis content exists anywhere else
                 const globalAnalysisContent = document.getElementById('analysis-content');
                 const globalAnalysisResults = document.getElementById('analysis-results');
                 const globalCitationTable = document.getElementById('citation-sources-table');
                 const globalReviewTable = document.getElementById('review-sources-table');
-                
+
                 if (globalAnalysisContent) {
                     globalAnalysisContent.style.display = 'none';
-                    globalAnalysisContent.style.visibility = 'hidden';
                     console.log('HISTORY TAB: Hidden global analysis content');
                 }
                 if (globalAnalysisResults) {
                     globalAnalysisResults.style.display = 'none';
-                    globalAnalysisResults.style.visibility = 'hidden';
                     console.log('HISTORY TAB: Hidden global analysis results');
                 }
                 if (globalCitationTable) {
                     globalCitationTable.style.display = 'none';
-                    globalCitationTable.style.visibility = 'hidden';
                     console.log('HISTORY TAB: Hidden global citation table');
                 }
                 if (globalReviewTable) {
                     globalReviewTable.style.display = 'none';
-                    globalReviewTable.style.visibility = 'hidden';
                     console.log('HISTORY TAB: Hidden global review table');
                 }
                 
@@ -1403,7 +1397,6 @@
                 // CRITICAL: Completely hide and clear history content when switching to reports
                 if (historyContainer) {
                     historyContainer.style.display = 'none';
-                    historyContainer.style.visibility = 'hidden';
                     console.log('REPORTS TAB: Hidden history container');
                     
                     // Clear all history content from the DOM
@@ -1411,12 +1404,10 @@
                     const historyList = historyContainer.querySelector('#history-list');
                     if (historyContent) {
                         historyContent.style.display = 'none';
-                        historyContent.style.visibility = 'hidden';
                         console.log('REPORTS TAB: Hidden history content in history container');
                     }
                     if (historyList) {
                         historyList.style.display = 'none';
-                        historyList.style.visibility = 'hidden';
                         console.log('REPORTS TAB: Hidden history list in history container');
                     }
                 }
@@ -1425,6 +1416,7 @@
                     console.log('Showing reports container');
                     reportsContainer.style.display = 'block';
                     reportsContainer.style.visibility = 'visible';
+                    reportsContainer.style.removeProperty('visibility');
 
                     // Restore visibility for analysis sections that may have been hidden
                     ['analysis-content', 'analysis-results', 'citation-sources-table', 'review-sources-table']
@@ -1435,9 +1427,23 @@
                                     el.style.display = 'block';
                                 }
                                 el.style.visibility = 'visible';
+                                el.style.removeProperty('visibility');
                             }
                         });
-                    
+
+                    // Ensure scrollable analysis containers remain scrollable after tab switches
+                    const scrollTargets = [
+                        reportsContainer,
+                        document.getElementById('analysis-results'),
+                        document.getElementById('analysis-content'),
+                        document.querySelector('#analysis-content .analysis-scroll-area')
+                    ];
+                    scrollTargets.forEach(target => {
+                        if (target) {
+                            target.style.overflowY = 'auto';
+                        }
+                    });
+
                     // Initialize analysis dashboard when switching to reports
                     initializeAnalysisDashboard();
                 } else {
@@ -1478,6 +1484,7 @@
             if (analysisContent) {
                 analysisContent.style.display = 'block';
                 analysisContent.style.visibility = 'visible';
+                analysisContent.style.removeProperty('visibility');
                 console.log('ANALYSIS: Made analysis content visible');
                 
                 // Also ensure analysis results are visible
@@ -1488,14 +1495,17 @@
                 if (analysisResults) {
                     analysisResults.style.display = 'block';
                     analysisResults.style.visibility = 'visible';
+                    analysisResults.style.removeProperty('visibility');
                 }
                 if (citationTable) {
                     citationTable.style.display = 'block';
                     citationTable.style.visibility = 'visible';
+                    citationTable.style.removeProperty('visibility');
                 }
                 if (reviewTable) {
                     reviewTable.style.display = 'block';
                     reviewTable.style.visibility = 'visible';
+                    reviewTable.style.removeProperty('visibility');
                 }
             }
             
@@ -1624,8 +1634,15 @@
             if (projectFilter) {
                 projectFilter.innerHTML = '<option value="">All Projects</option>' +
                     projects.map(project => `<option value="${project.id}">${project.name}</option>`).join('');
-                
-                projectFilter.addEventListener('change', updateAnalysisFilterSummary);
+
+                projectFilter.addEventListener('change', () => {
+                    if (projectFilter.value) {
+                        document.querySelectorAll('.analysis-tag-checkbox').forEach(cb => {
+                            cb.checked = false;
+                        });
+                    }
+                    updateAnalysisFilterSummary();
+                });
             }
             
             // Populate tags filter
@@ -1668,7 +1685,12 @@
                         `;
                         
                         const checkbox = tagCheckbox.querySelector('input');
-                        checkbox.addEventListener('change', updateAnalysisFilterSummary);
+                        checkbox.addEventListener('change', () => {
+                            if (checkbox.checked && projectFilter) {
+                                projectFilter.value = '';
+                            }
+                            updateAnalysisFilterSummary();
+                        });
                         
                         tagsFilter.appendChild(tagCheckbox);
                     });
@@ -1732,8 +1754,21 @@
             const projectFilter = document.getElementById('analysis-project-filter');
             const checkedTagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
 
-            const selectedProject = projectFilter ? projectFilter.value : '';
-            const selectedTags = Array.from(checkedTagCheckboxes).map(cb => cb.value);
+            let selectedProject = projectFilter ? projectFilter.value : '';
+            let selectedTags = Array.from(checkedTagCheckboxes).map(cb => cb.value);
+
+            if (selectedTags.length > 0 && selectedProject) {
+                selectedProject = '';
+                if (projectFilter) {
+                    projectFilter.value = '';
+                }
+            }
+
+            if (selectedProject && selectedTags.length === 0) {
+                document.querySelectorAll('.analysis-tag-checkbox').forEach(cb => {
+                    cb.checked = false;
+                });
+            }
 
             // Keep shared filter state in sync so History reflects analysis selections
             const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
