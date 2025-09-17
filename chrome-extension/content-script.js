@@ -3869,6 +3869,7 @@
         // Global filter state
         let currentFilters = {
             text: '',
+            rawText: '',
             project: '',
             tags: [],
             isActive: false
@@ -4021,9 +4022,13 @@
             const filterProject = document.getElementById('filter-project');
             const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]:checked');
             
+            const rawText = filterText ? filterText.value.trim() : '';
+            const normalizedText = rawText.toLowerCase();
+
             // Update global filter state
             currentFilters = {
-                text: filterText ? filterText.value.trim().toLowerCase() : '',
+                text: normalizedText,
+                rawText: rawText,
                 project: filterProject ? filterProject.value : '',
                 tags: Array.from(tagCheckboxes).map(cb => cb.value),
                 isActive: true
@@ -4197,6 +4202,7 @@
             // Reset global state
             currentFilters = {
                 text: '',
+                rawText: '',
                 project: '',
                 tags: [],
                 isActive: false
@@ -4216,84 +4222,21 @@
         // ===== SIDEBAR-TO-FILTER INTEGRATION =====
         
         function filterByProject(projectId) {
-            console.log('=== FILTER BY PROJECT CALLED ===', projectId);
-            const active = getActiveTab();
-
-            if (active === 'reports') {
-                // We're on Analysis -> set the analysis project filter and re-generate
-                const projectFilter = document.getElementById('analysis-project-filter');
-                if (projectFilter) {
-                    projectFilter.value = projectId;
-                    // keep the report tab active and visible
-                    switchTab('reports');
-                    // update summaries/chips and re-run analysis
-                    updateAnalysisFilterSummary();
-                    updateAnalysisFilterChips?.();
-                    applyAnalysisFilters?.(); // this calls generateAnalysisReports()
-                }
+            const tab = typeof _activeTab === 'function' ? _activeTab() : (typeof getActiveTab === 'function' ? getActiveTab() : 'history');
+            if (tab === 'reports') {
+                _applyToAnalysis({ projectId });
                 return;
             }
-
-            // Default behavior (Search/History): go to history and filter there
-            switchTab('history');
-            loadHistory();
-            setTimeout(() => {
-                const filterText = document.getElementById('filter-text');
-                const currentText = filterText ? filterText.value.trim() : '';
-
-                const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
-                tagCheckboxes.forEach(cb => cb.checked = false);
-
-                const filterProject = document.getElementById('filter-project');
-                if (filterProject) filterProject.value = projectId;
-
-                currentFilters = { text: currentText.toLowerCase(), project: projectId, tags: [], isActive: true };
-
-                const history = loadSearchHistory();
-                const filteredHistory = applyAdvancedFilters(history);
-                renderHistoryList(filteredHistory);
-                updateFilterChips();
-                console.log('Filtered by project (history):', projectId);
-            }, 0);
+            _applyToHistory({ projectId });
         }
-        
-        function filterByTag(tagId) {
-            const active = getActiveTab();
 
-            if (active === 'reports') {
-                // We're on Analysis -> set the single tag in analysis UI and re-generate
-                switchTab('reports'); // ensure only reports is visible
-                // clear all analysis tag checkboxes then check this one
-                const checkboxes = document.querySelectorAll('.analysis-tag-checkbox');
-                checkboxes.forEach(cb => { cb.checked = (cb.value === tagId); });
-                updateAnalysisFilterSummary();
-                updateAnalysisFilterChips?.();
-                applyAnalysisFilters?.();
-                console.log('Filtered by tag (analysis):', tagId);
+        function filterByTag(tagId) {
+            const tab = typeof _activeTab === 'function' ? _activeTab() : (typeof getActiveTab === 'function' ? getActiveTab() : 'history');
+            if (tab === 'reports') {
+                _applyToAnalysis({ tagId });
                 return;
             }
-
-            // Default behavior (Search/History)
-            switchTab('history');
-            loadHistory();
-            setTimeout(() => {
-                const filterProject = document.getElementById('filter-project');
-                if (filterProject) filterProject.value = '';
-
-                const filterText = document.getElementById('filter-text');
-                const currentText = filterText ? filterText.value.trim() : '';
-
-                const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
-                tagCheckboxes.forEach(cb => { cb.checked = (cb.value === tagId); });
-
-                currentFilters = { text: currentText.toLowerCase(), project: '', tags: [tagId], isActive: true };
-
-                const history = loadSearchHistory();
-                const filteredHistory = applyAdvancedFilters(history);
-                renderHistoryList(filteredHistory);
-                updateFilterChips();
-                console.log('Filtered by tag (history):', tagId);
-            }, 0);
+            _applyToHistory({ tagId });
         }
         
         // ===== END SIDEBAR-TO-FILTER INTEGRATION =====
@@ -4882,6 +4825,37 @@
                 
                 // Initialize advanced filtering system
                 initializeAdvancedFiltering();
+
+                // Restore filter UI to match current filter state
+                const filterTextField = document.getElementById('filter-text');
+                const filterProjectField = document.getElementById('filter-project');
+                const filterTagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
+
+                if (filterTextField) {
+                    filterTextField.value = currentFilters.rawText || '';
+                }
+                if (filterProjectField) {
+                    filterProjectField.value = currentFilters.project || '';
+                }
+                if (filterTagCheckboxes.length > 0) {
+                    const activeTags = new Set(currentFilters.tags || []);
+                    filterTagCheckboxes.forEach(cb => {
+                        cb.checked = activeTags.has(cb.value);
+                    });
+                }
+
+                currentFilters.isActive = Boolean(
+                    (currentFilters.rawText && currentFilters.rawText.trim().length) ||
+                    (currentFilters.project && currentFilters.project.length) ||
+                    (currentFilters.tags && currentFilters.tags.length)
+                );
+                
+                if (typeof updateFilterSummary === 'function') {
+                    updateFilterSummary();
+                }
+                if (typeof updateFilterChips === 'function') {
+                    updateFilterChips();
+                }
                 
                 // Apply current filters (if any) or show all
                 const filteredHistory = applyAdvancedFilters(history);
@@ -6797,10 +6771,12 @@
         }
 
         function _applyToAnalysis({ projectId = '', tagId = '' }) {
-            const projectSel = document.getElementById('analysis-project-filter');
-            if (projectSel) {
-                projectSel.value = projectId || '';
-                projectSel.dispatchEvent(new Event('change', { bubbles: true }));
+            const projectSelects = document.querySelectorAll('select#analysis-project-filter');
+            if (projectSelects.length > 0) {
+                projectSelects.forEach(select => {
+                    select.value = projectId || '';
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                });
             }
 
             if (tagId) {
@@ -6819,21 +6795,48 @@
             if (typeof applyAnalysisFilters === 'function') {
                 applyAnalysisFilters();
             }
+
+            if (projectId || tagId) {
+                const syncOptions = { shouldSwitch: false };
+                if (projectId) syncOptions.projectId = projectId;
+                if (tagId) syncOptions.tagId = tagId;
+                _applyToHistory(syncOptions);
+            }
         }
 
-        function _applyToHistory({ projectId = '', tagId = '' }) {
-            const filterTextInput = document.getElementById('filter-text');
-            const rawFilterText = filterTextInput ? filterTextInput.value : '';
-            const normalizedText = rawFilterText.trim().toLowerCase();
+        function _applyToHistory({ projectId, tagId, shouldSwitch = true } = {}) {
+            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
+            const hasProject = typeof projectId === 'string' && projectId.length > 0;
+            const hasTag = typeof tagId === 'string' && tagId.length > 0;
 
-            currentFilters = {
+            const filterTextInput = document.getElementById('filter-text');
+            const rawFromDom = filterTextInput ? filterTextInput.value.trim() : '';
+            const effectiveRawText = rawFromDom || previousFilters.rawText || '';
+            const normalizedText = effectiveRawText.toLowerCase();
+
+            const nextState = {
                 text: normalizedText,
-                project: projectId || '',
-                tags: tagId ? [tagId] : [],
-                isActive: Boolean(normalizedText || projectId || tagId)
+                rawText: effectiveRawText,
+                project: hasTag ? '' : (hasProject ? projectId : (previousFilters.project || '')),
+                tags: hasTag ? [tagId] : (hasProject ? [] : (previousFilters.tags || [])),
+                isActive: false
             };
 
-            switchTab('history');
+            nextState.isActive = Boolean(nextState.text || nextState.project || (nextState.tags && nextState.tags.length));
+
+            currentFilters = nextState;
+
+            const historyIsActive = _activeTab() === 'history';
+            const shouldRender = shouldSwitch || historyIsActive;
+
+            if (!shouldRender) {
+                return;
+            }
+
+            if (shouldSwitch && !historyIsActive) {
+                switchTab('history');
+            }
+
             if (typeof loadHistory === 'function') {
                 loadHistory();
             }
@@ -6847,51 +6850,40 @@
 
             const projectSel = document.getElementById('filter-project');
             if (projectSel) {
-                projectSel.value = projectId || '';
+                projectSel.value = currentFilters.project || '';
             }
 
             const tagChecks = document.querySelectorAll('#filter-tags input[type="checkbox"]');
-            tagChecks.forEach(cb => {
-                if (tagId) {
-                    cb.checked = cb.value === tagId;
-                } else if (projectId) {
-                    cb.checked = false;
-                }
-            });
-
-            if (filterTextInput) {
-                filterTextInput.value = rawFilterText;
+            if (tagChecks.length > 0) {
+                const activeTags = new Set(currentFilters.tags || []);
+                tagChecks.forEach(cb => {
+                    cb.checked = activeTags.has(cb.value);
+                });
             }
 
-            const history = typeof loadSearchHistory === 'function' ? loadSearchHistory() : [];
-            const filtered = typeof applyAdvancedFilters === 'function' ? applyAdvancedFilters(history) : history;
+            const updatedFilterText = document.getElementById('filter-text');
+            if (updatedFilterText) {
+                updatedFilterText.value = currentFilters.rawText || '';
+            }
 
-            if (typeof renderHistoryList === 'function') {
-                renderHistoryList(filtered);
+            if (typeof updateFilterSummary === 'function') {
+                updateFilterSummary();
             }
             if (typeof updateFilterChips === 'function') {
                 updateFilterChips();
             }
-            if (typeof updateFilterSummary === 'function') {
-                updateFilterSummary();
+
+            if (typeof loadSearchHistory === 'function' && typeof applyAdvancedFilters === 'function') {
+                const history = loadSearchHistory();
+                const filtered = applyAdvancedFilters(history);
+                if (typeof renderHistoryList === 'function') {
+                    renderHistoryList(filtered);
+                }
             }
         }
 
-        window.filterByProject = function(projectId) {
-            const tab = _activeTab();
-            if (tab === 'reports') {
-                return _applyToAnalysis({ projectId });
-            }
-            return _applyToHistory({ projectId });
-        };
-
-        window.filterByTag = function(tagId) {
-            const tab = _activeTab();
-            if (tab === 'reports') {
-                return _applyToAnalysis({ tagId });
-            }
-            return _applyToHistory({ tagId });
-        };
+        window.filterByProject = filterByProject;
+        window.filterByTag = filterByTag;
 
         // Listen for messages from popup
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
