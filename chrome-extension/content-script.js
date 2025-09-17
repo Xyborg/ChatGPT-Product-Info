@@ -1730,8 +1730,27 @@
         
         function applyAnalysisFilters() {
             const projectFilter = document.getElementById('analysis-project-filter');
-            const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
-            
+            const checkedTagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
+
+            const selectedProject = projectFilter ? projectFilter.value : '';
+            const selectedTags = Array.from(checkedTagCheckboxes).map(cb => cb.value);
+
+            // Keep shared filter state in sync so History reflects analysis selections
+            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
+            currentFilters = {
+                text: previousFilters.text || '',
+                rawText: previousFilters.rawText || '',
+                project: selectedProject,
+                tags: selectedTags,
+                isActive: Boolean(
+                    (previousFilters.text && previousFilters.text.length) ||
+                    selectedProject ||
+                    selectedTags.length
+                )
+            };
+
+            _applyToHistory({ projectId: selectedProject, tags: selectedTags, shouldSwitch: false });
+
             // Hide filter panel
             const panel = document.getElementById('analysis-filter-panel');
             const toggleText = document.getElementById('analysis-filter-toggle-text');
@@ -1745,8 +1764,8 @@
             generateAnalysisReports();
             
             console.log('Applied analysis filters:', {
-                project: projectFilter ? projectFilter.value : '',
-                tags: Array.from(tagCheckboxes).map(cb => cb.value)
+                project: selectedProject,
+                tags: selectedTags
             });
         }
         
@@ -1758,6 +1777,16 @@
             tagCheckboxes.forEach(checkbox => checkbox.checked = false);
             
             updateAnalysisFilterSummary();
+
+            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
+            currentFilters = {
+                text: previousFilters.text || '',
+                rawText: previousFilters.rawText || '',
+                project: '',
+                tags: [],
+                isActive: Boolean(previousFilters.text && previousFilters.text.length)
+            };
+            _applyToHistory({ projectId: '', tags: [], shouldSwitch: false });
         }
         
         function updateAnalysisFilterChips() {
@@ -6842,32 +6871,53 @@
             if (projectId || tagId) {
                 const syncOptions = { shouldSwitch: false };
                 if (projectId) syncOptions.projectId = projectId;
-                if (tagId) syncOptions.tagId = tagId;
+                if (tagId) {
+                    syncOptions.tagId = tagId;
+                    syncOptions.tags = [tagId];
+                }
                 _applyToHistory(syncOptions);
             }
         }
 
-        function _applyToHistory({ projectId, tagId, shouldSwitch = true } = {}) {
+        function _applyToHistory({ projectId, tagId, tags, shouldSwitch = true } = {}) {
             const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
-            const hasProject = typeof projectId === 'string' && projectId.length > 0;
-            const hasTag = typeof tagId === 'string' && tagId.length > 0;
 
             const filterTextInput = document.getElementById('filter-text');
             const rawFromDom = filterTextInput ? filterTextInput.value.trim() : '';
             const effectiveRawText = rawFromDom || previousFilters.rawText || '';
+
+            let nextProject = previousFilters.project || '';
+            if (typeof projectId === 'string') {
+                nextProject = projectId;
+            }
+
+            let nextTags = Array.isArray(previousFilters.tags) ? [...previousFilters.tags] : [];
+            if (Array.isArray(tags)) {
+                nextTags = Array.from(new Set(
+                    tags.filter(tag => typeof tag === 'string' && tag.length > 0)
+                ));
+            }
+
+            if (typeof tagId === 'string' && tagId.length > 0) {
+                nextTags = [tagId];
+                if (typeof projectId !== 'string') {
+                    nextProject = '';
+                }
+            }
+
+            if (typeof projectId === 'string' && (!Array.isArray(tags) || tags.length === 0) && !tagId) {
+                nextTags = [];
+            }
+
             const normalizedText = effectiveRawText.toLowerCase();
 
-            const nextState = {
+            currentFilters = {
                 text: normalizedText,
                 rawText: effectiveRawText,
-                project: hasTag ? '' : (hasProject ? projectId : (previousFilters.project || '')),
-                tags: hasTag ? [tagId] : (hasProject ? [] : (previousFilters.tags || [])),
-                isActive: false
+                project: nextProject,
+                tags: nextTags,
+                isActive: Boolean(normalizedText || nextProject || nextTags.length)
             };
-
-            nextState.isActive = Boolean(nextState.text || nextState.project || (nextState.tags && nextState.tags.length));
-
-            currentFilters = nextState;
 
             const historyIsActive = _activeTab() === 'history';
             const shouldRender = shouldSwitch || historyIsActive;
