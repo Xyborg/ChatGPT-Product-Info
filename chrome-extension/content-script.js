@@ -82,6 +82,9 @@
                         color: #0056b3 !important;
                         text-decoration: underline;
                     }
+                    .analysis-tag-label:hover {
+                        background-color: #f8f9fa !important;
+                    }
                 </style>
                 <div style="
                     background: white;
@@ -293,7 +296,7 @@
                                 cursor: pointer;
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
-                            ">📊 Reports</button>
+                            ">📊 Analysis</button>
                         </div>
                         
                         <div id="search-area" style="
@@ -776,26 +779,207 @@
                                     font-size: 20px;
                                     font-weight: 600;
                                     color: #495057;
-                                ">Reports & Analytics</h3>
+                                ">Cross-Search Analysis</h3>
                                 <p style="
                                     margin: 0 0 24px 0;
                                     font-size: 16px;
                                     line-height: 1.5;
                                     max-width: 400px;
-                                ">Your reports will appear here. Start searching to build your analytics!</p>
+                                ">No search history available. Start searching to see analysis results here.</p>
                             </div>
-                            <div id="reports-content" style="display: none;">
+                            <div id="analysis-content" style="display: none;">
+                                <div style="
+                                    margin-bottom: 20px;
+                                    border-bottom: 1px solid #e9ecef;
+                                ">
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    padding-bottom: 10px;
+                                ">
+                                    <h4 style="margin: 0; font-size: 16px; color: #495057;">Analysis Results</h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button id="toggle-analysis-filters" style="
+                                            background: none;
+                                            color: #007bff;
+                                            border: none;
+                                            padding: 6px 12px;
+                                            border-radius: 4px;
+                                            font-size: 13px;
+                                            font-weight: 500;
+                                            cursor: pointer;
+                                            transition: background-color 0.2s;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                        ">
+                                            <svg width="16" height="16" viewBox="0 0 90 90" style="fill: currentColor;">
+                                                <path d="M 85.813 59.576 H 55.575 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 30.237 c 1.657 0 3 1.343 3 3 S 87.47 59.576 85.813 59.576 z"/>
+                                                <path d="M 48.302 66.849 c -5.664 0 -10.272 -4.608 -10.272 -10.272 c 0 -5.665 4.608 -10.273 10.272 -10.273 c 5.665 0 10.273 4.608 10.273 10.273 C 58.575 62.24 53.967 66.849 48.302 66.849 z M 48.302 52.303 c -2.356 0 -4.272 1.917 -4.272 4.273 c 0 2.355 1.917 4.272 4.272 4.272 c 2.356 0 4.273 -1.917 4.273 -4.272 C 52.575 54.22 50.658 52.303 48.302 52.303 z"/>
+                                                <path d="M 41.029 59.576 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 36.842 c 1.657 0 3 1.343 3 3 S 42.686 59.576 41.029 59.576 z"/>
+                                                <path d="M 85.813 36.424 h -57.79 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 57.79 c 1.657 0 3 1.343 3 3 S 87.47 36.424 85.813 36.424 z"/>
+                                                <path d="M 20.75 43.697 c -5.665 0 -10.273 -4.608 -10.273 -10.273 s 4.608 -10.273 10.273 -10.273 s 10.273 4.608 10.273 10.273 S 26.414 43.697 20.75 43.697 z M 20.75 29.151 c -2.356 0 -4.273 1.917 -4.273 4.273 s 1.917 4.273 4.273 4.273 s 4.273 -1.917 4.273 -4.273 S 23.105 29.151 20.75 29.151 z"/>
+                                                <path d="M 13.477 36.424 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 9.289 c 1.657 0 3 1.343 3 3 S 15.133 36.424 13.477 36.424 z"/>
+                                                <path d="M 57.637 13.273 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 53.449 c 1.657 0 3 1.343 3 3 S 59.294 13.273 57.637 13.273 z"/>
+                                                <path d="M 64.909 20.546 c -5.664 0 -10.272 -4.608 -10.272 -10.273 S 59.245 0 64.909 0 c 5.665 0 10.273 4.608 10.273 10.273 S 70.574 20.546 64.909 20.546 z M 64.909 6 c -2.355 0 -4.272 1.917 -4.272 4.273 s 1.917 4.273 4.272 4.273 c 2.356 0 4.273 -1.917 4.273 -4.273 S 67.266 6 64.909 6 z"/>
+                                                <path d="M 85.813 13.273 h -13.63 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 13.63 c 1.657 0 3 1.343 3 3 S 87.47 13.273 85.813 13.273 z"/>
+                                                <path d="M 85.813 82.728 h -57.79 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 57.79 c 1.657 0 3 1.343 3 3 S 87.47 82.728 85.813 82.728 z"/>
+                                                <path d="M 20.75 90 c -5.665 0 -10.273 -4.608 -10.273 -10.272 c 0 -5.665 4.608 -10.273 10.273 -10.273 s 10.273 4.608 10.273 10.273 C 31.022 85.392 26.414 90 20.75 90 z M 20.75 75.454 c -2.356 0 -4.273 1.917 -4.273 4.273 c 0 2.355 1.917 4.272 4.273 4.272 s 4.273 -1.917 4.273 -4.272 C 25.022 77.371 23.105 75.454 20.75 75.454 z"/>
+                                                <path d="M 13.477 82.728 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 9.289 c 1.657 0 3 1.343 3 3 S 15.133 82.728 13.477 82.728 z"/>
+                                            </svg>
+                                            <span id="analysis-filter-toggle-text">Filters</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Advanced Filter Panel -->
+                                <div id="analysis-filter-panel" style="
+                                    display: none;
+                                    background: #f8f9fa;
+                                    border: 1px solid #e9ecef;
+                                    border-radius: 8px;
+                                    padding: 16px;
+                                    margin-bottom: 16px;
+                                ">
+                                    <div style="
+                                        display: grid;
+                                        grid-template-columns: 1fr 1fr;
+                                        gap: 16px;
+                                        margin-bottom: 12px;
+                                    ">
+                                        <div>
+                                            <label style="
+                                                display: block;
+                                                font-size: 12px;
+                                                font-weight: 600;
+                                                color: #6c757d;
+                                                margin-bottom: 4px;
+                                            ">Filter by Project</label>
+                                            <select id="analysis-project-filter" style="
+                                                width: 100%;
+                                                padding: 8px 12px;
+                                                border: 1px solid #dee2e6;
+                                                border-radius: 4px;
+                                                font-size: 14px;
+                                                background: white;
+                                            ">
+                                                <option value="">All Projects</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style="
+                                                display: block;
+                                                font-size: 12px;
+                                                font-weight: 600;
+                                                color: #6c757d;
+                                                margin-bottom: 4px;
+                                            ">Filter by Tags</label>
+                                            <div id="analysis-tags-filter" style="
+                                                min-height: 32px;
+                                                max-height: 80px;
+                                                overflow-y: auto;
+                                                border: 1px solid #dee2e6;
+                                                border-radius: 4px;
+                                                padding: 8px;
+                                                background: white;
+                                                display: flex;
+                                                flex-wrap: wrap;
+                                                gap: 6px;
+                                                align-items: center;
+                                            ">
+                                                <!-- Tags populated dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                    ">
+                                        <div id="analysis-filter-summary" style="
+                                            font-size: 13px;
+                                            color: #6c757d;
+                                        ">No filters applied</div>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button id="clear-analysis-filters" style="
+                                                background: #6c757d;
+                                                color: white;
+                                                border: none;
+                                                border-radius: 4px;
+                                                padding: 6px 12px;
+                                                font-size: 12px;
+                                                cursor: pointer;
+                                            ">Clear</button>
+                                            <button id="apply-analysis-filters" style="
+                                                background: #28a745;
+                                                color: white;
+                                                border: none;
+                                                border-radius: 4px;
+                                                padding: 6px 12px;
+                                                font-size: 12px;
+                                                cursor: pointer;
+                                            ">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Active Filters Display -->
+                                <div id="analysis-active-filters" style="
+                                    display: none;
+                                    margin-bottom: 12px;
+                                    padding: 8px 0;
+                                ">
+                                    <div style="
+                                        font-size: 12px;
+                                        font-weight: 600;
+                                        color: #6c757d;
+                                        margin-bottom: 6px;
+                                    ">Active Filters:</div>
+                                    <div id="analysis-filter-chips" style="
+                                        display: flex;
+                                        flex-wrap: wrap;
+                                        gap: 6px;
+                                    ">
+                                        <!-- Filter chips will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                                <!-- Analysis Results -->
+                                <div id="analysis-results">
                                 <div style="
                                     display: grid;
                                     grid-template-columns: 1fr 1fr;
                                     gap: 32px;
-                                    margin-bottom: 20px;
+                                        margin-bottom: 32px;
                                     max-width: 1200px;
-                                    margin: 0 auto 20px auto;
+                                        margin: 0 auto 32px auto;
                                     justify-content: center;
                                 ">
                                     <div id="citation-sources-table"></div>
                                     <div id="review-sources-table"></div>
+                                    </div>
+                                    
+                                    <!-- Sentiment Analysis Section -->
+                                    <div id="sentiment-analysis-section" style="
+                                        max-width: 600px;
+                                        margin: 0 auto;
+                                        background: white;
+                                        border: 1px solid #e9ecef;
+                                        border-radius: 8px;
+                                        padding: 20px;
+                                    ">
+                                        <h3 style="
+                                            margin: 0 0 16px 0;
+                                            font-size: 16px;
+                                            font-weight: 600;
+                                            color: #495057;
+                                        ">Sentiment Analysis</h3>
+                                        <div id="sentiment-content">
+                                            <!-- Populated by analysis -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1022,8 +1206,8 @@
                     console.log('ERROR: Reports container not found!');
                 }
                 
-                // Load the reports data
-                loadReports();
+                // Initialize the Analysis Dashboard
+                initializeAnalysisDashboard();
             });
 
             // History functionality
@@ -1046,6 +1230,12 @@
             
             // Initialize sidebar (Phase 2)
             initializeSidebar();
+        }
+
+        // Helper to read active tab id: 'search' | 'history' | 'reports'
+        function getActiveTab() {
+            const active = document.querySelector('#tab-navigation .active-tab');
+            return active?.id?.replace('-tab', '') || 'search';
         }
 
         function switchTab(tab) {
@@ -1078,14 +1268,45 @@
                 }
             });
 
-            // Hide all containers
+            // Hide all containers explicitly and aggressively
             console.log('Hiding all containers...');
-            [searchArea, resultsContainer, historyContainer, reportsContainer].forEach(c => {
-                if (c) {
-                    console.log('Hiding container:', c.id);
-                    c.style.display = 'none';
-                }
-            });
+            
+            // Hide all containers cleanly
+            if (searchArea) {
+                searchArea.style.display = 'none';
+                console.log('Hidden searchArea');
+            }
+            if (resultsContainer) {
+                resultsContainer.style.display = 'none';
+                console.log('Hidden resultsContainer');
+            }
+            if (historyContainer) {
+                historyContainer.style.display = 'none';
+                console.log('Hidden historyContainer');
+            }
+            if (reportsContainer) {
+                reportsContainer.style.display = 'none';
+                console.log('Hidden reportsContainer');
+            }
+            
+            // Reset all internal content states
+            const analysisContent = document.getElementById('analysis-content');
+            const reportsWelcomeState = document.getElementById('reports-welcome-state');
+            const historyContent = document.getElementById('history-content');
+            const historyWelcomeState = document.getElementById('history-welcome-state');
+            
+            if (analysisContent) {
+                analysisContent.style.display = 'none';
+            }
+            if (reportsWelcomeState) {
+                reportsWelcomeState.style.display = 'none';
+            }
+            if (historyContent) {
+                historyContent.style.display = 'none';
+            }
+            if (historyWelcomeState) {
+                historyWelcomeState.style.display = 'none';
+            }
             
             // Clean up any organization interfaces when switching tabs
             const postSearchInterface = document.getElementById('post-search-tagging');
@@ -1102,16 +1323,76 @@
                 searchTab.style.color = '#495057';
                 searchTab.style.borderBottom = '2px solid #007bff';
                 searchTab.classList.add('active-tab');
-                
+
                 if (searchArea) searchArea.style.display = 'block';
-                if (resultsContainer) resultsContainer.style.display = 'block';
+                if (resultsContainer) {
+                    resultsContainer.style.display = 'none';
+                    resultsContainer.innerHTML = '';
+                }
+                if (typeof resetToCleanSearchState === 'function') {
+                    resetToCleanSearchState();
+                }
             } else if (tab === 'history') {
                 historyTab.style.background = 'white';
                 historyTab.style.color = '#495057';
                 historyTab.style.borderBottom = '2px solid #007bff';
                 historyTab.classList.add('active-tab');
                 
-                if (historyContainer) historyContainer.style.display = 'block';
+                // CRITICAL: Completely hide and clear analysis content when switching to history
+                if (reportsContainer) {
+                    reportsContainer.style.display = 'none';
+                    reportsContainer.style.visibility = 'hidden';
+                    console.log('HISTORY TAB: Hidden reports container');
+                    
+                    // Clear all analysis content from the DOM
+                    const analysisContent = reportsContainer.querySelector('#analysis-content');
+                    if (analysisContent) {
+                        analysisContent.style.display = 'none';
+                        analysisContent.style.visibility = 'hidden';
+                        console.log('HISTORY TAB: Hidden analysis content in reports container');
+                    }
+                }
+                
+                // Also ensure no analysis content exists anywhere else
+                const globalAnalysisContent = document.getElementById('analysis-content');
+                const globalAnalysisResults = document.getElementById('analysis-results');
+                const globalCitationTable = document.getElementById('citation-sources-table');
+                const globalReviewTable = document.getElementById('review-sources-table');
+                
+                if (globalAnalysisContent) {
+                    globalAnalysisContent.style.display = 'none';
+                    globalAnalysisContent.style.visibility = 'hidden';
+                    console.log('HISTORY TAB: Hidden global analysis content');
+                }
+                if (globalAnalysisResults) {
+                    globalAnalysisResults.style.display = 'none';
+                    globalAnalysisResults.style.visibility = 'hidden';
+                    console.log('HISTORY TAB: Hidden global analysis results');
+                }
+                if (globalCitationTable) {
+                    globalCitationTable.style.display = 'none';
+                    globalCitationTable.style.visibility = 'hidden';
+                    console.log('HISTORY TAB: Hidden global citation table');
+                }
+                if (globalReviewTable) {
+                    globalReviewTable.style.display = 'none';
+                    globalReviewTable.style.visibility = 'hidden';
+                    console.log('HISTORY TAB: Hidden global review table');
+                }
+                
+                if (historyContainer) {
+                    historyContainer.style.display = 'block';
+                    historyContainer.style.visibility = 'visible';
+                    console.log('HISTORY TAB: Shown history container');
+
+                    // Restore visibility that reports tab may have hidden
+                    ['history-content', 'history-welcome-state', 'history-list'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.style.visibility = 'visible';
+                        }
+                    });
+                }
             } else if (tab === 'reports') {
                 console.log('Setting reports tab as active');
                 reportsTab.style.background = 'white';
@@ -1119,66 +1400,517 @@
                 reportsTab.style.borderBottom = '2px solid #007bff';
                 reportsTab.classList.add('active-tab');
                 
+                // CRITICAL: Completely hide and clear history content when switching to reports
+                if (historyContainer) {
+                    historyContainer.style.display = 'none';
+                    historyContainer.style.visibility = 'hidden';
+                    console.log('REPORTS TAB: Hidden history container');
+                    
+                    // Clear all history content from the DOM
+                    const historyContent = historyContainer.querySelector('#history-content');
+                    const historyList = historyContainer.querySelector('#history-list');
+                    if (historyContent) {
+                        historyContent.style.display = 'none';
+                        historyContent.style.visibility = 'hidden';
+                        console.log('REPORTS TAB: Hidden history content in history container');
+                    }
+                    if (historyList) {
+                        historyList.style.display = 'none';
+                        historyList.style.visibility = 'hidden';
+                        console.log('REPORTS TAB: Hidden history list in history container');
+                    }
+                }
+                
                 if (reportsContainer) {
                     console.log('Showing reports container');
                     reportsContainer.style.display = 'block';
+                    reportsContainer.style.visibility = 'visible';
+                    
+                    // Initialize analysis dashboard when switching to reports
+                    initializeAnalysisDashboard();
                 } else {
                     console.log('ERROR: Reports container not found!');
                 }
             }
         }
 
-        function loadReports() {
-            console.log('=== LOADING REPORTS ===');
+        // ===== ANALYSIS DASHBOARD FUNCTIONALITY - Phase 6 =====
+        
+        function initializeAnalysisDashboard() {
+            console.log('=== INITIALIZING ANALYSIS DASHBOARD ===');
+            
+            // Allow analysis dashboard to initialize when called
             
             const history = loadSearchHistory();
             const reportsWelcomeState = document.getElementById('reports-welcome-state');
-            const reportsContent = document.getElementById('reports-content');
-            const reviewSourcesTable = document.getElementById('review-sources-table');
-            const citationSourcesTable = document.getElementById('citation-sources-table');
+            const analysisContent = document.getElementById('analysis-content');
 
             console.log('Elements found:', {
                 reportsWelcomeState: !!reportsWelcomeState,
-                reportsContent: !!reportsContent,
-                reviewSourcesTable: !!reviewSourcesTable,
-                citationSourcesTable: !!citationSourcesTable
+                analysisContent: !!analysisContent,
+                historyLength: history.length
             });
 
             if (history.length === 0) {
                 console.log('No history, showing welcome state');
                 if (reportsWelcomeState) reportsWelcomeState.style.display = 'flex';
-                if (reportsContent) reportsContent.style.display = 'none';
+                if (analysisContent) analysisContent.style.display = 'none';
                 return;
             }
 
-            console.log('History found:', history.length, 'items');
-            if (reportsWelcomeState) reportsWelcomeState.style.display = 'none';
-            if (reportsContent) reportsContent.style.display = 'block';
+            // Show analysis content immediately and setup interface
+            if (reportsWelcomeState) {
+                reportsWelcomeState.style.display = 'none';
+                reportsWelcomeState.style.visibility = 'hidden';
+            }
+            if (analysisContent) {
+                analysisContent.style.display = 'block';
+                analysisContent.style.visibility = 'visible';
+                console.log('ANALYSIS: Made analysis content visible');
+                
+                // Also ensure analysis results are visible
+                const analysisResults = document.getElementById('analysis-results');
+                const citationTable = document.getElementById('citation-sources-table');
+                const reviewTable = document.getElementById('review-sources-table');
+                
+                if (analysisResults) {
+                    analysisResults.style.display = 'block';
+                    analysisResults.style.visibility = 'visible';
+                }
+                if (citationTable) {
+                    citationTable.style.display = 'block';
+                    citationTable.style.visibility = 'visible';
+                }
+                if (reviewTable) {
+                    reviewTable.style.display = 'block';
+                    reviewTable.style.visibility = 'visible';
+                }
+            }
             
-
-            // Generate the reports
-            const reviewSources = generateReviewSourcesReport(history);
-            const citationSources = generateCitationSourcesReport(history);
-
-            console.log('Generated reports:', {
-                reviewSources: reviewSources.length,
-                citationSources: citationSources.length
+            // Clean up any existing event listeners and reset state
+            cleanupAnalysisInterface();
+            resetAnalysisFilterPanelState();
+            
+            // Setup analysis interface and generate initial analysis
+            setupAnalysisInterface();
+            initializeAnalysisFilters();
+            generateAnalysisReports();
+            console.log('Analysis dashboard initialized successfully');
+        }
+        
+        function cleanupAnalysisInterface() {
+            // Remove existing event listeners to prevent duplicates
+            const toggleFiltersBtn = document.getElementById('toggle-analysis-filters');
+            const clearFiltersBtn = document.getElementById('clear-analysis-filters');
+            const applyFiltersBtn = document.getElementById('apply-analysis-filters');
+            
+            if (toggleFiltersBtn) {
+                // Clone the element to remove all event listeners
+                const newToggleBtn = toggleFiltersBtn.cloneNode(true);
+                toggleFiltersBtn.parentNode.replaceChild(newToggleBtn, toggleFiltersBtn);
+            }
+            
+            if (clearFiltersBtn) {
+                const newClearBtn = clearFiltersBtn.cloneNode(true);
+                clearFiltersBtn.parentNode.replaceChild(newClearBtn, clearFiltersBtn);
+            }
+            
+            if (applyFiltersBtn) {
+                const newApplyBtn = applyFiltersBtn.cloneNode(true);
+                applyFiltersBtn.parentNode.replaceChild(newApplyBtn, applyFiltersBtn);
+            }
+            
+            // Clear any dynamic content that might have old event listeners
+            const tagsFilter = document.getElementById('analysis-tags-filter');
+            if (tagsFilter) {
+                tagsFilter.innerHTML = '';
+            }
+            
+            console.log('Analysis interface cleaned up');
+        }
+        
+        function resetAnalysisFilterPanelState() {
+            // Reset filter panel to hidden state
+            const filterPanel = document.getElementById('analysis-filter-panel');
+            const toggleText = document.getElementById('analysis-filter-toggle-text');
+            const activeFiltersDiv = document.getElementById('analysis-active-filters');
+            
+            if (filterPanel) {
+                filterPanel.style.display = 'none';
+            }
+            
+            if (toggleText) {
+                toggleText.textContent = 'Filters';
+            }
+            
+            // Hide active filters section
+            if (activeFiltersDiv) {
+                activeFiltersDiv.style.display = 'none';
+            }
+            
+            console.log('Analysis filter panel state reset');
+        }
+        
+        function setupAnalysisInterface() {
+            console.log('Setting up analysis interface...');
+            const toggleFiltersBtn = document.getElementById('toggle-analysis-filters');
+            const clearFiltersBtn = document.getElementById('clear-analysis-filters');
+            const applyFiltersBtn = document.getElementById('apply-analysis-filters');
+            
+            console.log('Analysis interface elements found:', {
+                toggleFiltersBtn: !!toggleFiltersBtn,
+                clearFiltersBtn: !!clearFiltersBtn,
+                applyFiltersBtn: !!applyFiltersBtn
             });
-
-            // Display the tables
-            if (citationSourcesTable) {
-                const citationHTML = generateCitationSourcesHTML(citationSources);
-                console.log('Citation HTML length:', citationHTML.length);
-                citationSourcesTable.innerHTML = citationHTML;
+            
+            // Toggle filters panel with hover effects
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', () => {
+                    const filterPanel = document.getElementById('analysis-filter-panel');
+                    const toggleText = document.getElementById('analysis-filter-toggle-text');
+                    if (filterPanel && toggleText) {
+                        const isHidden = filterPanel.style.display === 'none';
+                        filterPanel.style.display = isHidden ? 'block' : 'none';
+                        toggleText.textContent = isHidden ? 'Hide Filters' : 'Filters';
+                    }
+                });
+                
+                // Add hover effects
+                toggleFiltersBtn.addEventListener('mouseenter', () => {
+                    toggleFiltersBtn.style.backgroundColor = '#f8f9fa';
+                });
+                toggleFiltersBtn.addEventListener('mouseleave', () => {
+                    toggleFiltersBtn.style.backgroundColor = 'transparent';
+                });
             }
-            if (reviewSourcesTable) {
-                const reviewHTML = generateReviewSourcesHTML(reviewSources);
-                console.log('Review HTML length:', reviewHTML.length);
-                reviewSourcesTable.innerHTML = reviewHTML;
+            
+            // Clear filters
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', clearAnalysisFilters);
             }
-
-
-            console.log('Reports loaded successfully');
+            
+            // Apply filters
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', applyAnalysisFilters);
+            }
+            
+            console.log('Analysis interface setup completed');
+        }
+        
+        function initializeAnalysisFilters() {
+            const projectFilter = document.getElementById('analysis-project-filter');
+            const tagsFilter = document.getElementById('analysis-tags-filter');
+            const projects = loadProjects();
+            const tags = loadTags();
+            
+            // Populate project filter
+            if (projectFilter) {
+                projectFilter.innerHTML = '<option value="">All Projects</option>' +
+                    projects.map(project => `<option value="${project.id}">${project.name}</option>`).join('');
+                
+                projectFilter.addEventListener('change', updateAnalysisFilterSummary);
+            }
+            
+            // Populate tags filter
+            if (tagsFilter) {
+                tagsFilter.innerHTML = '';
+                
+                if (tags.length === 0) {
+                    tagsFilter.innerHTML = `
+                        <div style="
+                            color: #6c757d;
+                            font-size: 12px;
+                            font-style: italic;
+                            padding: 8px;
+                        ">No tags available</div>
+                    `;
+                } else {
+                    tags.forEach(tag => {
+                        const tagCheckbox = document.createElement('label');
+                        tagCheckbox.className = 'analysis-tag-label';
+                        tagCheckbox.style.cssText = `
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            background: ${tag.color}15;
+                            border: 1px solid ${tag.color}30;
+                            cursor: pointer;
+                            font-size: 12px;
+                            color: ${tag.color};
+                            margin: 0;
+                        `;
+                        
+                        tagCheckbox.innerHTML = `
+                            <input type="checkbox" 
+                                   class="analysis-tag-checkbox" 
+                                   value="${tag.id}" 
+                                   style="margin: 0; width: 12px; height: 12px;">
+                            🏷️ <span>${tag.name}</span>
+                        `;
+                        
+                        const checkbox = tagCheckbox.querySelector('input');
+                        checkbox.addEventListener('change', updateAnalysisFilterSummary);
+                        
+                        tagsFilter.appendChild(tagCheckbox);
+                    });
+                }
+            }
+        }
+        
+        function updateAnalysisFilterSummary() {
+            const projectFilter = document.getElementById('analysis-project-filter');
+            const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
+            const summary = document.getElementById('analysis-filter-summary');
+            
+            if (!summary) return;
+            
+            let filterCount = 0;
+            if (projectFilter && projectFilter.value) filterCount++;
+            if (tagCheckboxes.length > 0) filterCount++;
+            
+            if (filterCount === 0) {
+                summary.textContent = 'No filters applied';
+            } else if (filterCount === 1) {
+                if (projectFilter && projectFilter.value) {
+                    const projects = loadProjects();
+                    const project = projects.find(p => p.id === projectFilter.value);
+                    summary.textContent = `Filtered by: ${project?.name || 'Unknown Project'}`;
+                } else {
+                    summary.textContent = `Filtered by: ${tagCheckboxes.length} tag${tagCheckboxes.length > 1 ? 's' : ''}`;
+                }
+            } else {
+                summary.textContent = `${filterCount} filters applied`;
+            }
+        }
+        
+        function applyAnalysisFilters() {
+            const projectFilter = document.getElementById('analysis-project-filter');
+            const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
+            
+            // Hide filter panel
+            const panel = document.getElementById('analysis-filter-panel');
+            const toggleText = document.getElementById('analysis-filter-toggle-text');
+            if (panel) panel.style.display = 'none';
+            if (toggleText) toggleText.textContent = 'Filters';
+            
+            // Update filter chips display
+            updateAnalysisFilterChips();
+            
+            // Generate filtered analysis
+            generateAnalysisReports();
+            
+            console.log('Applied analysis filters:', {
+                project: projectFilter ? projectFilter.value : '',
+                tags: Array.from(tagCheckboxes).map(cb => cb.value)
+            });
+        }
+        
+        function clearAnalysisFilters() {
+            const projectFilter = document.getElementById('analysis-project-filter');
+            const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox');
+            
+            if (projectFilter) projectFilter.value = '';
+            tagCheckboxes.forEach(checkbox => checkbox.checked = false);
+            
+            updateAnalysisFilterSummary();
+        }
+        
+        function updateAnalysisFilterChips() {
+            const activeFiltersDiv = document.getElementById('analysis-active-filters');
+            const filterChips = document.getElementById('analysis-filter-chips');
+            
+            if (!activeFiltersDiv || !filterChips) return;
+            
+            // Clear existing chips
+            filterChips.innerHTML = '';
+            
+            let hasActiveFilters = false;
+            const projectFilter = document.getElementById('analysis-project-filter');
+            const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
+            
+            // Project filter chip
+            if (projectFilter && projectFilter.value) {
+                hasActiveFilters = true;
+                const projects = loadProjects();
+                const project = projects.find(p => p.id === projectFilter.value);
+                const chip = createFilterChip('project', `📁 ${project?.name || 'Unknown Project'}`, () => {
+                    projectFilter.value = '';
+                    applyAnalysisFilters();
+                });
+                filterChips.appendChild(chip);
+            }
+            
+            // Tag filter chips
+            if (tagCheckboxes.length > 0) {
+                hasActiveFilters = true;
+                const tags = loadTags();
+                Array.from(tagCheckboxes).forEach(checkbox => {
+                    const tag = tags.find(t => t.id === checkbox.value);
+                    if (tag) {
+                        const chip = createFilterChip('tag', tag.name, () => {
+                            checkbox.checked = false;
+                            applyAnalysisFilters();
+                        });
+                        filterChips.appendChild(chip);
+                    }
+                });
+            }
+            
+            // Show/hide active filters section
+            activeFiltersDiv.style.display = hasActiveFilters ? 'block' : 'none';
+        }
+        
+        function getFilteredSearchHistory() {
+            const history = loadSearchHistory();
+            const projectFilter = document.getElementById('analysis-project-filter');
+            const selectedTags = Array.from(document.querySelectorAll('.analysis-tag-checkbox:checked'))
+                .map(cb => cb.value);
+            
+            return history.filter(item => {
+                // Filter by project
+                if (projectFilter && projectFilter.value && item.projectId !== projectFilter.value) {
+                    return false;
+                }
+                
+                // Filter by tags (AND logic)
+                if (selectedTags.length > 0) {
+                    const itemTags = item.tags || [];
+                    const hasAllTags = selectedTags.every(tagId => itemTags.includes(tagId));
+                    if (!hasAllTags) return false;
+                }
+                
+                return true;
+            });
+        }
+        
+        function generateAnalysisReports() {
+            const filteredHistory = getFilteredSearchHistory();
+            
+            if (filteredHistory.length === 0) {
+                // Show empty state
+                const citationTable = document.getElementById('citation-sources-table');
+                const reviewTable = document.getElementById('review-sources-table');
+                const sentimentContent = document.getElementById('sentiment-content');
+                
+                if (citationTable) citationTable.innerHTML = '<div style="text-align: center; padding: 40px; color: #6c757d;">No citation sources found</div>';
+                if (reviewTable) reviewTable.innerHTML = '<div style="text-align: center; padding: 40px; color: #6c757d;">No review sources found</div>';
+                if (sentimentContent) sentimentContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #6c757d;">No sentiment data available</div>';
+                return;
+            }
+            
+            // Generate reports
+            const citationSources = generateCitationSourcesReport(filteredHistory);
+            const reviewSources = generateReviewSourcesReport(filteredHistory);
+            
+            // Display tables
+            const citationTable = document.getElementById('citation-sources-table');
+            const reviewTable = document.getElementById('review-sources-table');
+            
+            if (citationTable) {
+                citationTable.innerHTML = generateCitationSourcesHTML(citationSources.slice(0, 10));
+            }
+            
+            if (reviewTable) {
+                reviewTable.innerHTML = generateReviewSourcesHTML(reviewSources.slice(0, 10));
+            }
+            
+            // Generate sentiment analysis
+            generateSimpleSentimentAnalysis(filteredHistory);
+        }
+        
+        function generateSimpleSentimentAnalysis(history) {
+            const sentimentContent = document.getElementById('sentiment-content');
+            if (!sentimentContent) return;
+            
+            let totalReviews = 0;
+            let positiveCount = 0;
+            let negativeCount = 0;
+            let neutralCount = 0;
+            
+            history.forEach(search => {
+                if (search.results && search.results.reviews) {
+                    search.results.reviews.forEach(review => {
+                        totalReviews++;
+                        
+                        // Use the existing sentiment property from the review data
+                        const sentiment = review.sentiment ? review.sentiment.toLowerCase() : 'neutral';
+                        
+                        if (sentiment === 'positive') {
+                            positiveCount++;
+                        } else if (sentiment === 'negative') {
+                            negativeCount++;
+                        } else {
+                            neutralCount++;
+                        }
+                    });
+                }
+            });
+            
+            const positivePercent = totalReviews > 0 ? Math.round((positiveCount / totalReviews) * 100) : 0;
+            const negativePercent = totalReviews > 0 ? Math.round((negativeCount / totalReviews) * 100) : 0;
+            const neutralPercent = totalReviews > 0 ? Math.round((neutralCount / totalReviews) * 100) : 0;
+            
+            sentimentContent.innerHTML = `
+                <div style="margin-bottom: 16px; font-size: 12px; color: #6c757d;">
+                    Based on ${totalReviews} review${totalReviews !== 1 ? 's' : ''} across ${history.length} search${history.length !== 1 ? 'es' : ''}
+                </div>
+                
+                <table style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    border: 1px solid #e9ecef;
+                ">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Sentiment</th>
+                            <th style="padding: 8px 12px; text-align: center; border-bottom: 1px solid #e9ecef;">Count</th>
+                            <th style="padding: 8px 12px; text-align: center; border-bottom: 1px solid #e9ecef;">Percentage</th>
+                            <th style="padding: 8px 12px; text-align: center; border-bottom: 1px solid #e9ecef;">Visual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #f8f9fa;">
+                            <td style="padding: 8px 12px; color: #28a745; font-weight: 600;">😊 Positive</td>
+                            <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${positiveCount}</td>
+                            <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${positivePercent}%</td>
+                            <td style="padding: 8px 12px;">
+                                <div style="background: #e9ecef; border-radius: 4px; height: 8px; width: 100%; position: relative;">
+                                    <div style="background: #28a745; height: 100%; border-radius: 4px; width: ${positivePercent}%; transition: width 0.3s ease;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f8f9fa;">
+                            <td style="padding: 8px 12px; color: #6c757d; font-weight: 600;">😐 Neutral</td>
+                            <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${neutralCount}</td>
+                            <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${neutralPercent}%</td>
+                            <td style="padding: 8px 12px;">
+                                <div style="background: #e9ecef; border-radius: 4px; height: 8px; width: 100%; position: relative;">
+                                    <div style="background: #6c757d; height: 100%; border-radius: 4px; width: ${neutralPercent}%; transition: width 0.3s ease;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 12px; color: #dc3545; font-weight: 600;">😞 Negative</td>
+                            <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${negativeCount}</td>
+                            <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${negativePercent}%</td>
+                            <td style="padding: 8px 12px;">
+                                <div style="background: #e9ecef; border-radius: 4px; height: 8px; width: 100%; position: relative;">
+                                    <div style="background: #dc3545; height: 100%; border-radius: 4px; width: ${negativePercent}%; transition: width 0.3s ease;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        
+        // Legacy function for backward compatibility
+        function loadReports() {
+            console.log('=== LEGACY REPORTS FUNCTION CALLED ===');
+            initializeAnalysisDashboard();
         }
 
         // Global function for direct onclick access
@@ -1589,23 +2321,9 @@
             }
         }
         
-        function filterByProject(projectId) {
-            // Switch to history tab and apply project filter
-            switchTab('history');
-            
-            // TODO: Implement project filtering in Phase 5
-            console.log('Filtering by project:', projectId);
-            alert('Project filtering will be implemented in Phase 5!');
-        }
+        // filterByProject function removed - duplicate implementation exists below
         
-        function filterByTag(tagId) {
-            // Switch to history tab and apply tag filter
-            switchTab('history');
-            
-            // TODO: Implement tag filtering in Phase 5
-            console.log('Filtering by tag:', tagId);
-            alert('Tag filtering will be implemented in Phase 5!');
-        }
+        // filterByTag function removed - duplicate implementation exists below
         
         function openSettingsModal() {
             // Remove existing settings modal if present
@@ -3498,81 +4216,84 @@
         // ===== SIDEBAR-TO-FILTER INTEGRATION =====
         
         function filterByProject(projectId) {
-            // Switch to history tab first
+            console.log('=== FILTER BY PROJECT CALLED ===', projectId);
+            const active = getActiveTab();
+
+            if (active === 'reports') {
+                // We're on Analysis -> set the analysis project filter and re-generate
+                const projectFilter = document.getElementById('analysis-project-filter');
+                if (projectFilter) {
+                    projectFilter.value = projectId;
+                    // keep the report tab active and visible
+                    switchTab('reports');
+                    // update summaries/chips and re-run analysis
+                    updateAnalysisFilterSummary();
+                    updateAnalysisFilterChips?.();
+                    applyAnalysisFilters?.(); // this calls generateAnalysisReports()
+                }
+                return;
+            }
+
+            // Default behavior (Search/History): go to history and filter there
             switchTab('history');
-            
-            // Wait for history to load and then apply filter
+            loadHistory();
             setTimeout(() => {
-                // Reset other filters but keep text if present
                 const filterText = document.getElementById('filter-text');
                 const currentText = filterText ? filterText.value.trim() : '';
-                
-                // Clear tag selections
+
                 const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
                 tagCheckboxes.forEach(cb => cb.checked = false);
-                
-                // Set project filter
+
                 const filterProject = document.getElementById('filter-project');
-                if (filterProject) {
-                    filterProject.value = projectId;
-                }
-                
-                // Apply the filters
-                currentFilters = {
-                    text: currentText.toLowerCase(),
-                    project: projectId,
-                    tags: [],
-                    isActive: true
-                };
-                
-                // Apply filters and update UI
+                if (filterProject) filterProject.value = projectId;
+
+                currentFilters = { text: currentText.toLowerCase(), project: projectId, tags: [], isActive: true };
+
                 const history = loadSearchHistory();
                 const filteredHistory = applyAdvancedFilters(history);
                 renderHistoryList(filteredHistory);
                 updateFilterChips();
-                
-                console.log('Filtered by project:', projectId);
-            }, 100);
+                console.log('Filtered by project (history):', projectId);
+            }, 0);
         }
         
         function filterByTag(tagId) {
-            // Switch to history tab first
+            const active = getActiveTab();
+
+            if (active === 'reports') {
+                // We're on Analysis -> set the single tag in analysis UI and re-generate
+                switchTab('reports'); // ensure only reports is visible
+                // clear all analysis tag checkboxes then check this one
+                const checkboxes = document.querySelectorAll('.analysis-tag-checkbox');
+                checkboxes.forEach(cb => { cb.checked = (cb.value === tagId); });
+                updateAnalysisFilterSummary();
+                updateAnalysisFilterChips?.();
+                applyAnalysisFilters?.();
+                console.log('Filtered by tag (analysis):', tagId);
+                return;
+            }
+
+            // Default behavior (Search/History)
             switchTab('history');
-            
-            // Wait for history to load and then apply filter
+            loadHistory();
             setTimeout(() => {
-                // Reset project filter
                 const filterProject = document.getElementById('filter-project');
-                if (filterProject) {
-                    filterProject.value = '';
-                }
-                
-                // Keep current text filter
+                if (filterProject) filterProject.value = '';
+
                 const filterText = document.getElementById('filter-text');
                 const currentText = filterText ? filterText.value.trim() : '';
-                
-                // Clear other tag selections and select only this tag
+
                 const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
-                tagCheckboxes.forEach(cb => {
-                    cb.checked = (cb.value === tagId);
-                });
-                
-                // Apply the filters
-                currentFilters = {
-                    text: currentText.toLowerCase(),
-                    project: '',
-                    tags: [tagId],
-                    isActive: true
-                };
-                
-                // Apply filters and update UI
+                tagCheckboxes.forEach(cb => { cb.checked = (cb.value === tagId); });
+
+                currentFilters = { text: currentText.toLowerCase(), project: '', tags: [tagId], isActive: true };
+
                 const history = loadSearchHistory();
                 const filteredHistory = applyAdvancedFilters(history);
                 renderHistoryList(filteredHistory);
                 updateFilterChips();
-                
-                console.log('Filtered by tag:', tagId);
-            }, 100);
+                console.log('Filtered by tag (history):', tagId);
+            }, 0);
         }
         
         // ===== END SIDEBAR-TO-FILTER INTEGRATION =====
@@ -4118,51 +4839,33 @@
             }
         }
 
-        function switchTab(tabName) {
-            const searchTabEl = document.getElementById('search-tab');
-            const historyTabEl = document.getElementById('history-tab');
-            const searchAreaEl = document.getElementById('search-area');
-            const resultsContainerEl = document.getElementById('results-container');
-            const historyContainerEl = document.getElementById('history-container');
-
-            if (tabName === 'search') {
-                // Update tab appearance
-                searchTabEl.style.background = 'white';
-                searchTabEl.style.color = '#495057';
-                searchTabEl.style.borderBottom = '2px solid #007bff';
-                historyTabEl.style.background = '#f8f9fa';
-                historyTabEl.style.color = '#6c757d';
-                historyTabEl.style.borderBottom = '2px solid transparent';
-
-                // Show search area and results, hide history
-                searchAreaEl.style.display = 'block';
-                resultsContainerEl.style.display = 'block';
-                historyContainerEl.style.display = 'none';
-
-                // Reset to clean search state
-                resetToCleanSearchState();
-            } else if (tabName === 'history') {
-                // Update tab appearance
-                historyTabEl.style.background = 'white';
-                historyTabEl.style.color = '#495057';
-                historyTabEl.style.borderBottom = '2px solid #007bff';
-                searchTabEl.style.background = '#f8f9fa';
-                searchTabEl.style.color = '#6c757d';
-                searchTabEl.style.borderBottom = '2px solid transparent';
-
-                // Hide search area and results, show history
-                searchAreaEl.style.display = 'none';
-                resultsContainerEl.style.display = 'none';
-                historyContainerEl.style.display = 'block';
-            }
-        }
 
         function loadHistory() {
+            console.log('=== LOAD HISTORY CALLED ===');
+
+            // Force-hide other containers so nothing leaks into History
+            const searchArea = document.getElementById('search-area');
+            const resultsContainer = document.getElementById('results-container');
+            const reportsContainer = document.getElementById('reports-container');
+            const historyContainer = document.getElementById('history-container');
+            if (searchArea) searchArea.style.display = 'none';
+            if (resultsContainer) resultsContainer.style.display = 'none';
+            if (reportsContainer) reportsContainer.style.display = 'none';
+            if (historyContainer) historyContainer.style.display = 'block';
+            
             const history = loadSearchHistory();
             const historyWelcome = document.getElementById('history-welcome-state');
             const historyContent = document.getElementById('history-content');
             const historyList = document.getElementById('history-list');
             const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+            // Ensure history elements are visible again after visiting other tabs
+            ['history-content', 'history-welcome-state', 'history-list'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.visibility = 'visible';
+                }
+            });
 
             if (history.length === 0) {
                 historyWelcome.style.display = 'flex';
@@ -4313,6 +5016,32 @@
                     }
                 });
             });
+            
+            // NUCLEAR SAFEGUARD: Ensure no analysis content has been accidentally added to history
+            const historyContainer = document.getElementById('history-container');
+            if (historyContainer) {
+                const analysisResults = historyContainer.querySelector('#analysis-results');
+                const analysisContent = historyContainer.querySelector('#analysis-content');
+                const citationTable = historyContainer.querySelector('#citation-sources-table');
+                const reviewTable = historyContainer.querySelector('#review-sources-table');
+                
+                if (analysisResults) {
+                    console.log('NUCLEAR: Removing analysis-results from history after render');
+                    analysisResults.remove();
+                }
+                if (analysisContent) {
+                    console.log('NUCLEAR: Removing analysis-content from history after render');
+                    analysisContent.remove();
+                }
+                if (citationTable) {
+                    console.log('NUCLEAR: Removing citation-sources-table from history after render');
+                    citationTable.remove();
+                }
+                if (reviewTable) {
+                    console.log('NUCLEAR: Removing review-sources-table from history after render');
+                    reviewTable.remove();
+                }
+            }
         }
 
         function toggleMultiProductSearch() {
@@ -5208,6 +5937,8 @@
                 console.error('Results container not found');
                 return;
             }
+
+            resultsContainer.style.display = 'block';
             
             if (!data || (!data.reviews.length && !data.products.length && !data.productLinks.length)) {
                 resultsContainer.innerHTML = `
@@ -5561,6 +6292,8 @@
                 console.error('Results container not found');
                 return;
             }
+
+            resultsContainer.style.display = 'block';
             
             const successfulResults = results.filter(r => r.success);
             const failedResults = results.filter(r => !r.success);
@@ -6049,6 +6782,116 @@
                 </div>
             `;
         }
+
+        // --- Patched, context-aware sidebar filters (last definition wins) ---
+        function _activeTab() {
+            const reportsContainer = document.getElementById('reports-container');
+            if (reportsContainer && reportsContainer.style.display !== 'none') {
+                return 'reports';
+            }
+            const historyContainer = document.getElementById('history-container');
+            if (historyContainer && historyContainer.style.display !== 'none') {
+                return 'history';
+            }
+            return 'search';
+        }
+
+        function _applyToAnalysis({ projectId = '', tagId = '' }) {
+            const projectSel = document.getElementById('analysis-project-filter');
+            if (projectSel) {
+                projectSel.value = projectId || '';
+                projectSel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            if (tagId) {
+                const tagChecks = document.querySelectorAll('.analysis-tag-checkbox');
+                tagChecks.forEach(cb => {
+                    cb.checked = cb.value === tagId;
+                });
+            }
+
+            if (typeof updateAnalysisFilterSummary === 'function') {
+                updateAnalysisFilterSummary();
+            }
+            if (typeof updateAnalysisFilterChips === 'function') {
+                updateAnalysisFilterChips();
+            }
+            if (typeof applyAnalysisFilters === 'function') {
+                applyAnalysisFilters();
+            }
+        }
+
+        function _applyToHistory({ projectId = '', tagId = '' }) {
+            const filterTextInput = document.getElementById('filter-text');
+            const rawFilterText = filterTextInput ? filterTextInput.value : '';
+            const normalizedText = rawFilterText.trim().toLowerCase();
+
+            currentFilters = {
+                text: normalizedText,
+                project: projectId || '',
+                tags: tagId ? [tagId] : [],
+                isActive: Boolean(normalizedText || projectId || tagId)
+            };
+
+            switchTab('history');
+            if (typeof loadHistory === 'function') {
+                loadHistory();
+            }
+
+            ['history-content', 'history-welcome-state', 'history-list'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.visibility = 'visible';
+                }
+            });
+
+            const projectSel = document.getElementById('filter-project');
+            if (projectSel) {
+                projectSel.value = projectId || '';
+            }
+
+            const tagChecks = document.querySelectorAll('#filter-tags input[type="checkbox"]');
+            tagChecks.forEach(cb => {
+                if (tagId) {
+                    cb.checked = cb.value === tagId;
+                } else if (projectId) {
+                    cb.checked = false;
+                }
+            });
+
+            if (filterTextInput) {
+                filterTextInput.value = rawFilterText;
+            }
+
+            const history = typeof loadSearchHistory === 'function' ? loadSearchHistory() : [];
+            const filtered = typeof applyAdvancedFilters === 'function' ? applyAdvancedFilters(history) : history;
+
+            if (typeof renderHistoryList === 'function') {
+                renderHistoryList(filtered);
+            }
+            if (typeof updateFilterChips === 'function') {
+                updateFilterChips();
+            }
+            if (typeof updateFilterSummary === 'function') {
+                updateFilterSummary();
+            }
+        }
+
+        window.filterByProject = function(projectId) {
+            const tab = _activeTab();
+            if (tab === 'reports') {
+                return _applyToAnalysis({ projectId });
+            }
+            return _applyToHistory({ projectId });
+        };
+
+        window.filterByTag = function(tagId) {
+            const tab = _activeTab();
+            if (tab === 'reports') {
+                return _applyToAnalysis({ tagId });
+            }
+            return _applyToHistory({ tagId });
+        };
 
         // Listen for messages from popup
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
