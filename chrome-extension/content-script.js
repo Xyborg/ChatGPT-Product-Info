@@ -1128,16 +1128,9 @@
             });
 
             // Tab switching functionality
-            console.log('=== SETTING UP TABS ===');
             const searchTab = document.getElementById('search-tab');
             const historyTab = document.getElementById('history-tab');
             const reportsTab = document.getElementById('reports-tab');
-            
-            console.log('Tab elements found:', {
-                searchTab: !!searchTab,
-                historyTab: !!historyTab, 
-                reportsTab: !!reportsTab
-            });
             const searchArea = document.getElementById('search-area');
             const resultsContainerTab = document.getElementById('results-container');
             const historyContainer = document.getElementById('history-container');
@@ -1171,7 +1164,6 @@
             });
 
             reportsTab.addEventListener('click', () => {
-                console.log('=== REPORTS TAB CLICKED ===');
                 // Reset all tabs first
                 [searchTab, historyTab, reportsTab].forEach(t => {
                     if (t) {
@@ -1201,9 +1193,7 @@
                 // Show reports container
                 if (reportsContainer) {
                     reportsContainer.style.display = 'block';
-                    console.log('Reports container shown, display:', reportsContainer.style.display);
                 } else {
-                    console.log('ERROR: Reports container not found!');
                 }
                 
                 // Initialize the Analysis Dashboard
@@ -1239,7 +1229,6 @@
         }
 
         function switchTab(tab) {
-            console.log('=== SWITCHING TO TAB:', tab, '===');
             const searchTab = document.getElementById('search-tab');
             const historyTab = document.getElementById('history-tab');
             const reportsTab = document.getElementById('reports-tab');
@@ -1247,16 +1236,6 @@
             const resultsContainer = document.getElementById('results-container');
             const historyContainer = document.getElementById('history-container');
             const reportsContainer = document.getElementById('reports-container');
-            
-            console.log('Found elements in switchTab:', {
-                searchTab: !!searchTab,
-                historyTab: !!historyTab,
-                reportsTab: !!reportsTab,
-                searchArea: !!searchArea,
-                resultsContainer: !!resultsContainer,
-                historyContainer: !!historyContainer,
-                reportsContainer: !!reportsContainer
-            });
 
             // Reset all tabs
             [searchTab, historyTab, reportsTab].forEach(t => {
@@ -1269,24 +1248,19 @@
             });
 
             // Hide all containers explicitly and aggressively
-            console.log('Hiding all containers...');
             
             // Hide all containers cleanly
             if (searchArea) {
                 searchArea.style.display = 'none';
-                console.log('Hidden searchArea');
             }
             if (resultsContainer) {
                 resultsContainer.style.display = 'none';
-                console.log('Hidden resultsContainer');
             }
             if (historyContainer) {
                 historyContainer.style.display = 'none';
-                console.log('Hidden historyContainer');
             }
             if (reportsContainer) {
                 reportsContainer.style.display = 'none';
-                console.log('Hidden reportsContainer');
             }
             
             // Reset all internal content states
@@ -1341,13 +1315,11 @@
                 // CRITICAL: Completely hide and clear analysis content when switching to history
                 if (reportsContainer) {
                     reportsContainer.style.display = 'none';
-                    console.log('HISTORY TAB: Hidden reports container');
                     
                     // Clear all analysis content from the DOM
                     const analysisContent = reportsContainer.querySelector('#analysis-content');
                     if (analysisContent) {
                         analysisContent.style.display = 'none';
-                        console.log('HISTORY TAB: Hidden analysis content in reports container');
                     }
                 }
 
@@ -1359,25 +1331,20 @@
 
                 if (globalAnalysisContent) {
                     globalAnalysisContent.style.display = 'none';
-                    console.log('HISTORY TAB: Hidden global analysis content');
                 }
                 if (globalAnalysisResults) {
                     globalAnalysisResults.style.display = 'none';
-                    console.log('HISTORY TAB: Hidden global analysis results');
                 }
                 if (globalCitationTable) {
                     globalCitationTable.style.display = 'none';
-                    console.log('HISTORY TAB: Hidden global citation table');
                 }
                 if (globalReviewTable) {
                     globalReviewTable.style.display = 'none';
-                    console.log('HISTORY TAB: Hidden global review table');
                 }
                 
                 if (historyContainer) {
                     historyContainer.style.display = 'block';
                     historyContainer.style.visibility = 'visible';
-                    console.log('HISTORY TAB: Shown history container');
 
                     // Restore visibility that reports tab may have hidden
                     ['history-content', 'history-welcome-state', 'history-list'].forEach(id => {
@@ -1388,7 +1355,6 @@
                     });
                 }
             } else if (tab === 'reports') {
-                console.log('Setting reports tab as active');
                 reportsTab.style.background = 'white';
                 reportsTab.style.color = '#495057';
                 reportsTab.style.borderBottom = '2px solid #007bff';
@@ -1397,23 +1363,19 @@
                 // CRITICAL: Completely hide and clear history content when switching to reports
                 if (historyContainer) {
                     historyContainer.style.display = 'none';
-                    console.log('REPORTS TAB: Hidden history container');
                     
                     // Clear all history content from the DOM
                     const historyContent = historyContainer.querySelector('#history-content');
                     const historyList = historyContainer.querySelector('#history-list');
                     if (historyContent) {
                         historyContent.style.display = 'none';
-                        console.log('REPORTS TAB: Hidden history content in history container');
                     }
                     if (historyList) {
                         historyList.style.display = 'none';
-                        console.log('REPORTS TAB: Hidden history list in history container');
                     }
                 }
                 
                 if (reportsContainer) {
-                    console.log('Showing reports container');
                     reportsContainer.style.display = 'block';
                     reportsContainer.style.visibility = 'visible';
                     reportsContainer.style.removeProperty('visibility');
@@ -1447,7 +1409,6 @@
                     // Initialize analysis dashboard when switching to reports
                     initializeAnalysisDashboard();
                 } else {
-                    console.log('ERROR: Reports container not found!');
                 }
             }
         }
@@ -1455,7 +1416,6 @@
         // ===== ANALYSIS DASHBOARD FUNCTIONALITY - Phase 6 =====
         
         function initializeAnalysisDashboard() {
-            console.log('=== INITIALIZING ANALYSIS DASHBOARD ===');
             
             // Allow analysis dashboard to initialize when called
             
@@ -1463,14 +1423,7 @@
             const reportsWelcomeState = document.getElementById('reports-welcome-state');
             const analysisContent = document.getElementById('analysis-content');
 
-            console.log('Elements found:', {
-                reportsWelcomeState: !!reportsWelcomeState,
-                analysisContent: !!analysisContent,
-                historyLength: history.length
-            });
-
             if (history.length === 0) {
-                console.log('No history, showing welcome state');
                 if (reportsWelcomeState) reportsWelcomeState.style.display = 'flex';
                 if (analysisContent) analysisContent.style.display = 'none';
                 return;
@@ -1485,7 +1438,6 @@
                 analysisContent.style.display = 'block';
                 analysisContent.style.visibility = 'visible';
                 analysisContent.style.removeProperty('visibility');
-                console.log('ANALYSIS: Made analysis content visible');
                 
                 // Also ensure analysis results are visible
                 const analysisResults = document.getElementById('analysis-results');
@@ -1522,7 +1474,6 @@
             } else {
                 generateAnalysisReports();
             }
-            console.log('Analysis dashboard initialized successfully');
         }
         
         function cleanupAnalysisInterface() {
@@ -1553,7 +1504,6 @@
                 tagsFilter.innerHTML = '';
             }
             
-            console.log('Analysis interface cleaned up');
         }
         
         function resetAnalysisFilterPanelState() {
@@ -1575,20 +1525,12 @@
                 activeFiltersDiv.style.display = 'none';
             }
             
-            console.log('Analysis filter panel state reset');
         }
         
         function setupAnalysisInterface() {
-            console.log('Setting up analysis interface...');
             const toggleFiltersBtn = document.getElementById('toggle-analysis-filters');
             const clearFiltersBtn = document.getElementById('clear-analysis-filters');
             const applyFiltersBtn = document.getElementById('apply-analysis-filters');
-            
-            console.log('Analysis interface elements found:', {
-                toggleFiltersBtn: !!toggleFiltersBtn,
-                clearFiltersBtn: !!clearFiltersBtn,
-                applyFiltersBtn: !!applyFiltersBtn
-            });
             
             // Toggle filters panel with hover effects
             if (toggleFiltersBtn) {
@@ -1621,7 +1563,6 @@
                 applyFiltersBtn.addEventListener('click', applyAnalysisFilters);
             }
             
-            console.log('Analysis interface setup completed');
         }
         
         function initializeAnalysisFilters() {
@@ -1797,11 +1738,6 @@
             
             // Generate filtered analysis
             generateAnalysisReports();
-            
-            console.log('Applied analysis filters:', {
-                project: selectedProject,
-                tags: selectedTags
-            });
         }
         
         function clearAnalysisFilters() {
@@ -2016,13 +1952,11 @@
         
         // Legacy function for backward compatibility
         function loadReports() {
-            console.log('=== LEGACY REPORTS FUNCTION CALLED ===');
             initializeAnalysisDashboard();
         }
 
         // Global function for direct onclick access
         window.switchTabToReports = function() {
-            console.log('=== GLOBAL SWITCH TO REPORTS ===');
             switchTab('reports');
             loadReports();
         };
@@ -2073,9 +2007,7 @@
                 }
                 
                 localStorage.setItem('chatgpt-product-search-history', JSON.stringify(history));
-                console.log('Search saved to history:', query);
             } catch (error) {
-                console.error('Failed to save search to history:', error);
             }
         }
 
@@ -2083,7 +2015,6 @@
             try {
                 return JSON.parse(localStorage.getItem('chatgpt-product-search-history') || '[]');
             } catch (error) {
-                console.error('Failed to load search history:', error);
                 return [];
             }
         }
@@ -2102,7 +2033,6 @@
             try {
                 return JSON.parse(localStorage.getItem('chatgpt-product-search-tags') || '[]');
             } catch (error) {
-                console.error('Failed to load tags:', error);
                 return [];
             }
         }
@@ -2112,7 +2042,6 @@
                 localStorage.setItem('chatgpt-product-search-tags', JSON.stringify(tags));
                 return true;
             } catch (error) {
-                console.error('Failed to save tags:', error);
                 return false;
             }
         }
@@ -2121,7 +2050,6 @@
             try {
                 return JSON.parse(localStorage.getItem('chatgpt-product-search-projects') || '[]');
             } catch (error) {
-                console.error('Failed to load projects:', error);
                 return [];
             }
         }
@@ -2131,7 +2059,6 @@
                 localStorage.setItem('chatgpt-product-search-projects', JSON.stringify(projects));
                 return true;
             } catch (error) {
-                console.error('Failed to save projects:', error);
                 return false;
             }
         }
@@ -2258,12 +2185,10 @@
                 
                 if (migrationNeeded) {
                     localStorage.setItem('chatgpt-product-search-history', JSON.stringify(migratedHistory));
-                    console.log('Search history migrated to version 2 format');
                 }
                 
                 return true;
             } catch (error) {
-                console.error('Failed to migrate search history:', error);
                 return false;
             }
         }
@@ -3416,7 +3341,6 @@
             populateProjectsList();
             populateTagsList();
             
-            console.log('Search saved with tags:', tagsArray, 'project:', selectedProject);
         }
         
         // ===== EDIT EXISTING SEARCH ORGANIZATION - Phase 4.6 =====
@@ -3864,7 +3788,6 @@
                     editInterface.remove();
                 }
                 
-                console.log('Updated search organization:', historyItem.id, { tags: newTags, project: newProject });
                 
                 // Show confirmation
                 const resultsContainer = document.getElementById('results-container');
@@ -4155,7 +4078,6 @@
             if (panel) panel.style.display = 'none';
             if (toggleText) toggleText.textContent = 'Filters';
             
-            console.log('Applied filters:', currentFilters);
         }
         
         function applyAdvancedFilters(history) {
@@ -4323,7 +4245,6 @@
             updateFilterSummary();
             updateFilterChips();
             
-            console.log('Cleared all filters');
         }
         
         // ===== SIDEBAR-TO-FILTER INTEGRATION =====
@@ -4361,24 +4282,15 @@
             }
 
             // Debug: Log full data structure
-            console.log('=== FULL HISTORY DEBUG ===');
-            console.log('Total history items:', history.length);
             
             history.forEach((item, index) => {
-                console.log(`\n--- Item ${index + 1}: "${item.query}" ---`);
-                console.log('Results structure:', Object.keys(item.results || {}));
                 
                 if (item.results) {
                     if (item.results.productLinks) {
-                        console.log('ProductLinks count:', item.results.productLinks.length);
-                        console.log('First productLink:', item.results.productLinks[0]);
                     }
                     if (item.results.citations) {
-                        console.log('Citations count:', item.results.citations.length);
-                        console.log('First citation:', item.results.citations[0]);
                     }
                     if (item.results.reviews) {
-                        console.log('Reviews count:', item.results.reviews.length);
                     }
                     
                     // Check for any other properties that might contain URLs
@@ -4386,7 +4298,6 @@
                         if (Array.isArray(item.results[key]) && item.results[key].length > 0) {
                             const firstItem = item.results[key][0];
                             if (firstItem && typeof firstItem === 'object' && firstItem.url) {
-                                console.log(`Found URLs in ${key}:`, item.results[key].length, 'items');
                             }
                         }
                     });
@@ -4405,7 +4316,6 @@
             const sourceCounts = new Map();
             const sourceDetails = new Map();
 
-            console.log('Analyzing history for review sources:', history.length, 'items');
 
             function addDomain(url, title, query, date) {
                 if (url) {
@@ -4421,16 +4331,13 @@
                         });
                     }
                     sourceDetails.get(domain).queries.add(query);
-                    console.log('Added review domain:', domain, 'count:', sourceCounts.get(domain));
                 }
             }
 
             history.forEach(item => {
-                console.log('Processing item for reviews:', item.query);
                 
                 // Check reviews only (single searches)
                 if (item.results && item.results.reviews) {
-                    console.log('Found reviews:', item.results.reviews.length);
                     item.results.reviews.forEach(review => {
                         addDomain(review.url, review.title, item.query, item.date);
                     });
@@ -4438,7 +4345,6 @@
 
                 // Check multiResults (multi-product searches)
                 if (item.results && item.results.multiResults) {
-                    console.log('Found multiResults for reviews:', item.results.multiResults.length);
                     item.results.multiResults.forEach(multiResult => {
                         if (multiResult.data && multiResult.data.reviews) {
                             multiResult.data.reviews.forEach(review => {
@@ -4449,7 +4355,6 @@
                 }
             });
 
-            console.log('Final review domain counts:', Array.from(sourceCounts.entries()));
 
             // Sort by count and convert to array
             const sortedSources = Array.from(sourceCounts.entries())
@@ -4480,16 +4385,13 @@
                         date: date,
                         snippet: snippet || ''
                     });
-                    console.log('Added citation domain:', domain);
                 }
             }
 
             history.forEach(item => {
-                console.log('Processing item for citations:', item.query);
                 
                 // Check single search citations only
                 if (item.results && item.results.citations) {
-                    console.log('Found citations:', item.results.citations.length);
                     item.results.citations.forEach(citation => {
                         addCitation(citation.url, citation.title, item.query, item.date, citation.snippet);
                     });
@@ -4497,7 +4399,6 @@
 
                 // Check single search productLinks only
                 if (item.results && item.results.productLinks) {
-                    console.log('Found productLinks as citations:', item.results.productLinks.length);
                     item.results.productLinks.forEach(link => {
                         addCitation(link.url, link.title, item.query, item.date, link.snippet);
                     });
@@ -4505,7 +4406,6 @@
 
                 // Check multiResults for citations and productLinks only (no reviews)
                 if (item.results && item.results.multiResults) {
-                    console.log('Found multiResults for citations:', item.results.multiResults.length);
                     item.results.multiResults.forEach(multiResult => {
                         if (multiResult.data) {
                             // Check citations in multiResult
@@ -4525,7 +4425,6 @@
                 }
             });
 
-            console.log('Final citation domain counts:', Array.from(citationsBySource.keys()));
 
             // Convert to array and sort by citation count
             const sortedCitations = Array.from(citationsBySource.entries())
@@ -4796,7 +4695,6 @@
                 localStorage.setItem('chatgpt-product-search-history', JSON.stringify(filteredHistory));
                 loadHistory();
             } catch (error) {
-                console.error('Failed to delete history item:', error);
             }
         }
 
@@ -4891,7 +4789,6 @@
 
 
         function loadHistory() {
-            console.log('=== LOAD HISTORY CALLED ===');
 
             // Force-hide other containers so nothing leaks into History
             const searchArea = document.getElementById('search-area');
@@ -5107,19 +5004,15 @@
                 const reviewTable = historyContainer.querySelector('#review-sources-table');
                 
                 if (analysisResults) {
-                    console.log('NUCLEAR: Removing analysis-results from history after render');
                     analysisResults.remove();
                 }
                 if (analysisContent) {
-                    console.log('NUCLEAR: Removing analysis-content from history after render');
                     analysisContent.remove();
                 }
                 if (citationTable) {
-                    console.log('NUCLEAR: Removing citation-sources-table from history after render');
                     citationTable.remove();
                 }
                 if (reviewTable) {
-                    console.log('NUCLEAR: Removing review-sources-table from history after render');
                     reviewTable.remove();
                 }
             }
@@ -5278,12 +5171,10 @@
             
             // Show info if duplicates were removed
             if (queries.length > uniqueQueries.length) {
-                console.log(`Removed ${queries.length - uniqueQueries.length} duplicate queries`);
             }
             
             // If only one unique query remains, treat as single product search
             if (uniqueQueries.length === 1) {
-                console.log('Only one unique query found, switching to single product search');
                 const singleQuery = document.getElementById('search-query');
                 if (singleQuery) {
                     singleQuery.value = uniqueQueries[0];
@@ -5523,7 +5414,6 @@
             const authStatus = document.getElementById('auth-status');
             
             if (!tokenInput || !authStatus) {
-                console.error('Token status elements not found');
                 return;
             }
             
@@ -5638,10 +5528,7 @@
             
             const reviewThemes = [...new Set(reviews.map(review => review.theme))];
             
-            console.log('Final productLinks count:', productLinks.length);
-            console.log('All citations processed:', Array.from(citations.entries()));
             productLinks.forEach((link, index) => {
-                console.log(`Link ${index + 1}:`, link.url, 'title:', link.title);
             });
             
             // Remove exact duplicates (same title AND url) while preserving different sources
@@ -5654,11 +5541,9 @@
                     seenCombinations.add(key);
                     deduplicatedLinks.push(link);
                 } else {
-                    console.log('Removing duplicate citation:', link.title, link.url);
                 }
             });
             
-            console.log(`Deduplication: ${productLinks.length} -> ${deduplicatedLinks.length} citations`);
             
             return {
                 products: products,
@@ -5708,7 +5593,6 @@
                         source: extractDomainFromUrl(data.v.url)
                     };
                     
-                    console.log('Direct citation found:', productLink.url, 'title:', productLink.title);
                     productLinks.push(productLink);
                 }
                 
@@ -5750,16 +5634,12 @@
                             source: extractDomainFromUrl(patch.v.url)
                         };
                         
-                        console.log('Array citation found:', productLink.url, 'title:', productLink.title);
-                        console.log('Current productLinks count before adding:', productLinks.length);
                         productLinks.push(productLink);
-                        console.log('Current productLinks count after adding:', productLinks.length);
                     }
                         
                         
                     // Handle supporting_websites array
                     if (patch.p === '/grouped_citation/supporting_websites' && patch.o === 'append' && patch.v && Array.isArray(patch.v)) {
-                        console.log('Supporting websites found:', patch.v.length);
                         for (const supportingSite of patch.v) {
                             if (supportingSite.url) {
                                 const productLink = {
@@ -5768,7 +5648,6 @@
                                     snippet: supportingSite.snippet || '',
                                     source: extractDomainFromUrl(supportingSite.url)
                                 };
-                                console.log('Adding supporting website:', productLink.url, 'title:', productLink.title);
                                 productLinks.push(productLink);
                             }
                         }
@@ -5816,13 +5695,11 @@
                             source: extractDomainFromUrl(patch.v.url)
                         };
                         
-                        console.log('Patch citation found:', productLink.url, 'title:', productLink.title);
                         productLinks.push(productLink);
                     }
                         
                     // Handle supporting_websites array in patch operations too
                     if (patch.p === '/grouped_citation/supporting_websites' && patch.o === 'append' && patch.v && Array.isArray(patch.v)) {
-                        console.log('Patch supporting websites found:', patch.v.length);
                         for (const supportingSite of patch.v) {
                             if (supportingSite.url) {
                                 const productLink = {
@@ -5831,7 +5708,6 @@
                                     snippet: supportingSite.snippet || '',
                                     source: extractDomainFromUrl(supportingSite.url)
                                 };
-                                console.log('Adding patch supporting website:', productLink.url, 'title:', productLink.title);
                                 productLinks.push(productLink);
                             }
                         }
@@ -6015,7 +5891,6 @@
         function displayResults(data, query) {
             const resultsContainer = document.getElementById('results-container');
             if (!resultsContainer) {
-                console.error('Results container not found');
                 return;
             }
 
@@ -6370,7 +6245,6 @@
         function displayMultiResults(results) {
             const resultsContainer = document.getElementById('results-container');
             if (!resultsContainer) {
-                console.error('Results container not found');
                 return;
             }
 
@@ -6843,7 +6717,6 @@
         function displayError(message) {
             const resultsContainer = document.getElementById('results-container');
             if (!resultsContainer) {
-                console.error('Results container not found');
                 alert(`Search Error: ${message}`);
                 return;
             }
