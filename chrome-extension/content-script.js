@@ -1576,14 +1576,7 @@
                 projectFilter.innerHTML = '<option value="">All Projects</option>' +
                     projects.map(project => `<option value="${project.id}">${project.name}</option>`).join('');
 
-                projectFilter.addEventListener('change', () => {
-                    if (projectFilter.value) {
-                        document.querySelectorAll('.analysis-tag-checkbox').forEach(cb => {
-                            cb.checked = false;
-                        });
-                    }
-                    updateAnalysisFilterSummary();
-                });
+                projectFilter.addEventListener('change', updateAnalysisFilterSummary);
             }
             
             // Populate tags filter
@@ -1626,12 +1619,7 @@
                         `;
                         
                         const checkbox = tagCheckbox.querySelector('input');
-                        checkbox.addEventListener('change', () => {
-                            if (checkbox.checked && projectFilter) {
-                                projectFilter.value = '';
-                            }
-                            updateAnalysisFilterSummary();
-                        });
+                        checkbox.addEventListener('change', updateAnalysisFilterSummary);
                         
                         tagsFilter.appendChild(tagCheckbox);
                     });
@@ -1695,21 +1683,8 @@
             const projectFilter = document.getElementById('analysis-project-filter');
             const checkedTagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
 
-            let selectedProject = projectFilter ? projectFilter.value : '';
-            let selectedTags = Array.from(checkedTagCheckboxes).map(cb => cb.value);
-
-            if (selectedTags.length > 0 && selectedProject) {
-                selectedProject = '';
-                if (projectFilter) {
-                    projectFilter.value = '';
-                }
-            }
-
-            if (selectedProject && selectedTags.length === 0) {
-                document.querySelectorAll('.analysis-tag-checkbox').forEach(cb => {
-                    cb.checked = false;
-                });
-            }
+            const selectedProject = projectFilter ? projectFilter.value : '';
+            const selectedTags = Array.from(checkedTagCheckboxes).map(cb => cb.value);
 
             // Keep shared filter state in sync so History reflects analysis selections
             const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
