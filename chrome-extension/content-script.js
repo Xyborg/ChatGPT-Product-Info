@@ -1425,6 +1425,18 @@
                     console.log('Showing reports container');
                     reportsContainer.style.display = 'block';
                     reportsContainer.style.visibility = 'visible';
+
+                    // Restore visibility for analysis sections that may have been hidden
+                    ['analysis-content', 'analysis-results', 'citation-sources-table', 'review-sources-table']
+                        .forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                if (el.style.display === 'none') {
+                                    el.style.display = 'block';
+                                }
+                                el.style.visibility = 'visible';
+                            }
+                        });
                     
                     // Initialize analysis dashboard when switching to reports
                     initializeAnalysisDashboard();
