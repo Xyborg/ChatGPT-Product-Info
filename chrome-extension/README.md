@@ -5,20 +5,22 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 ## Features
 
 ### Core Search Features
-- 🔍 **Single Product Search**: Search for individual products and get detailed reviews
-- 📊 **Multi-Product Comparison**: Compare multiple products side-by-side in a table format  
-- 🎯 **Sentiment Analysis**: Visual sentiment breakdown of reviews (positive/neutral/negative)
-- 🔗 **Citation Links**: Direct links to source websites for more information
-- 🏷️ **Review Themes**: Categorized review themes for easy browsing
+- **Single Product Search**: Search for individual products and get detailed reviews
+- **Multi-Product Comparison**: Compare multiple products side-by-side in a table format  
+- **Sentiment Analysis**: Visual sentiment breakdown of reviews (positive/neutral/negative)
+- **Citation Links**: Direct links to source websites for more information
+- **Review Themes**: Categorized review themes for easy browsing
+- **Projects & Tags**: Organize every search with project assignments and tag labels for richer filtering
 
 ### Chrome Extension Features
-- 📋 **Search History**: Automatically save all your searches and easily reopen them later (up to 50 searches)
-- 📊 **Basic Reports**: View simple reports on review sources and citation sources from your search history
-- 🛍️ **Floating Button**: Always-visible product search button on ChatGPT pages
-- 🔧 **Popup Interface**: Quick access and status checking from Chrome toolbar
-- 📱 **Responsive UI**: Clean, modern interface that works seamlessly with ChatGPT
-- 🔄 **Auto-Save**: All successful searches automatically saved to local history
-- 🔍 **History Filtering**: Search through your saved searches with built-in filter
+- **Search History**: Automatically save searches (up to 50) and reopen them instantly
+- **Filter-Aware Reports**: Review/citation source reports that respect your active filters
+- **Floating Product Bubble**: Always-visible light-yellow button with the extension logo in the bottom-right corner
+- **Popup Interface**: Quick access and status checking from the Chrome toolbar
+- **Responsive UI**: Clean, modern interface that works seamlessly with ChatGPT
+- **Auto-Save**: All successful searches automatically saved to local history
+- **Unified Project & Tag Filters**: Combine projects and tags, and have those selections stay in sync across History, Analysis, and Reports
+- **History Filtering**: Text search plus synced project/tag filters to drill into past work
 
 ## Installation
 
@@ -29,7 +31,7 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 3. **Enable Developer Mode** (toggle in top-right corner)
 4. **Click "Load unpacked"** and select the `chrome-extension` folder
 5. **Navigate to ChatGPT** (https://chatgpt.com) and log in
-6. **Click the extension icon** in your toolbar or look for the floating 🛍️ button on ChatGPT
+6. **Click the extension icon** in your toolbar or look for the floating Product Info bubble on ChatGPT
 
 ### From Chrome Web Store
 
@@ -41,7 +43,7 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 1. **Make sure you're logged in** to ChatGPT (https://chatgpt.com)
 2. **Access the search interface** using either:
    - Click the extension icon in your Chrome toolbar → "Open Product Search"
-   - Click the floating 🛍️ button on any ChatGPT page
+   - Click the floating Product Info bubble in the bottom-right corner of any ChatGPT page
 3. **Start searching** for products using natural language queries
 
 ### Search Examples
@@ -67,15 +69,16 @@ Try searching for:
 - All successful searches are automatically saved to your history
 - Click the "📋 History" tab to view your search history
 - **Reopen** any previous search to view the results again
-- **Filter** your history using the search box
+- **Filter** your history using the search box plus shared project/tag filters
 - **Delete** individual searches or clear all history
 - History is stored locally in your browser (up to 50 most recent searches)
+- **Organize** each search with project assignments and tag labels directly from the sidebar or post-search workflow
 
 ### Basic Reports
 - Click the "📊 Reports" tab to view simple analytics from your search history
 - **Review Sources Report**: See which websites have provided reviews in your searches
 - **Citation Sources Report**: View the sources that have been cited across your searches
-- Reports are generated from your local search history and processed locally
+- Reports are generated from your local search history, processed locally, and reflect the same project/tag filters you have applied
 
 ## Why This Works as a Chrome Extension
 
@@ -93,12 +96,12 @@ Unlike the original bookmarklet, this Chrome extension has several advantages:
 - No need to re-inject code manually
 
 ### **Enhanced User Experience**
-- Floating 🛍️ button for instant access
+- Floating Product Info bubble (with branded icon) for instant access in the lower-right corner
 - Proper toolbar icon and popup interface with status checking
-- Persistent search history with filtering and management
-- Basic reports on search sources
-- Better error handling and status indicators
-- Seamless integration with ChatGPT's interface
+- Persistent search history with powerful filtering and management
+- Filter-aware reports on search sources
+- Unified project/tag filters that seamlessly sync between History and Analysis views
+- Better error handling, status indicators, and seamless integration with ChatGPT's interface
 
 ## Technical Details
 
