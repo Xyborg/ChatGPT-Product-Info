@@ -464,8 +464,8 @@
                                     gap: 32px;
                                     margin-bottom: 20px;
                                 ">
-                                    <div id="review-sources-table"></div>
                                     <div id="citation-sources-table"></div>
+                                    <div id="review-sources-table"></div>
                                 </div>
                             </div>
                         </div>
@@ -821,15 +821,15 @@
             });
 
             // Display the tables
-            if (reviewSourcesTable) {
-                const reviewHTML = generateReviewSourcesHTML(reviewSources);
-                console.log('Review HTML length:', reviewHTML.length);
-                reviewSourcesTable.innerHTML = reviewHTML;
-            }
             if (citationSourcesTable) {
                 const citationHTML = generateCitationSourcesHTML(citationSources);
                 console.log('Citation HTML length:', citationHTML.length);
                 citationSourcesTable.innerHTML = citationHTML;
+            }
+            if (reviewSourcesTable) {
+                const reviewHTML = generateReviewSourcesHTML(reviewSources);
+                console.log('Review HTML length:', reviewHTML.length);
+                reviewSourcesTable.innerHTML = reviewHTML;
             }
 
             console.log('Reports loaded successfully');
@@ -1206,22 +1206,22 @@
                     ">
                         <thead>
                             <tr style="background: #f8f9fa;">
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
-                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
+                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
+                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
+                                <th style="padding: 6px 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${reviewSources.map((source, index) => `
                                 <tr style="border-bottom: 1px solid #f8f9fa;">
-                                    <td style="padding: 12px; font-weight: bold;">${index + 1}</td>
-                                    <td style="padding: 12px;">
+                                    <td style="padding: 6px 12px; font-weight: bold;">${index + 1}</td>
+                                    <td style="padding: 6px 12px;">
                                         <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
                                             <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
                                             ${source.domain}
                                         </a>
                                     </td>
-                                    <td style="padding: 12px; text-align: right; font-weight: bold;">${source.count}</td>
+                                    <td style="padding: 6px 12px; text-align: right; font-weight: bold;">${source.count}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -1241,22 +1241,22 @@
                     ">
                         <thead>
                             <tr style="background: #f8f9fa;">
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
-                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
+                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
+                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
+                                <th style="padding: 6px 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${citationSources.map((source, index) => `
                                 <tr style="border-bottom: 1px solid #f8f9fa;">
-                                    <td style="padding: 12px; font-weight: bold;">${index + 1}</td>
-                                    <td style="padding: 12px;">
+                                    <td style="padding: 6px 12px; font-weight: bold;">${index + 1}</td>
+                                    <td style="padding: 6px 12px;">
                                         <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
                                             <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
                                             ${source.domain}
                                         </a>
                                     </td>
-                                    <td style="padding: 12px; text-align: right; font-weight: bold;">${source.citationCount}</td>
+                                    <td style="padding: 6px 12px; text-align: right; font-weight: bold;">${source.citationCount}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -2443,7 +2443,7 @@
             
             let html = `
                 <div style="
-                    padding: 12px;
+                    padding: 6px 12px;
                     margin-bottom: 16px;
                     border-bottom: 1px solid #e9ecef;
                 ">
@@ -2474,7 +2474,7 @@
                         ">Product Overview</div>
                         <div style="
                             background: #e2f1ff;
-                            padding: 12px;
+                            padding: 6px 12px;
                             margin: 0 12px;
                             color: #000;
                             line-height: 1.4;
@@ -2497,7 +2497,7 @@
                         ">Review Summary</div>
                         <div style="
                             background: #f5fee8;
-                            padding: 12px;
+                            padding: 6px 12px;
                             margin: 0 12px;
                             color: #000;
                             line-height: 1.4;
@@ -2522,7 +2522,7 @@
                             <div style="
                                 border: 1px solid #e9ecef;
                                 border-radius: 6px;
-                                padding: 12px;
+                                padding: 6px 12px;
                                 margin: 0 12px 8px 12px;
                                 background: #f8f9fa;
                             ">
@@ -2642,7 +2642,7 @@
                             return `
                                 <div style="
                                     border-bottom: 1px solid #f8f9fa;
-                                    padding: 12px;
+                                    padding: 6px 12px;
                                     margin-bottom: 1px;
                                 ">
                                     <div style="
@@ -2782,7 +2782,7 @@
             
             let html = `
                 <div style="
-                    padding: 12px;
+                    padding: 6px 12px;
                     margin-bottom: 16px;
                     border-bottom: 1px solid #e9ecef;
                 ">
@@ -2813,7 +2813,7 @@
                             background: #f8d7da;
                             border: 1px solid #f5c6cb;
                             border-radius: 4px;
-                            padding: 12px;
+                            padding: 6px 12px;
                             margin: 0 12px;
                             color: #721c24;
                             font-size: 13px;
@@ -3200,7 +3200,7 @@
             detailedContent.innerHTML = `
                 <div style="
                     background: #f8f9fa;
-                    padding: 12px;
+                    padding: 6px 12px;
                     margin-bottom: 16px;
                     border-radius: 6px;
                     border-left: 4px solid #007bff;

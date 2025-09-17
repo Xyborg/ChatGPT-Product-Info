@@ -55,5 +55,5 @@ tmp/
 temp/
 
 # Chrome extension
-chrome-extension.crx
-chrome-extension.pem
+*.crx
+*.pem
