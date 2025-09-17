@@ -1506,7 +1506,12 @@
             // Setup analysis interface and generate initial analysis
             setupAnalysisInterface();
             initializeAnalysisFilters();
-            generateAnalysisReports();
+            syncAnalysisFiltersWithHistoryFilters();
+            if (typeof applyAnalysisFilters === 'function') {
+                applyAnalysisFilters();
+            } else {
+                generateAnalysisReports();
+            }
             console.log('Analysis dashboard initialized successfully');
         }
         
@@ -1670,7 +1675,33 @@
                 }
             }
         }
-        
+
+        function syncAnalysisFiltersWithHistoryFilters() {
+            if (!currentFilters) {
+                return;
+            }
+
+            const projectFilter = document.getElementById('analysis-project-filter');
+            if (projectFilter) {
+                projectFilter.value = currentFilters.project || '';
+            }
+
+            const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox');
+            if (tagCheckboxes.length > 0) {
+                const activeTags = new Set(currentFilters.tags || []);
+                tagCheckboxes.forEach(cb => {
+                    cb.checked = activeTags.has(cb.value);
+                });
+            }
+
+            if (typeof updateAnalysisFilterSummary === 'function') {
+                updateAnalysisFilterSummary();
+            }
+            if (typeof updateAnalysisFilterChips === 'function') {
+                updateAnalysisFilterChips();
+            }
+        }
+
         function updateAnalysisFilterSummary() {
             const projectFilter = document.getElementById('analysis-project-filter');
             const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
