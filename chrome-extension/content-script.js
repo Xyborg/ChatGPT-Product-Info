@@ -1,4 +1,4 @@
-// ChatGPT Product Info Search - Chrome Extension Content Script
+// ChatGPT Product Info Research - Chrome Extension Content Script
 // Automatically injects the product search functionality into ChatGPT
 
 (function() {
@@ -27,6 +27,9 @@
             existingButton.remove();
         }
 
+        // Migrate existing search history data to new format (Phase 1)
+        migrateSearchHistoryData();
+
         // Create modal HTML
         const modalHTML = `
             <div id="chatgpt-product-search-modal" style="
@@ -45,6 +48,39 @@
                 <style>
                     .table-row-hover:hover {
                         background-color: #fffbf0 !important;
+                    }
+                    .sidebar-project {
+                        padding: 6px 8px;
+                        margin: 1px 0;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        transition: background-color 0.2s;
+                        font-size: 13px;
+                        color: #495057;
+                        border: 1px solid transparent;
+                    }
+                    .sidebar-project:hover {
+                        background-color: #e9ecef !important;
+                    }
+                    .sidebar-tag {
+                        padding: 4px 8px;
+                        margin: 1px 0;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        font-size: 12px;
+                        color: #495057;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    .sidebar-tag:hover {
+                        filter: brightness(0.95);
+                        transform: scale(1.02);
+                    }
+                    #toggle-filters:hover {
+                        color: #0056b3 !important;
+                        text-decoration: underline;
                     }
                 </style>
                 <div style="
@@ -70,7 +106,7 @@
                             font-weight: 600;
                             margin: 0;
                             color: #495057;
-                        ">🔍 ChatGPT Product Info Search</h1>
+                        ">🔍 ChatGPT Product Info Research</h1>
                         <button id="close-modal-btn" style="
                             background: none;
                             border: none;
@@ -86,6 +122,130 @@
                         ">&times;</button>
                     </div>
                     
+                    <div style="
+                        flex: 1;
+                        display: flex;
+                        flex-direction: row;
+                        overflow: hidden;
+                    ">
+                        <!-- Sidebar Navigation -->
+                        <div id="sidebar" style="
+                            width: 200px;
+                            min-width: 200px;
+                            background: #f8f9fa;
+                            border-right: 1px solid #e9ecef;
+                            display: flex;
+                            flex-direction: column;
+                            overflow: hidden;
+                        ">
+                            <div style="
+                                padding: 12px 16px;
+                                background: #ffffff;
+                                border-bottom: 1px solid #e9ecef;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                            ">
+                                <h3 style="
+                                    margin: 0;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    color: #495057;
+                                ">Organization</h3>
+                                <button id="settings-btn" style="
+                                    background: none;
+                                    border: none;
+                                    color: #6c757d;
+                                    font-size: 16px;
+                                    width: 24px;
+                                    height: 24px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    transition: all 0.2s ease;
+                                " title="Settings">⚙️</button>
+                            </div>
+                            
+                            <div style="
+                                flex: 1;
+                                overflow-y: auto;
+                                padding: 8px;
+                            ">
+                                <!-- Projects Section -->
+                                <div style="margin-bottom: 16px;">
+                                    <div style="
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        padding: 4px 8px;
+                                        margin-bottom: 4px;
+                                    ">
+                                        <span style="
+                                            font-size: 12px;
+                                            font-weight: 600;
+                                            color: #6c757d;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                        ">Projects</span>
+                                        <button id="add-project-btn" style="
+                                            background: none;
+                                            border: none;
+                                            color: #007bff;
+                                            font-size: 12px;
+                                            cursor: pointer;
+                                            padding: 2px 4px;
+                                            border-radius: 2px;
+                                        " title="Add Project">+</button>
+                                    </div>
+                                    <div id="projects-list" style="
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 2px;
+                                    ">
+                                        <!-- Projects will be dynamically loaded here -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Tags Section -->
+                                <div>
+                                    <div style="
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        padding: 4px 8px;
+                                        margin-bottom: 4px;
+                                    ">
+                                        <span style="
+                                            font-size: 12px;
+                                            font-weight: 600;
+                                            color: #6c757d;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                        ">Tags</span>
+                                        <button id="add-tag-btn" style="
+                                            background: none;
+                                            border: none;
+                                            color: #007bff;
+                                            font-size: 12px;
+                                            cursor: pointer;
+                                            padding: 2px 4px;
+                                            border-radius: 2px;
+                                        " title="Add Tag">+</button>
+                                    </div>
+                                    <div id="tags-list" style="
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 2px;
+                                    ">
+                                        <!-- Tags will be dynamically loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Content Area -->
                     <div style="
                         flex: 1;
                         display: flex;
@@ -394,22 +554,46 @@
                             </div>
                             <div id="history-content" style="display: none;">
                                 <div style="
+                                    margin-bottom: 20px;
+                                    border-bottom: 1px solid #e9ecef;
+                                ">
+                                <div style="
                                     display: flex;
                                     justify-content: space-between;
                                     align-items: center;
-                                    margin-bottom: 20px;
                                     padding-bottom: 10px;
-                                    border-bottom: 1px solid #e9ecef;
                                 ">
                                     <h3 style="margin: 0; font-size: 18px; color: #495057;">Search History</h3>
-                                    <div style="display: flex; gap: 10px;">
-                                        <input type="text" id="history-search" placeholder="Filter history..." style="
-                                            padding: 6px 12px;
-                                            border: 1px solid #dee2e6;
-                                            border-radius: 4px;
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <button id="toggle-filters" style="
+                                                background: none;
+                                                color: #007bff;
+                                                border: none;
+                                                padding: 6px 8px;
                                             font-size: 13px;
-                                            width: 150px;
-                                        " />
+                                                font-weight: 500;
+                                                cursor: pointer;
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                text-decoration: none;
+                                            ">
+                                                <svg width="16" height="16" viewBox="0 0 90 90" style="fill: currentColor;">
+                                                    <path d="M 85.813 59.576 H 55.575 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 30.237 c 1.657 0 3 1.343 3 3 S 87.47 59.576 85.813 59.576 z"/>
+                                                    <path d="M 48.302 66.849 c -5.664 0 -10.272 -4.608 -10.272 -10.272 c 0 -5.665 4.608 -10.273 10.272 -10.273 c 5.665 0 10.273 4.608 10.273 10.273 C 58.575 62.24 53.967 66.849 48.302 66.849 z M 48.302 52.303 c -2.356 0 -4.272 1.917 -4.272 4.273 c 0 2.355 1.917 4.272 4.272 4.272 c 2.356 0 4.273 -1.917 4.273 -4.272 C 52.575 54.22 50.658 52.303 48.302 52.303 z"/>
+                                                    <path d="M 41.029 59.576 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 36.842 c 1.657 0 3 1.343 3 3 S 42.686 59.576 41.029 59.576 z"/>
+                                                    <path d="M 85.813 36.424 h -57.79 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 57.79 c 1.657 0 3 1.343 3 3 S 87.47 36.424 85.813 36.424 z"/>
+                                                    <path d="M 20.75 43.697 c -5.665 0 -10.273 -4.608 -10.273 -10.273 s 4.608 -10.273 10.273 -10.273 s 10.273 4.608 10.273 10.273 S 26.414 43.697 20.75 43.697 z M 20.75 29.151 c -2.356 0 -4.273 1.917 -4.273 4.273 s 1.917 4.273 4.273 4.273 s 4.273 -1.917 4.273 -4.273 S 23.105 29.151 20.75 29.151 z"/>
+                                                    <path d="M 13.477 36.424 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 9.289 c 1.657 0 3 1.343 3 3 S 15.133 36.424 13.477 36.424 z"/>
+                                                    <path d="M 57.637 13.273 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 53.449 c 1.657 0 3 1.343 3 3 S 59.294 13.273 57.637 13.273 z"/>
+                                                    <path d="M 64.909 20.546 c -5.664 0 -10.272 -4.608 -10.272 -10.273 S 59.245 0 64.909 0 c 5.665 0 10.273 4.608 10.273 10.273 S 70.574 20.546 64.909 20.546 z M 64.909 6 c -2.355 0 -4.272 1.917 -4.272 4.273 s 1.917 4.273 4.272 4.273 c 2.356 0 4.273 -1.917 4.273 -4.273 S 67.266 6 64.909 6 z"/>
+                                                    <path d="M 85.813 13.273 h -13.63 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 13.63 c 1.657 0 3 1.343 3 3 S 87.47 13.273 85.813 13.273 z"/>
+                                                    <path d="M 85.813 82.728 h -57.79 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 57.79 c 1.657 0 3 1.343 3 3 S 87.47 82.728 85.813 82.728 z"/>
+                                                    <path d="M 20.75 90 c -5.665 0 -10.273 -4.608 -10.273 -10.272 c 0 -5.665 4.608 -10.273 10.273 -10.273 s 10.273 4.608 10.273 10.273 C 31.022 85.392 26.414 90 20.75 90 z M 20.75 75.454 c -2.356 0 -4.273 1.917 -4.273 4.273 c 0 2.355 1.917 4.272 4.273 4.272 s 4.273 -1.917 4.273 -4.272 C 25.022 77.371 23.105 75.454 20.75 75.454 z"/>
+                                                    <path d="M 13.477 82.728 H 4.188 c -1.657 0 -3 -1.343 -3 -3 s 1.343 -3 3 -3 h 9.289 c 1.657 0 3 1.343 3 3 S 15.133 82.728 13.477 82.728 z"/>
+                                                </svg>
+                                                <span id="filter-toggle-text">Filters</span>
+                                            </button>
                                         <button id="clear-history-btn-header" style="
                                             background: #dc3545;
                                             color: white;
@@ -419,7 +603,145 @@
                                             font-size: 13px;
                                             font-weight: 500;
                                             cursor: pointer;
-                                        ">Clear All</button>
+                                            ">Clear History</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Advanced Filter Panel -->
+                                    <div id="filter-panel" style="
+                                        display: none;
+                                        background: #f8f9fa;
+                                        border: 1px solid #e9ecef;
+                                        border-radius: 8px;
+                                        padding: 16px;
+                                        margin-bottom: 16px;
+                                    ">
+                                        <div style="
+                                            display: grid;
+                                            grid-template-columns: 1fr 1fr;
+                                            gap: 16px;
+                                            margin-bottom: 12px;
+                                        ">
+                                            <div>
+                                                <label style="
+                                                    display: block;
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #6c757d;
+                                                    margin-bottom: 6px;
+                                                ">Search Text</label>
+                                                <input type="text" id="filter-text" placeholder="Search in queries and results..." style="
+                                                    width: 100%;
+                                                    padding: 8px 12px;
+                                                    border: 1px solid #dee2e6;
+                                                    border-radius: 4px;
+                                                    font-size: 13px;
+                                                    box-sizing: border-box;
+                                                " />
+                                            </div>
+                                            
+                                            <div>
+                                                <label style="
+                                                    display: block;
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #6c757d;
+                                                    margin-bottom: 6px;
+                                                ">Project</label>
+                                                <select id="filter-project" style="
+                                                    width: 100%;
+                                                    padding: 8px 12px;
+                                                    border: 1px solid #dee2e6;
+                                                    border-radius: 4px;
+                                                    font-size: 13px;
+                                                    background: white;
+                                                    box-sizing: border-box;
+                                                ">
+                                                    <option value="">All Projects</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 12px;">
+                                            <label style="
+                                                display: block;
+                                                font-size: 12px;
+                                                font-weight: 600;
+                                                color: #6c757d;
+                                                margin-bottom: 6px;
+                                            ">Tags</label>
+                                            <div id="filter-tags" style="
+                                                min-height: 32px;
+                                                max-height: 80px;
+                                                overflow-y: auto;
+                                                border: 1px solid #dee2e6;
+                                                border-radius: 4px;
+                                                padding: 8px;
+                                                background: white;
+                                                display: flex;
+                                                flex-wrap: wrap;
+                                                gap: 6px;
+                                                align-items: flex-start;
+                                            ">
+                                                <!-- Tag checkboxes will be populated here -->
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="
+                                            display: flex;
+                                            justify-content: space-between;
+                                            align-items: center;
+                                            padding-top: 8px;
+                                            border-top: 1px solid #e9ecef;
+                                        ">
+                                            <div id="filter-summary" style="
+                                                font-size: 12px;
+                                                color: #6c757d;
+                                            ">
+                                                No filters applied
+                                            </div>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button id="clear-filters" style="
+                                                    background: #6c757d;
+                                                    color: white;
+                                                    border: none;
+                                                    padding: 6px 12px;
+                                                    border-radius: 4px;
+                                                    font-size: 12px;
+                                                    cursor: pointer;
+                                                ">Clear Filters</button>
+                                                <button id="apply-filters" style="
+                                                    background: #28a745;
+                                                    color: white;
+                                                    border: none;
+                                                    padding: 6px 12px;
+                                                    border-radius: 4px;
+                                                    font-size: 12px;
+                                                    cursor: pointer;
+                                                ">Apply</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Active Filters Display -->
+                                    <div id="active-filters" style="
+                                        display: none;
+                                        margin-bottom: 12px;
+                                        padding: 8px 0;
+                                    ">
+                                        <div style="
+                                            font-size: 12px;
+                                            font-weight: 600;
+                                            color: #6c757d;
+                                            margin-bottom: 6px;
+                                        ">Active Filters:</div>
+                                        <div id="filter-chips" style="
+                                            display: flex;
+                                            flex-wrap: wrap;
+                                            gap: 6px;
+                                        ">
+                                            <!-- Filter chips will be populated here -->
+                                        </div>
                                     </div>
                                 </div>
                                 <div id="history-list"></div>
@@ -494,6 +816,8 @@
                     ">
                         Created by <a href="https://www.martinaberastegue.com/" target="_blank" rel="noopener noreferrer">Martin Aberastegue (@Xyborg)</a>
                     </div>
+                        </div> <!-- End Main Content Area -->
+                    </div> <!-- End Sidebar + Content Container -->
                 </div>
             </div>
         `;
@@ -719,6 +1043,9 @@
 
             // Initialize token status
             initializeTokenStatus();
+            
+            // Initialize sidebar (Phase 2)
+            initializeSidebar();
         }
 
         function switchTab(tab) {
@@ -759,6 +1086,16 @@
                     c.style.display = 'none';
                 }
             });
+            
+            // Clean up any organization interfaces when switching tabs
+            const postSearchInterface = document.getElementById('post-search-tagging');
+            const editInterface = document.getElementById('edit-organization-interface');
+            if (postSearchInterface) {
+                postSearchInterface.remove();
+            }
+            if (editInterface) {
+                editInterface.remove();
+            }
 
             if (tab === 'search') {
                 searchTab.style.background = 'white';
@@ -861,7 +1198,7 @@
 
         // Search functionality functions
         // History Management Functions
-        function saveSearchToHistory(query, results, searchType = 'single') {
+        function saveSearchToHistory(query, results, searchType = 'single', tags = [], projectId = null) {
             try {
                 const history = JSON.parse(localStorage.getItem('chatgpt-product-search-history') || '[]');
                 const historyItem = {
@@ -870,8 +1207,23 @@
                     results: results,
                     searchType: searchType,
                     timestamp: Date.now(),
-                    date: new Date().toLocaleString()
+                    date: new Date().toLocaleString(),
+                    tags: Array.isArray(tags) ? tags : [],
+                    projectId: projectId,
+                    version: 2
                 };
+                
+                // Update tag usage counts
+                if (tags && Array.isArray(tags)) {
+                    tags.forEach(tagId => {
+                        if (tagId) updateTagUsage(tagId);
+                    });
+                }
+                
+                // Update project search count
+                if (projectId) {
+                    updateProjectSearchCount(projectId);
+                }
                 
                 // Add to beginning of array (most recent first)
                 history.unshift(historyItem);
@@ -903,6 +1255,2331 @@
                 loadHistory();
             }
         }
+
+        // ===== ENHANCED DATA MANAGEMENT FUNCTIONS =====
+        // Tags and Projects Management - Phase 1 Implementation
+        
+        function loadTags() {
+            try {
+                return JSON.parse(localStorage.getItem('chatgpt-product-search-tags') || '[]');
+            } catch (error) {
+                console.error('Failed to load tags:', error);
+                return [];
+            }
+        }
+        
+        function saveTags(tags) {
+            try {
+                localStorage.setItem('chatgpt-product-search-tags', JSON.stringify(tags));
+                return true;
+            } catch (error) {
+                console.error('Failed to save tags:', error);
+                return false;
+            }
+        }
+        
+        function loadProjects() {
+            try {
+                return JSON.parse(localStorage.getItem('chatgpt-product-search-projects') || '[]');
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+                return [];
+            }
+        }
+        
+        function saveProjects(projects) {
+            try {
+                localStorage.setItem('chatgpt-product-search-projects', JSON.stringify(projects));
+                return true;
+            } catch (error) {
+                console.error('Failed to save projects:', error);
+                return false;
+            }
+        }
+        
+        function createTag(name, color = '#007bff') {
+            const tags = loadTags();
+            
+            // Check for duplicate names
+            if (tags.find(tag => tag.name.toLowerCase() === name.toLowerCase())) {
+                throw new Error('A tag with this name already exists');
+            }
+            
+            const newTag = {
+                id: Date.now() + Math.random().toString(36).substr(2, 9),
+                name: name.trim(),
+                color: color,
+                created: Date.now(),
+                usageCount: 0
+            };
+            
+            tags.push(newTag);
+            saveTags(tags);
+            return newTag;
+        }
+        
+        function createProject(name, description = '') {
+            const projects = loadProjects();
+            
+            // Check for duplicate names
+            if (projects.find(project => project.name.toLowerCase() === name.toLowerCase())) {
+                throw new Error('A project with this name already exists');
+            }
+            
+            const newProject = {
+                id: Date.now() + Math.random().toString(36).substr(2, 9),
+                name: name.trim(),
+                description: description.trim(),
+                created: Date.now(),
+                searchCount: 0
+            };
+            
+            projects.push(newProject);
+            saveProjects(projects);
+            return newProject;
+        }
+        
+        function deleteTag(tagId) {
+            const tags = loadTags();
+            const filteredTags = tags.filter(tag => tag.id !== tagId);
+            
+            if (filteredTags.length === tags.length) {
+                throw new Error('Tag not found');
+            }
+            
+            // Remove tag from all searches
+            const history = loadSearchHistory();
+            const updatedHistory = history.map(search => ({
+                ...search,
+                tags: (search.tags || []).filter(id => id !== tagId)
+            }));
+            
+            localStorage.setItem('chatgpt-product-search-history', JSON.stringify(updatedHistory));
+            saveTags(filteredTags);
+            return true;
+        }
+        
+        function deleteProject(projectId) {
+            const projects = loadProjects();
+            const filteredProjects = projects.filter(project => project.id !== projectId);
+            
+            if (filteredProjects.length === projects.length) {
+                throw new Error('Project not found');
+            }
+            
+            // Remove project from all searches
+            const history = loadSearchHistory();
+            const updatedHistory = history.map(search => ({
+                ...search,
+                projectId: search.projectId === projectId ? null : search.projectId
+            }));
+            
+            localStorage.setItem('chatgpt-product-search-history', JSON.stringify(updatedHistory));
+            saveProjects(filteredProjects);
+            return true;
+        }
+        
+        function updateTagUsage(tagId) {
+            const tags = loadTags();
+            const tag = tags.find(t => t.id === tagId);
+            if (tag) {
+                tag.usageCount = (tag.usageCount || 0) + 1;
+                saveTags(tags);
+            }
+        }
+        
+        function updateProjectSearchCount(projectId) {
+            const projects = loadProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                project.searchCount = (project.searchCount || 0) + 1;
+                saveProjects(projects);
+            }
+        }
+        
+        // Migration function for existing data
+        function migrateSearchHistoryData() {
+            try {
+                const history = loadSearchHistory();
+                let migrationNeeded = false;
+                
+                const migratedHistory = history.map(search => {
+                    // Check if this search needs migration (version 2 format)
+                    if (!search.version || search.version < 2) {
+                        migrationNeeded = true;
+                        return {
+                            ...search,
+                            tags: search.tags || [],
+                            projectId: search.projectId || null,
+                            version: 2
+                        };
+                    }
+                    return search;
+                });
+                
+                if (migrationNeeded) {
+                    localStorage.setItem('chatgpt-product-search-history', JSON.stringify(migratedHistory));
+                    console.log('Search history migrated to version 2 format');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Failed to migrate search history:', error);
+                return false;
+            }
+        }
+        
+        // ===== END ENHANCED DATA MANAGEMENT FUNCTIONS =====
+
+        // ===== SIDEBAR FUNCTIONALITY - Phase 2 =====
+        
+        function initializeSidebar() {
+            // Populate sidebar with existing data
+            populateProjectsList();
+            populateTagsList();
+            
+            // Add event listeners for sidebar buttons
+            const settingsBtn = document.getElementById('settings-btn');
+            const addProjectBtn = document.getElementById('add-project-btn');
+            const addTagBtn = document.getElementById('add-tag-btn');
+            
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', openSettingsModal);
+            }
+            
+            if (addProjectBtn) {
+                addProjectBtn.addEventListener('click', quickAddProject);
+            }
+            
+            if (addTagBtn) {
+                addTagBtn.addEventListener('click', quickAddTag);
+            }
+        }
+        
+        function populateProjectsList() {
+            const projectsList = document.getElementById('projects-list');
+            if (!projectsList) return;
+            
+            const projects = loadProjects();
+            
+            if (projects.length === 0) {
+                projectsList.innerHTML = `
+                    <div style="
+                        padding: 8px;
+                        text-align: center;
+                        color: #6c757d;
+                        font-size: 12px;
+                        font-style: italic;
+                    ">No projects yet</div>
+                `;
+                return;
+            }
+            
+            projectsList.innerHTML = projects.map(project => `
+                <div class="sidebar-project" data-project-id="${project.id}">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    ">
+                        <span style="font-weight: 500;">📁 ${project.name}</span>
+                        <span style="
+                            font-size: 11px;
+                            color: #6c757d;
+                            background: #f8f9fa;
+                            padding: 1px 4px;
+                            border-radius: 8px;
+                        ">${project.searchCount || 0}</span>
+                    </div>
+                    ${project.description ? `
+                        <div style="
+                            font-size: 11px;
+                            color: #6c757d;
+                            margin-top: 2px;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        ">${project.description}</div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            // Add click handlers for project filtering
+            document.querySelectorAll('.sidebar-project').forEach(element => {
+                element.addEventListener('click', () => {
+                    const projectId = element.getAttribute('data-project-id');
+                    filterByProject(projectId);
+                });
+            });
+        }
+        
+        function populateTagsList() {
+            const tagsList = document.getElementById('tags-list');
+            if (!tagsList) return;
+            
+            const tags = loadTags();
+            
+            if (tags.length === 0) {
+                tagsList.innerHTML = `
+                    <div style="
+                        padding: 8px;
+                        text-align: center;
+                        color: #6c757d;
+                        font-size: 12px;
+                        font-style: italic;
+                    ">No tags yet</div>
+                `;
+                return;
+            }
+            
+            tagsList.innerHTML = tags.map(tag => `
+                <div class="sidebar-tag" data-tag-id="${tag.id}" style="
+                    border: 1px solid ${tag.color}20;
+                    background: ${tag.color}10;
+                ">
+                    <span style="
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    ">
+                        🏷️ ${tag.name}
+                    </span>
+                    <span style="
+                        font-size: 10px;
+                        color: #6c757d;
+                        background: #f8f9fa;
+                        padding: 1px 4px;
+                        border-radius: 6px;
+                    ">${tag.usageCount || 0}</span>
+                </div>
+            `).join('');
+            
+            // Add click handlers for tag filtering
+            document.querySelectorAll('.sidebar-tag').forEach(element => {
+                element.addEventListener('click', () => {
+                    const tagId = element.getAttribute('data-tag-id');
+                    filterByTag(tagId);
+                });
+            });
+        }
+        
+        function quickAddProject() {
+            const name = prompt('Enter project name:');
+            if (!name || !name.trim()) return;
+            
+            try {
+                const project = createProject(name.trim());
+                populateProjectsList();
+                alert(`Project "${project.name}" created successfully!`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        function quickAddTag() {
+            const name = prompt('Enter tag name:');
+            if (!name || !name.trim()) return;
+            
+            try {
+                const tag = createTag(name.trim());
+                populateTagsList();
+                alert(`Tag "${tag.name}" created successfully!`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        function filterByProject(projectId) {
+            // Switch to history tab and apply project filter
+            switchTab('history');
+            
+            // TODO: Implement project filtering in Phase 5
+            console.log('Filtering by project:', projectId);
+            alert('Project filtering will be implemented in Phase 5!');
+        }
+        
+        function filterByTag(tagId) {
+            // Switch to history tab and apply tag filter
+            switchTab('history');
+            
+            // TODO: Implement tag filtering in Phase 5
+            console.log('Filtering by tag:', tagId);
+            alert('Tag filtering will be implemented in Phase 5!');
+        }
+        
+        function openSettingsModal() {
+            // Remove existing settings modal if present
+            const existingModal = document.getElementById('settings-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            const settingsModalHTML = `
+                <div id="settings-modal" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10002;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                ">
+                    <div style="
+                        background: white;
+                        width: 600px;
+                        max-width: 90vw;
+                        height: 500px;
+                        max-height: 90vh;
+                        border-radius: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        overflow: hidden;
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                    ">
+                        <!-- Modal Header -->
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 16px 20px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-bottom: 1px solid #e9ecef;
+                        ">
+                            <h2 style="
+                                font-size: 18px;
+                                font-weight: 600;
+                                margin: 0;
+                                color: #495057;
+                            ">⚙️ Settings</h2>
+                            <button id="close-settings-modal" style="
+                                background: none;
+                                border: none;
+                                color: #6c757d;
+                                font-size: 20px;
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            ">&times;</button>
+                        </div>
+                        
+                        <!-- Settings Tabs -->
+                        <div style="
+                            display: flex;
+                            background: #f8f9fa;
+                            border-bottom: 1px solid #e9ecef;
+                        ">
+                            <button id="tags-settings-tab" class="settings-tab-button active-settings-tab" style="
+                                flex: 1;
+                                padding: 12px 20px;
+                                border: none;
+                                background: white;
+                                color: #495057;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                border-bottom: 2px solid #007bff;
+                                transition: all 0.2s ease;
+                            ">🏷️ Tags</button>
+                            <button id="projects-settings-tab" class="settings-tab-button" style="
+                                flex: 1;
+                                padding: 12px 20px;
+                                border: none;
+                                background: #f8f9fa;
+                                color: #6c757d;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                border-bottom: 2px solid transparent;
+                                transition: all 0.2s ease;
+                            ">📁 Projects</button>
+                        </div>
+                        
+                        <!-- Settings Content -->
+                        <div style="
+                            flex: 1;
+                            overflow: hidden;
+                            display: flex;
+                            flex-direction: column;
+                        ">
+                            <!-- Tags Settings -->
+                            <div id="tags-settings-content" style="
+                                flex: 1;
+                                padding: 20px;
+                                overflow-y: auto;
+                                display: block;
+                            ">
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    margin-bottom: 20px;
+                                ">
+                                    <h3 style="margin: 0; color: #495057;">Manage Tags</h3>
+                                    <button id="create-tag-btn" style="
+                                        background: #007bff;
+                                        color: white;
+                                        border: none;
+                                        padding: 8px 16px;
+                                        border-radius: 4px;
+                                        font-size: 14px;
+                                        cursor: pointer;
+                                    ">+ New Tag</button>
+                                </div>
+                                <div id="tags-management-list">
+                                    <!-- Tags list will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Projects Settings -->
+                            <div id="projects-settings-content" style="
+                                flex: 1;
+                                padding: 20px;
+                                overflow-y: auto;
+                                display: none;
+                            ">
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    margin-bottom: 20px;
+                                ">
+                                    <h3 style="margin: 0; color: #495057;">Manage Projects</h3>
+                                    <button id="create-project-btn" style="
+                                        background: #007bff;
+                                        color: white;
+                                        border: none;
+                                        padding: 8px 16px;
+                                        border-radius: 4px;
+                                        font-size: 14px;
+                                        cursor: pointer;
+                                    ">+ New Project</button>
+                                </div>
+                                <div id="projects-management-list">
+                                    <!-- Projects list will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Modal Footer -->
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 16px 20px;
+                            border-top: 1px solid #e9ecef;
+                            display: flex;
+                            justify-content: flex-end;
+                            gap: 12px;
+                        ">
+                            <button id="cancel-settings" style="
+                                background: #6c757d;
+                                color: white;
+                                border: none;
+                                padding: 8px 16px;
+                                border-radius: 4px;
+                                font-size: 14px;
+                                cursor: pointer;
+                            ">Cancel</button>
+                            <button id="save-settings" style="
+                                background: #28a745;
+                                color: white;
+                                border: none;
+                                padding: 8px 16px;
+                                border-radius: 4px;
+                                font-size: 14px;
+                                cursor: pointer;
+                            ">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Create and append modal
+            const modalDiv = document.createElement('div');
+            modalDiv.innerHTML = settingsModalHTML;
+            const modal = modalDiv.firstElementChild;
+            document.body.appendChild(modal);
+            
+            // Initialize settings modal
+            initializeSettingsModal();
+        }
+        
+        function initializeSettingsModal() {
+            // Add event listeners for modal controls
+            const closeBtn = document.getElementById('close-settings-modal');
+            const cancelBtn = document.getElementById('cancel-settings');
+            const saveBtn = document.getElementById('save-settings');
+            const tagsTab = document.getElementById('tags-settings-tab');
+            const projectsTab = document.getElementById('projects-settings-tab');
+            const createTagBtn = document.getElementById('create-tag-btn');
+            const createProjectBtn = document.getElementById('create-project-btn');
+            
+            // Close modal handlers
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeSettingsModal);
+            }
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', closeSettingsModal);
+            }
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveSettingsAndClose);
+            }
+            
+            // Tab switching
+            if (tagsTab) {
+                tagsTab.addEventListener('click', () => switchSettingsTab('tags'));
+            }
+            if (projectsTab) {
+                projectsTab.addEventListener('click', () => switchSettingsTab('projects'));
+            }
+            
+            // Create buttons
+            if (createTagBtn) {
+                createTagBtn.addEventListener('click', showCreateTagForm);
+            }
+            if (createProjectBtn) {
+                createProjectBtn.addEventListener('click', showCreateProjectForm);
+            }
+            
+            // Close on outside click
+            const modal = document.getElementById('settings-modal');
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeSettingsModal();
+                    }
+                });
+            }
+            
+            // Populate initial content
+            populateTagsManagement();
+            populateProjectsManagement();
+        }
+        
+        function switchSettingsTab(tab) {
+            const tagsTab = document.getElementById('tags-settings-tab');
+            const projectsTab = document.getElementById('projects-settings-tab');
+            const tagsContent = document.getElementById('tags-settings-content');
+            const projectsContent = document.getElementById('projects-settings-content');
+            
+            if (tab === 'tags') {
+                tagsTab.style.background = 'white';
+                tagsTab.style.color = '#495057';
+                tagsTab.style.borderBottom = '2px solid #007bff';
+                projectsTab.style.background = '#f8f9fa';
+                projectsTab.style.color = '#6c757d';
+                projectsTab.style.borderBottom = '2px solid transparent';
+                
+                tagsContent.style.display = 'block';
+                projectsContent.style.display = 'none';
+            } else {
+                projectsTab.style.background = 'white';
+                projectsTab.style.color = '#495057';
+                projectsTab.style.borderBottom = '2px solid #007bff';
+                tagsTab.style.background = '#f8f9fa';
+                tagsTab.style.color = '#6c757d';
+                tagsTab.style.borderBottom = '2px solid transparent';
+                
+                tagsContent.style.display = 'none';
+                projectsContent.style.display = 'block';
+            }
+        }
+        
+        function populateTagsManagement() {
+            const tagsManagementList = document.getElementById('tags-management-list');
+            if (!tagsManagementList) return;
+            
+            const tags = loadTags();
+            
+            if (tags.length === 0) {
+                tagsManagementList.innerHTML = `
+                    <div style="
+                        text-align: center;
+                        padding: 40px;
+                        color: #6c757d;
+                        font-style: italic;
+                    ">
+                        No tags created yet. Click "New Tag" to create your first tag.
+                    </div>
+                `;
+                return;
+            }
+            
+            tagsManagementList.innerHTML = tags.map(tag => `
+                <div class="tag-management-item" data-tag-id="${tag.id}" style="
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 12px;
+                    background: white;
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 8px;
+                    ">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        ">
+                            <input type="color" value="${tag.color}" class="tag-color-input" style="
+                                width: 30px;
+                                height: 30px;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                            ">
+                            <input type="text" value="${tag.name}" class="tag-name-input" style="
+                                border: 1px solid #e9ecef;
+                                border-radius: 4px;
+                                padding: 6px 8px;
+                                font-size: 14px;
+                                flex: 1;
+                                min-width: 200px;
+                            ">
+                        </div>
+                        <div style="
+                            display: flex;
+                            gap: 8px;
+                            align-items: center;
+                        ">
+                            <span style="
+                                background: #f8f9fa;
+                                padding: 4px 8px;
+                                border-radius: 12px;
+                                font-size: 12px;
+                                color: #6c757d;
+                            ">${tag.usageCount || 0} uses</span>
+                            <button class="delete-tag-btn" data-tag-id="${tag.id}" style="
+                                background: #dc3545;
+                                color: white;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                font-size: 12px;
+                                cursor: pointer;
+                            ">Delete</button>
+                        </div>
+                    </div>
+                    <div style="
+                        font-size: 12px;
+                        color: #6c757d;
+                    ">Created: ${new Date(tag.created).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+            
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.delete-tag-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tagId = btn.getAttribute('data-tag-id');
+                    deleteTagFromSettings(tagId);
+                });
+            });
+        }
+        
+        function populateProjectsManagement() {
+            const projectsManagementList = document.getElementById('projects-management-list');
+            if (!projectsManagementList) return;
+            
+            const projects = loadProjects();
+            
+            if (projects.length === 0) {
+                projectsManagementList.innerHTML = `
+                    <div style="
+                        text-align: center;
+                        padding: 40px;
+                        color: #6c757d;
+                        font-style: italic;
+                    ">
+                        No projects created yet. Click "New Project" to create your first project.
+                    </div>
+                `;
+                return;
+            }
+            
+            projectsManagementList.innerHTML = projects.map(project => `
+                <div class="project-management-item" data-project-id="${project.id}" style="
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 12px;
+                    background: white;
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        margin-bottom: 8px;
+                    ">
+                        <div style="flex: 1; margin-right: 16px;">
+                            <input type="text" value="${project.name}" class="project-name-input" style="
+                                border: 1px solid #e9ecef;
+                                border-radius: 4px;
+                                padding: 6px 8px;
+                                font-size: 14px;
+                                width: 100%;
+                                margin-bottom: 8px;
+                                font-weight: 500;
+                            ">
+                            <textarea class="project-description-input" placeholder="Project description (optional)" style="
+                                border: 1px solid #e9ecef;
+                                border-radius: 4px;
+                                padding: 6px 8px;
+                                font-size: 13px;
+                                width: 100%;
+                                min-height: 60px;
+                                resize: vertical;
+                                font-family: inherit;
+                            ">${project.description || ''}</textarea>
+                        </div>
+                        <div style="
+                            display: flex;
+                            flex-direction: column;
+                            gap: 8px;
+                            align-items: flex-end;
+                        ">
+                            <span style="
+                                background: #f8f9fa;
+                                padding: 4px 8px;
+                                border-radius: 12px;
+                                font-size: 12px;
+                                color: #6c757d;
+                            ">${project.searchCount || 0} searches</span>
+                            <button class="delete-project-btn" data-project-id="${project.id}" style="
+                                background: #dc3545;
+                                color: white;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                font-size: 12px;
+                                cursor: pointer;
+                            ">Delete</button>
+                        </div>
+                    </div>
+                    <div style="
+                        font-size: 12px;
+                        color: #6c757d;
+                    ">Created: ${new Date(project.created).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+            
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.delete-project-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const projectId = btn.getAttribute('data-project-id');
+                    deleteProjectFromSettings(projectId);
+                });
+            });
+        }
+        
+        function showCreateTagForm() {
+            const name = prompt('Enter tag name:');
+            if (!name || !name.trim()) return;
+            
+            const color = prompt('Enter tag color (hex):', '#007bff');
+            if (!color) return;
+            
+            try {
+                createTag(name.trim(), color);
+                populateTagsManagement();
+                alert(`Tag "${name}" created successfully!`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        function showCreateProjectForm() {
+            const name = prompt('Enter project name:');
+            if (!name || !name.trim()) return;
+            
+            const description = prompt('Enter project description (optional):') || '';
+            
+            try {
+                createProject(name.trim(), description.trim());
+                populateProjectsManagement();
+                alert(`Project "${name}" created successfully!`);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        function deleteTagFromSettings(tagId) {
+            const tag = loadTags().find(t => t.id === tagId);
+            if (!tag) return;
+            
+            if (confirm(`Are you sure you want to delete the tag "${tag.name}"? This will remove it from all searches.`)) {
+                try {
+                    deleteTag(tagId);
+                    populateTagsManagement();
+                    alert('Tag deleted successfully!');
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+            }
+        }
+        
+        function deleteProjectFromSettings(projectId) {
+            const project = loadProjects().find(p => p.id === projectId);
+            if (!project) return;
+            
+            if (confirm(`Are you sure you want to delete the project "${project.name}"? This will remove it from all searches.`)) {
+                try {
+                    deleteProject(projectId);
+                    populateProjectsManagement();
+                    alert('Project deleted successfully!');
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+            }
+        }
+        
+        function saveSettingsAndClose() {
+            // Save all changes from the forms
+            try {
+                // Save tag changes
+                const tagItems = document.querySelectorAll('.tag-management-item');
+                tagItems.forEach(item => {
+                    const tagId = item.getAttribute('data-tag-id');
+                    const nameInput = item.querySelector('.tag-name-input');
+                    const colorInput = item.querySelector('.tag-color-input');
+                    
+                    if (nameInput && colorInput) {
+                        const tags = loadTags();
+                        const tag = tags.find(t => t.id === tagId);
+                        if (tag) {
+                            tag.name = nameInput.value.trim();
+                            tag.color = colorInput.value;
+                        }
+                        saveTags(tags);
+                    }
+                });
+                
+                // Save project changes
+                const projectItems = document.querySelectorAll('.project-management-item');
+                projectItems.forEach(item => {
+                    const projectId = item.getAttribute('data-project-id');
+                    const nameInput = item.querySelector('.project-name-input');
+                    const descInput = item.querySelector('.project-description-input');
+                    
+                    if (nameInput && descInput) {
+                        const projects = loadProjects();
+                        const project = projects.find(p => p.id === projectId);
+                        if (project) {
+                            project.name = nameInput.value.trim();
+                            project.description = descInput.value.trim();
+                        }
+                        saveProjects(projects);
+                    }
+                });
+                
+                // Refresh sidebar
+                populateProjectsList();
+                populateTagsList();
+                
+                // Close modal
+                closeSettingsModal();
+                
+                alert('Settings saved successfully!');
+            } catch (error) {
+                alert(`Error saving settings: ${error.message}`);
+            }
+        }
+        
+        function closeSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // ===== POST-SEARCH TAGGING FUNCTIONALITY - Phase 4 =====
+        
+        function showPostSearchTagging(query, results, searchType) {
+            // Remove any existing tagging or edit interfaces
+            const existingInterface = document.getElementById('post-search-tagging');
+            const existingToggle = document.getElementById('post-search-toggle');
+            const editInterface = document.getElementById('edit-organization-interface');
+            const editToggle = document.getElementById('edit-organization-toggle');
+            
+            if (existingInterface) {
+                existingInterface.remove();
+            }
+            if (existingToggle) {
+                existingToggle.remove();
+            }
+            if (editInterface) {
+                editInterface.remove();
+            }
+            if (editToggle) {
+                editToggle.remove();
+            }
+            
+            // Add toggle button for post-search tagging
+            addPostSearchTaggingToggle(query, results, searchType);
+        }
+        
+        function addPostSearchTaggingToggle(query, results, searchType) {
+            const toggleHTML = `
+                <div id="post-search-toggle" style="
+                    background: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 12px 16px;
+                    margin: 16px 0;
+                    border-left: 4px solid #28a745;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <span style="font-size: 16px;">🏷️</span>
+                        <span style="
+                            font-weight: 600;
+                            color: #155724;
+                            font-size: 14px;
+                        ">Organize Search</span>
+                        <span style="
+                            font-size: 12px;
+                            color: #6c757d;
+                        ">Add tags and assign to project</span>
+                    </div>
+                    <span id="post-search-arrow" style="
+                        font-size: 14px;
+                        color: #155724;
+                        transition: transform 0.2s ease;
+                    ">▼</span>
+                </div>
+                <div id="post-search-content" style="display: none;">
+                </div>
+            `;
+            
+            // Insert the toggle at the top of results container
+            const resultsContainer = document.getElementById('results-container');
+            if (resultsContainer) {
+                resultsContainer.insertAdjacentHTML('afterbegin', toggleHTML);
+                
+                // Add click handler for toggle
+                const toggle = document.getElementById('post-search-toggle');
+                const content = document.getElementById('post-search-content');
+                const arrow = document.getElementById('post-search-arrow');
+                
+                toggle.addEventListener('click', () => {
+                    const isHidden = content.style.display === 'none';
+                    content.style.display = isHidden ? 'block' : 'none';
+                    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+                    arrow.textContent = isHidden ? '▲' : '▼';
+                    
+                    if (isHidden) {
+                        // Show the tagging interface
+                        showActualPostSearchTagging(query, results, searchType);
+                    } else {
+                        // Clear the content
+                        content.innerHTML = '';
+                    }
+                });
+            }
+        }
+        
+        function showActualPostSearchTagging(query, results, searchType) {
+            const tags = loadTags();
+            const projects = loadProjects();
+            
+            // Create tagging interface
+            const taggingHTML = `
+                <div id="post-search-tagging" style="
+                    background: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin: 16px 0;
+                    border-left: 4px solid #28a745;
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    ">
+                        <h4 style="
+                            margin: 0;
+                            color: #495057;
+                            font-size: 14px;
+                            font-weight: 600;
+                        ">🏷️ Organize This Search</h4>
+                        <div style="
+                            font-size: 12px;
+                            color: #6c757d;
+                        ">Optional - help organize your research</div>
+                    </div>
+                    
+                    <div style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 12px;
+                        margin-bottom: 12px;
+                    ">
+                        <div>
+                            <label style="
+                                display: block;
+                                font-size: 12px;
+                                font-weight: 600;
+                                color: #6c757d;
+                                margin-bottom: 4px;
+                            ">Project</label>
+                            <select id="tagging-project" style="
+                                width: 100%;
+                                padding: 6px 8px;
+                                border: 1px solid #dee2e6;
+                                border-radius: 4px;
+                                font-size: 13px;
+                                background: white;
+                            ">
+                                <option value="">No project</option>
+                                ${projects.map(project => `
+                                    <option value="${project.id}">${project.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="
+                                display: block;
+                                font-size: 12px;
+                                font-weight: 600;
+                                color: #6c757d;
+                                margin-bottom: 4px;
+                            ">Tags</label>
+                            <div id="tagging-tags" style="
+                                min-height: 32px;
+                                border: 1px solid #dee2e6;
+                                border-radius: 4px;
+                                padding: 4px;
+                                background: white;
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 4px;
+                                align-items: center;
+                            ">
+                                <button id="add-tag-to-search" style="
+                                    background: none;
+                                    border: 1px dashed #007bff;
+                                    color: #007bff;
+                                    padding: 2px 6px;
+                                    border-radius: 12px;
+                                    font-size: 11px;
+                                    cursor: pointer;
+                                ">+ Add Tag</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 8px;
+                        padding-top: 8px;
+                        border-top: 1px solid #e9ecef;
+                    ">
+                        <button id="skip-tagging" style="
+                            background: #6c757d;
+                            color: white;
+                            border: none;
+                            padding: 6px 12px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            cursor: pointer;
+                        ">Skip</button>
+                        <button id="save-with-tags" style="
+                            background: #28a745;
+                            color: white;
+                            border: none;
+                            padding: 6px 12px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            cursor: pointer;
+                        ">Save to History</button>
+                    </div>
+                </div>
+            `;
+            
+            // Insert the interface in the content area
+            const content = document.getElementById('post-search-content');
+            if (content) {
+                content.innerHTML = taggingHTML;
+                
+                // Initialize the interface
+                initializePostSearchTagging(query, results, searchType);
+                
+                // No auto-hide since it's now manually controlled
+            }
+        }
+        
+        function initializePostSearchTagging(query, results, searchType) {
+            const selectedTags = new Set();
+            
+            // Add tag button functionality
+            const addTagBtn = document.getElementById('add-tag-to-search');
+            if (addTagBtn) {
+                addTagBtn.addEventListener('click', () => {
+                    showTagSelector(selectedTags);
+                });
+            }
+            
+            // Skip button
+            const skipBtn = document.getElementById('skip-tagging');
+            if (skipBtn) {
+                skipBtn.addEventListener('click', () => {
+                    saveSearchWithSelectedTags(query, results, searchType);
+                    const taggingInterface = document.getElementById('post-search-tagging');
+                    if (taggingInterface) {
+                        taggingInterface.remove();
+                    }
+                });
+            }
+            
+            // Save button
+            const saveBtn = document.getElementById('save-with-tags');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    saveSearchWithSelectedTags(query, results, searchType, selectedTags);
+                    const taggingInterface = document.getElementById('post-search-tagging');
+                    if (taggingInterface) {
+                        taggingInterface.remove();
+                    }
+                });
+            }
+        }
+        
+        function showTagSelector(selectedTags) {
+            const tags = loadTags();
+            const tagsContainer = document.getElementById('tagging-tags');
+            if (!tagsContainer) return;
+            
+            // Create dropdown for tag selection
+            const dropdown = document.createElement('select');
+            dropdown.style.cssText = `
+                width: 100%;
+                padding: 6px 8px;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                background: white;
+                font-size: 12px;
+                margin: 2px 0;
+            `;
+            
+            dropdown.innerHTML = `
+                <option value="">Select a tag...</option>
+                ${tags.filter(tag => !selectedTags.has(tag.id)).map(tag => `
+                    <option value="${tag.id}">${tag.name}</option>
+                `).join('')}
+            `;
+            
+            dropdown.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    selectedTags.add(e.target.value);
+                    updateTagsDisplay(selectedTags);
+                    dropdown.remove();
+                }
+            });
+            
+            dropdown.addEventListener('blur', () => {
+                setTimeout(() => dropdown.remove(), 100);
+            });
+            
+            // Remove any existing dropdowns first
+            const existingDropdown = tagsContainer.querySelector('select');
+            if (existingDropdown) {
+                existingDropdown.remove();
+            }
+            
+            // Insert dropdown in a clean way
+            tagsContainer.insertBefore(dropdown, tagsContainer.firstChild);
+            dropdown.focus();
+        }
+        
+        function updateTagsDisplay(selectedTags) {
+            const tagsContainer = document.getElementById('tagging-tags');
+            if (!tagsContainer) return;
+            
+            const tags = loadTags();
+            
+            // Clear existing tags display and any dropdowns
+            tagsContainer.innerHTML = '';
+            
+            // Add selected tags
+            selectedTags.forEach(tagId => {
+                const tag = tags.find(t => t.id === tagId);
+                if (tag) {
+                    const tagElement = document.createElement('span');
+                    tagElement.style.cssText = `
+                        background: ${tag.color}20;
+                        color: ${tag.color};
+                        border: 1px solid ${tag.color}40;
+                        padding: 2px 6px;
+                        border-radius: 12px;
+                        font-size: 11px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    `;
+                    tagElement.innerHTML = `
+                        ${tag.name}
+                        <button class="remove-tag-btn" data-tag-id="${tagId}" style="
+                            background: none;
+                            border: none;
+                            color: ${tag.color};
+                            cursor: pointer;
+                            padding: 0;
+                            width: 14px;
+                            height: 14px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 10px;
+                        ">×</button>
+                    `;
+                    
+                    // Add event listener for remove button
+                    const removeBtn = tagElement.querySelector('.remove-tag-btn');
+                    removeBtn.addEventListener('click', () => {
+                        selectedTags.delete(tagId);
+                        updateTagsDisplay(selectedTags);
+                    });
+                    tagsContainer.appendChild(tagElement);
+                }
+            });
+            
+            // Re-add the add button
+            const addButton = document.createElement('button');
+            addButton.id = 'add-tag-to-search';
+            addButton.style.cssText = `
+                background: none;
+                border: 1px dashed #007bff;
+                color: #007bff;
+                padding: 2px 6px;
+                border-radius: 12px;
+                font-size: 11px;
+                cursor: pointer;
+            `;
+            addButton.textContent = '+ Add Tag';
+            addButton.addEventListener('click', () => showTagSelector(selectedTags));
+            tagsContainer.appendChild(addButton);
+        }
+        
+        function saveSearchWithSelectedTags(query, results, searchType, selectedTags = new Set()) {
+            const projectSelect = document.getElementById('tagging-project');
+            const selectedProject = projectSelect ? projectSelect.value || null : null;
+            const tagsArray = Array.from(selectedTags);
+            
+            // Now save to history with tags and project
+            saveSearchToHistory(query, results, searchType, tagsArray, selectedProject);
+            
+            // Update sidebar to reflect new usage
+            populateProjectsList();
+            populateTagsList();
+            
+            console.log('Search saved with tags:', tagsArray, 'project:', selectedProject);
+        }
+        
+        // ===== EDIT EXISTING SEARCH ORGANIZATION - Phase 4.6 =====
+        
+        function showEditOrganizationInterface(historyItem) {
+            // Remove any existing edit interface or post-search tagging
+            const existingInterface = document.getElementById('edit-organization-interface');
+            const existingToggle = document.getElementById('edit-organization-toggle');
+            const postSearchInterface = document.getElementById('post-search-tagging');
+            const postSearchToggle = document.getElementById('post-search-toggle');
+            
+            if (existingInterface) {
+                existingInterface.remove();
+            }
+            if (existingToggle) {
+                existingToggle.remove();
+            }
+            if (postSearchInterface) {
+                postSearchInterface.remove();
+            }
+            if (postSearchToggle) {
+                postSearchToggle.remove();
+            }
+            
+            // Add toggle button for edit organization
+            addEditOrganizationToggle(historyItem);
+        }
+        
+        function addEditOrganizationToggle(historyItem) {
+            const toggleHTML = `
+                <div id="edit-organization-toggle" style="
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    border-radius: 8px;
+                    padding: 12px 16px;
+                    margin: 16px 0;
+                    border-left: 4px solid #f39c12;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    ">
+                        <span style="font-size: 16px;">🏷️</span>
+                        <span style="
+                            font-weight: 600;
+                            color: #856404;
+                            font-size: 14px;
+                        ">Edit Organization</span>
+                        <span style="
+                            font-size: 12px;
+                            color: #6c757d;
+                        ">Modify tags and project assignment</span>
+                    </div>
+                    <span id="edit-organization-arrow" style="
+                        font-size: 14px;
+                        color: #856404;
+                        transition: transform 0.2s ease;
+                    ">▼</span>
+                </div>
+                <div id="edit-organization-content" style="display: none;">
+                </div>
+            `;
+            
+            // Insert the toggle at the top of results container
+            const resultsContainer = document.getElementById('results-container');
+            if (resultsContainer) {
+                resultsContainer.insertAdjacentHTML('afterbegin', toggleHTML);
+                
+                // Add click handler for toggle
+                const toggle = document.getElementById('edit-organization-toggle');
+                const content = document.getElementById('edit-organization-content');
+                const arrow = document.getElementById('edit-organization-arrow');
+                
+                toggle.addEventListener('click', () => {
+                    const isHidden = content.style.display === 'none';
+                    content.style.display = isHidden ? 'block' : 'none';
+                    arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+                    arrow.textContent = isHidden ? '▲' : '▼';
+                    
+                    if (isHidden) {
+                        // Show the edit interface
+                        showActualEditOrganizationInterface(historyItem);
+                    } else {
+                        // Clear the content
+                        content.innerHTML = '';
+                    }
+                });
+            }
+        }
+        
+        function showActualEditOrganizationInterface(historyItem) {
+            const tags = loadTags();
+            const projects = loadProjects();
+            const currentTags = historyItem.tags || [];
+            const currentProject = historyItem.projectId || '';
+            
+            // Create edit interface
+            const editHTML = `
+                <div id="edit-organization-interface" style="
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin: 16px 0;
+                    border-left: 4px solid #f39c12;
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    ">
+                        <h4 style="
+                            margin: 0;
+                            color: #856404;
+                            font-size: 14px;
+                            font-weight: 600;
+                        ">✏️ Edit Organization</h4>
+                        <div style="
+                            font-size: 12px;
+                            color: #856404;
+                        ">Reopened from history • ${historyItem.date}</div>
+                    </div>
+                    
+                    <div style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 12px;
+                        margin-bottom: 12px;
+                    ">
+                        <div>
+                            <label style="
+                                display: block;
+                                font-size: 12px;
+                                font-weight: 600;
+                                color: #856404;
+                                margin-bottom: 4px;
+                            ">Project</label>
+                            <select id="edit-project" style="
+                                width: 100%;
+                                padding: 6px 8px;
+                                border: 1px solid #f1c40f;
+                                border-radius: 4px;
+                                font-size: 13px;
+                                background: white;
+                            ">
+                                <option value="">No project</option>
+                                ${projects.map(project => `
+                                    <option value="${project.id}" ${project.id === currentProject ? 'selected' : ''}>${project.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="
+                                display: block;
+                                font-size: 12px;
+                                font-weight: 600;
+                                color: #856404;
+                                margin-bottom: 4px;
+                            ">Tags</label>
+                            <div id="edit-tags" style="
+                                min-height: 32px;
+                                border: 1px solid #f1c40f;
+                                border-radius: 4px;
+                                padding: 4px;
+                                background: white;
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 4px;
+                                align-items: center;
+                            ">
+                                <button id="add-tag-to-edit" style="
+                                    background: none;
+                                    border: 1px dashed #f39c12;
+                                    color: #f39c12;
+                                    padding: 2px 6px;
+                                    border-radius: 12px;
+                                    font-size: 11px;
+                                    cursor: pointer;
+                                ">+ Add Tag</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding-top: 8px;
+                        border-top: 1px solid #f1c40f;
+                    ">
+                        <div style="
+                            font-size: 12px;
+                            color: #856404;
+                        ">Changes will update this search in your history</div>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="cancel-edit" style="
+                                background: #6c757d;
+                                color: white;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                font-size: 12px;
+                                cursor: pointer;
+                            ">Cancel</button>
+                            <button id="save-edit" style="
+                                background: #f39c12;
+                                color: white;
+                                border: none;
+                                padding: 6px 12px;
+                                border-radius: 4px;
+                                font-size: 12px;
+                                cursor: pointer;
+                            ">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insert the interface in the content area
+            const content = document.getElementById('edit-organization-content');
+            if (content) {
+                content.innerHTML = editHTML;
+                
+                // Initialize the interface with current tags/project
+                initializeEditOrganizationInterface(historyItem, currentTags);
+            }
+        }
+        
+        function initializeEditOrganizationInterface(historyItem, selectedTags) {
+            const selectedTagsSet = new Set(selectedTags);
+            
+            // Display current tags
+            updateEditTagsDisplay(selectedTagsSet);
+            
+            // Add tag button functionality
+            const addTagBtn = document.getElementById('add-tag-to-edit');
+            if (addTagBtn) {
+                addTagBtn.addEventListener('click', () => {
+                    showEditTagSelector(selectedTagsSet);
+                });
+            }
+            
+            // Cancel button
+            const cancelBtn = document.getElementById('cancel-edit');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    const editInterface = document.getElementById('edit-organization-interface');
+                    if (editInterface) {
+                        editInterface.remove();
+                    }
+                });
+            }
+            
+            // Save button
+            const saveBtn = document.getElementById('save-edit');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    saveEditedOrganization(historyItem, selectedTagsSet);
+                });
+            }
+        }
+        
+        function showEditTagSelector(selectedTags) {
+            const tags = loadTags();
+            const tagsContainer = document.getElementById('edit-tags');
+            if (!tagsContainer) return;
+            
+            // Create dropdown for tag selection
+            const dropdown = document.createElement('select');
+            dropdown.style.cssText = `
+                width: 100%;
+                padding: 6px 8px;
+                border: 1px solid #f1c40f;
+                border-radius: 4px;
+                background: white;
+                font-size: 12px;
+                margin: 2px 0;
+            `;
+            
+            dropdown.innerHTML = `
+                <option value="">Select a tag...</option>
+                ${tags.filter(tag => !selectedTags.has(tag.id)).map(tag => `
+                    <option value="${tag.id}">${tag.name}</option>
+                `).join('')}
+            `;
+            
+            dropdown.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    selectedTags.add(e.target.value);
+                    updateEditTagsDisplay(selectedTags);
+                    dropdown.remove();
+                }
+            });
+            
+            dropdown.addEventListener('blur', () => {
+                setTimeout(() => dropdown.remove(), 100);
+            });
+            
+            // Remove any existing dropdowns first
+            const existingDropdown = tagsContainer.querySelector('select');
+            if (existingDropdown) {
+                existingDropdown.remove();
+            }
+            
+            // Insert dropdown in a clean way
+            tagsContainer.insertBefore(dropdown, tagsContainer.firstChild);
+            dropdown.focus();
+        }
+        
+        function updateEditTagsDisplay(selectedTags) {
+            const tagsContainer = document.getElementById('edit-tags');
+            if (!tagsContainer) return;
+            
+            const tags = loadTags();
+            
+            // Clear existing tags display and any dropdowns
+            tagsContainer.innerHTML = '';
+            
+            // Add selected tags
+            selectedTags.forEach(tagId => {
+                const tag = tags.find(t => t.id === tagId);
+                if (tag) {
+                    const tagElement = document.createElement('span');
+                    tagElement.style.cssText = `
+                        background: ${tag.color}20;
+                        color: ${tag.color};
+                        border: 1px solid ${tag.color}40;
+                        padding: 2px 6px;
+                        border-radius: 12px;
+                        font-size: 11px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    `;
+                    tagElement.innerHTML = `
+                        🏷️ ${tag.name}
+                        <button class="remove-edit-tag-btn" data-tag-id="${tagId}" style="
+                            background: none;
+                            border: none;
+                            color: ${tag.color};
+                            cursor: pointer;
+                            padding: 0;
+                            width: 14px;
+                            height: 14px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 10px;
+                        ">×</button>
+                    `;
+                    
+                    // Add event listener for remove button
+                    const removeBtn = tagElement.querySelector('.remove-edit-tag-btn');
+                    removeBtn.addEventListener('click', () => {
+                        selectedTags.delete(tagId);
+                        updateEditTagsDisplay(selectedTags);
+                    });
+                    tagsContainer.appendChild(tagElement);
+                }
+            });
+            
+            // Re-add the add button
+            const addButton = document.createElement('button');
+            addButton.id = 'add-tag-to-edit';
+            addButton.style.cssText = `
+                background: none;
+                border: 1px dashed #f39c12;
+                color: #f39c12;
+                padding: 2px 6px;
+                border-radius: 12px;
+                font-size: 11px;
+                cursor: pointer;
+            `;
+            addButton.textContent = '+ Add Tag';
+            addButton.addEventListener('click', () => showEditTagSelector(selectedTags));
+            tagsContainer.appendChild(addButton);
+        }
+        
+        function saveEditedOrganization(historyItem, selectedTags) {
+            const projectSelect = document.getElementById('edit-project');
+            const newProject = projectSelect ? projectSelect.value || null : null;
+            const newTags = Array.from(selectedTags);
+            
+            // Update the history item
+            const history = loadSearchHistory();
+            const itemIndex = history.findIndex(h => h.id === historyItem.id);
+            
+            if (itemIndex !== -1) {
+                // Remove old tag usage counts
+                if (historyItem.tags) {
+                    historyItem.tags.forEach(tagId => {
+                        const tags = loadTags();
+                        const tag = tags.find(t => t.id === tagId);
+                        if (tag && tag.usageCount > 0) {
+                            tag.usageCount = Math.max(0, tag.usageCount - 1);
+                        }
+                        saveTags(tags);
+                    });
+                }
+                
+                // Remove old project count
+                if (historyItem.projectId) {
+                    const projects = loadProjects();
+                    const project = projects.find(p => p.id === historyItem.projectId);
+                    if (project && project.searchCount > 0) {
+                        project.searchCount = Math.max(0, project.searchCount - 1);
+                    }
+                    saveProjects(projects);
+                }
+                
+                // Update history item
+                history[itemIndex] = {
+                    ...historyItem,
+                    tags: newTags,
+                    projectId: newProject
+                };
+                
+                // Update new tag usage counts
+                newTags.forEach(tagId => {
+                    updateTagUsage(tagId);
+                });
+                
+                // Update new project count
+                if (newProject) {
+                    updateProjectSearchCount(newProject);
+                }
+                
+                // Save updated history
+                localStorage.setItem('chatgpt-product-search-history', JSON.stringify(history));
+                
+                // Update sidebar to reflect changes
+                populateProjectsList();
+                populateTagsList();
+                
+                // Remove edit interface
+                const editInterface = document.getElementById('edit-organization-interface');
+                if (editInterface) {
+                    editInterface.remove();
+                }
+                
+                console.log('Updated search organization:', historyItem.id, { tags: newTags, project: newProject });
+                
+                // Show confirmation
+                const resultsContainer = document.getElementById('results-container');
+                if (resultsContainer) {
+                    const confirmation = document.createElement('div');
+                    confirmation.style.cssText = `
+                        background: #d4edda;
+                        border: 1px solid #c3e6cb;
+                        border-radius: 4px;
+                        padding: 8px 12px;
+                        margin: 16px 0;
+                        color: #155724;
+                        font-size: 13px;
+                        text-align: center;
+                    `;
+                    confirmation.textContent = '✅ Organization updated successfully!';
+                    resultsContainer.insertAdjacentElement('afterbegin', confirmation);
+                    
+                    // Remove confirmation after 3 seconds
+                    setTimeout(() => {
+                        confirmation.remove();
+                    }, 3000);
+                }
+            }
+        }
+        
+        // ===== END EDIT EXISTING SEARCH ORGANIZATION =====
+        
+        // ===== END POST-SEARCH TAGGING FUNCTIONALITY =====
+        
+        // ===== HISTORY ENHANCEMENT FUNCTIONS - Phase 4 =====
+        
+        function generateHistoryTagsAndProject(item) {
+            const tags = loadTags();
+            const projects = loadProjects();
+            const itemTags = item.tags || [];
+            const itemProject = item.projectId;
+            
+            // Skip if no tags or project
+            if (!itemTags.length && !itemProject) {
+                return '';
+            }
+            
+            let html = `
+                <div style="
+                    margin-bottom: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                ">
+            `;
+            
+            // Add project if present
+            if (itemProject) {
+                const project = projects.find(p => p.id === itemProject);
+                if (project) {
+                    html += `
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            background: #f8f9fa;
+                            border: 1px solid #e9ecef;
+                            padding: 2px 6px;
+                            border-radius: 12px;
+                            font-size: 11px;
+                            color: #495057;
+                        ">
+                            <span>📁</span>
+                            <span>${project.name}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Add tags if present
+            if (itemTags.length > 0) {
+                itemTags.forEach(tagId => {
+                    const tag = tags.find(t => t.id === tagId);
+                    if (tag) {
+                        html += `
+                            <div style="
+                                background: ${tag.color}15;
+                                color: ${tag.color};
+                                border: 1px solid ${tag.color}30;
+                                padding: 2px 6px;
+                                border-radius: 12px;
+                                font-size: 11px;
+                                display: flex;
+                                align-items: center;
+                                gap: 2px;
+                            ">
+                                🏷️ <span>${tag.name}</span>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+        
+        // ===== END HISTORY ENHANCEMENT FUNCTIONS =====
+        
+        // ===== ADVANCED FILTERING SYSTEM - Phase 5 =====
+        
+        // Global filter state
+        let currentFilters = {
+            text: '',
+            project: '',
+            tags: [],
+            isActive: false
+        };
+        
+        function initializeAdvancedFiltering() {
+            // Populate filter dropdowns and checkboxes
+            populateFilterOptions();
+            
+            // Add event listeners
+            const toggleBtn = document.getElementById('toggle-filters');
+            const applyBtn = document.getElementById('apply-filters');
+            const clearBtn = document.getElementById('clear-filters');
+            const filterText = document.getElementById('filter-text');
+            const filterProject = document.getElementById('filter-project');
+            
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleFilterPanel);
+            }
+            
+            if (applyBtn) {
+                applyBtn.addEventListener('click', applyFilters);
+            }
+            
+            if (clearBtn) {
+                clearBtn.addEventListener('click', clearAllFilters);
+            }
+            
+            if (filterText) {
+                filterText.addEventListener('input', updateFilterSummary);
+            }
+            
+            if (filterProject) {
+                filterProject.addEventListener('change', updateFilterSummary);
+            }
+        }
+        
+        function populateFilterOptions() {
+            const projects = loadProjects();
+            const tags = loadTags();
+            
+            // Populate projects dropdown
+            const projectSelect = document.getElementById('filter-project');
+            if (projectSelect) {
+                projectSelect.innerHTML = '<option value="">All Projects</option>';
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    projectSelect.appendChild(option);
+                });
+            }
+            
+            // Populate tags checkboxes
+            const tagsContainer = document.getElementById('filter-tags');
+            if (tagsContainer) {
+                tagsContainer.innerHTML = '';
+                
+                if (tags.length === 0) {
+                    tagsContainer.innerHTML = `
+                        <div style="
+                            color: #6c757d;
+                            font-size: 12px;
+                            font-style: italic;
+                            padding: 8px;
+                        ">No tags available</div>
+                    `;
+                } else {
+                    tags.forEach(tag => {
+                        const tagCheckbox = document.createElement('label');
+                        tagCheckbox.style.cssText = `
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 4px 8px;
+                            border-radius: 12px;
+                            background: ${tag.color}15;
+                            border: 1px solid ${tag.color}30;
+                            cursor: pointer;
+                            font-size: 12px;
+                            color: ${tag.color};
+                            white-space: nowrap;
+                        `;
+                        
+                        tagCheckbox.innerHTML = `
+                            <input type="checkbox" value="${tag.id}" style="
+                                margin: 0;
+                                width: 12px;
+                                height: 12px;
+                            " />
+                            🏷️ <span>${tag.name}</span>
+                        `;
+                        
+                        const checkbox = tagCheckbox.querySelector('input');
+                        checkbox.addEventListener('change', updateFilterSummary);
+                        
+                        tagsContainer.appendChild(tagCheckbox);
+                    });
+                }
+            }
+        }
+        
+        function toggleFilterPanel() {
+            const panel = document.getElementById('filter-panel');
+            const toggleText = document.getElementById('filter-toggle-text');
+            
+            if (panel && toggleText) {
+                const isVisible = panel.style.display !== 'none';
+                panel.style.display = isVisible ? 'none' : 'block';
+                toggleText.textContent = isVisible ? 'Filters' : 'Hide Filters';
+            }
+        }
+        
+        function updateFilterSummary() {
+            const filterText = document.getElementById('filter-text');
+            const filterProject = document.getElementById('filter-project');
+            const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]:checked');
+            const summary = document.getElementById('filter-summary');
+            
+            if (!summary) return;
+            
+            let activeCount = 0;
+            let summaryParts = [];
+            
+            if (filterText && filterText.value.trim()) {
+                activeCount++;
+                summaryParts.push('text search');
+            }
+            
+            if (filterProject && filterProject.value) {
+                activeCount++;
+                const selectedProject = loadProjects().find(p => p.id === filterProject.value);
+                summaryParts.push(`project: ${selectedProject?.name || 'Unknown'}`);
+            }
+            
+            if (tagCheckboxes.length > 0) {
+                activeCount++;
+                summaryParts.push(`${tagCheckboxes.length} tag${tagCheckboxes.length > 1 ? 's' : ''}`);
+            }
+            
+            if (activeCount === 0) {
+                summary.textContent = 'No filters applied';
+            } else {
+                summary.textContent = `${activeCount} filter${activeCount > 1 ? 's' : ''} ready: ${summaryParts.join(', ')}`;
+            }
+        }
+        
+        function applyFilters() {
+            const filterText = document.getElementById('filter-text');
+            const filterProject = document.getElementById('filter-project');
+            const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]:checked');
+            
+            // Update global filter state
+            currentFilters = {
+                text: filterText ? filterText.value.trim().toLowerCase() : '',
+                project: filterProject ? filterProject.value : '',
+                tags: Array.from(tagCheckboxes).map(cb => cb.value),
+                isActive: true
+            };
+            
+            // Apply filters to history
+            const history = loadSearchHistory();
+            const filteredHistory = applyAdvancedFilters(history);
+            renderHistoryList(filteredHistory);
+            
+            // Update filter chips display
+            updateFilterChips();
+            
+            // Hide filter panel
+            const panel = document.getElementById('filter-panel');
+            const toggleText = document.getElementById('filter-toggle-text');
+            if (panel) panel.style.display = 'none';
+            if (toggleText) toggleText.textContent = 'Filters';
+            
+            console.log('Applied filters:', currentFilters);
+        }
+        
+        function applyAdvancedFilters(history) {
+            if (!currentFilters.isActive && !currentFilters.text && !currentFilters.project && currentFilters.tags.length === 0) {
+                return history;
+            }
+            
+            return history.filter(item => {
+                // Text filter - search in query, rationale, and review summary
+                if (currentFilters.text) {
+                    const searchableText = [
+                        item.query || '',
+                        item.results?.rationale || '',
+                        item.results?.reviewSummary || '',
+                        ...(item.results?.reviews || []).map(r => r.content || ''),
+                        ...(item.results?.citations || []).map(c => c.snippet || ''),
+                        ...(item.results?.productLinks || []).map(p => p.title || '')
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchableText.includes(currentFilters.text)) {
+                        return false;
+                    }
+                }
+                
+                // Project filter
+                if (currentFilters.project) {
+                    if (item.projectId !== currentFilters.project) {
+                        return false;
+                    }
+                }
+                
+                // Tags filter - item must have ALL selected tags (AND logic)
+                if (currentFilters.tags.length > 0) {
+                    const itemTags = item.tags || [];
+                    if (!currentFilters.tags.every(tagId => itemTags.includes(tagId))) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+        }
+        
+        function updateFilterChips() {
+            const activeFiltersDiv = document.getElementById('active-filters');
+            const filterChips = document.getElementById('filter-chips');
+            
+            if (!activeFiltersDiv || !filterChips) return;
+            
+            // Clear existing chips
+            filterChips.innerHTML = '';
+            
+            let hasActiveFilters = false;
+            
+            // Text filter chip
+            if (currentFilters.text) {
+                hasActiveFilters = true;
+                const chip = createFilterChip('text', `Text: "${currentFilters.text}"`, () => {
+                    currentFilters.text = '';
+                    const filterText = document.getElementById('filter-text');
+                    if (filterText) filterText.value = '';
+                    applyFilters();
+                });
+                filterChips.appendChild(chip);
+            }
+            
+            // Project filter chip
+            if (currentFilters.project) {
+                hasActiveFilters = true;
+                const project = loadProjects().find(p => p.id === currentFilters.project);
+                const chip = createFilterChip('project', `📁 ${project?.name || 'Unknown Project'}`, () => {
+                    currentFilters.project = '';
+                    const filterProject = document.getElementById('filter-project');
+                    if (filterProject) filterProject.value = '';
+                    applyFilters();
+                });
+                filterChips.appendChild(chip);
+            }
+            
+            // Tag filter chips
+            if (currentFilters.tags.length > 0) {
+                hasActiveFilters = true;
+                const tags = loadTags();
+                currentFilters.tags.forEach(tagId => {
+                    const tag = tags.find(t => t.id === tagId);
+                    if (tag) {
+                        const chip = createFilterChip('tag', tag.name, () => {
+                            currentFilters.tags = currentFilters.tags.filter(id => id !== tagId);
+                            const checkbox = document.querySelector(`#filter-tags input[value="${tagId}"]`);
+                            if (checkbox) checkbox.checked = false;
+                            applyFilters();
+                        }, tag.color);
+                        filterChips.appendChild(chip);
+                    }
+                });
+            }
+            
+            // Show/hide active filters section
+            activeFiltersDiv.style.display = hasActiveFilters ? 'block' : 'none';
+        }
+        
+        function createFilterChip(type, text, onRemove, color = '#007bff') {
+            const chip = document.createElement('div');
+            chip.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: ${color}15;
+                color: ${color};
+                border: 1px solid ${color}30;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                white-space: nowrap;
+            `;
+            
+            chip.innerHTML = `
+                <span>${text}</span>
+                <button style="
+                    background: none;
+                    border: none;
+                    color: ${color};
+                    cursor: pointer;
+                    padding: 0;
+                    width: 14px;
+                    height: 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    border-radius: 50%;
+                ">×</button>
+            `;
+            
+            const removeBtn = chip.querySelector('button');
+            removeBtn.addEventListener('click', onRemove);
+            
+            return chip;
+        }
+        
+        function clearAllFilters() {
+            // Reset form
+            const filterText = document.getElementById('filter-text');
+            const filterProject = document.getElementById('filter-project');
+            const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
+            
+            if (filterText) filterText.value = '';
+            if (filterProject) filterProject.value = '';
+            tagCheckboxes.forEach(cb => cb.checked = false);
+            
+            // Reset global state
+            currentFilters = {
+                text: '',
+                project: '',
+                tags: [],
+                isActive: false
+            };
+            
+            // Show all history
+            const history = loadSearchHistory();
+            renderHistoryList(history);
+            
+            // Update UI
+            updateFilterSummary();
+            updateFilterChips();
+            
+            console.log('Cleared all filters');
+        }
+        
+        // ===== SIDEBAR-TO-FILTER INTEGRATION =====
+        
+        function filterByProject(projectId) {
+            // Switch to history tab first
+            switchTab('history');
+            
+            // Wait for history to load and then apply filter
+            setTimeout(() => {
+                // Reset other filters but keep text if present
+                const filterText = document.getElementById('filter-text');
+                const currentText = filterText ? filterText.value.trim() : '';
+                
+                // Clear tag selections
+                const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
+                tagCheckboxes.forEach(cb => cb.checked = false);
+                
+                // Set project filter
+                const filterProject = document.getElementById('filter-project');
+                if (filterProject) {
+                    filterProject.value = projectId;
+                }
+                
+                // Apply the filters
+                currentFilters = {
+                    text: currentText.toLowerCase(),
+                    project: projectId,
+                    tags: [],
+                    isActive: true
+                };
+                
+                // Apply filters and update UI
+                const history = loadSearchHistory();
+                const filteredHistory = applyAdvancedFilters(history);
+                renderHistoryList(filteredHistory);
+                updateFilterChips();
+                
+                console.log('Filtered by project:', projectId);
+            }, 100);
+        }
+        
+        function filterByTag(tagId) {
+            // Switch to history tab first
+            switchTab('history');
+            
+            // Wait for history to load and then apply filter
+            setTimeout(() => {
+                // Reset project filter
+                const filterProject = document.getElementById('filter-project');
+                if (filterProject) {
+                    filterProject.value = '';
+                }
+                
+                // Keep current text filter
+                const filterText = document.getElementById('filter-text');
+                const currentText = filterText ? filterText.value.trim() : '';
+                
+                // Clear other tag selections and select only this tag
+                const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
+                tagCheckboxes.forEach(cb => {
+                    cb.checked = (cb.value === tagId);
+                });
+                
+                // Apply the filters
+                currentFilters = {
+                    text: currentText.toLowerCase(),
+                    project: '',
+                    tags: [tagId],
+                    isActive: true
+                };
+                
+                // Apply filters and update UI
+                const history = loadSearchHistory();
+                const filteredHistory = applyAdvancedFilters(history);
+                renderHistoryList(filteredHistory);
+                updateFilterChips();
+                
+                console.log('Filtered by tag:', tagId);
+            }, 100);
+        }
+        
+        // ===== END SIDEBAR-TO-FILTER INTEGRATION =====
+        
+        // ===== END ADVANCED FILTERING SYSTEM =====
+
+        // ===== END SIDEBAR FUNCTIONALITY =====
 
         // Reports and Analytics Functions
         function generateReports() {
@@ -1352,6 +4029,95 @@
             }
         }
 
+        function resetToCleanSearchState() {
+            // Clear search input fields
+            const searchQuery = document.getElementById('search-query');
+            const multiSearchQuery = document.getElementById('multi-search-query');
+            const multiProductToggle = document.getElementById('multi-product-toggle');
+            
+            if (searchQuery) {
+                searchQuery.value = '';
+            }
+            if (multiSearchQuery) {
+                multiSearchQuery.value = '';
+            }
+            if (multiProductToggle) {
+                multiProductToggle.checked = false;
+                // Trigger change event to update UI
+                multiProductToggle.dispatchEvent(new Event('change'));
+            }
+            
+            // Remove any organization interfaces
+            const editToggle = document.getElementById('edit-organization-toggle');
+            const editContent = document.getElementById('edit-organization-content');
+            const postSearchToggle = document.getElementById('post-search-toggle');
+            const postSearchContent = document.getElementById('post-search-content');
+            
+            if (editToggle) editToggle.remove();
+            if (editContent) editContent.remove();
+            if (postSearchToggle) postSearchToggle.remove();
+            if (postSearchContent) postSearchContent.remove();
+            
+            // Reset results container to welcome state
+            const resultsContainer = document.getElementById('results-container');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = `
+                    <div id="welcome-state" style="
+                        text-align: center; 
+                        padding: 60px 40px; 
+                        color: #6c757d;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        min-height: 300px;
+                    ">
+                        <div style="
+                            font-size: 48px;
+                            margin-bottom: 20px;
+                            opacity: 0.7;
+                        ">🔍</div>
+                        <h3 style="
+                            margin: 0 0 12px 0;
+                            font-size: 20px;
+                            font-weight: 600;
+                            color: #495057;
+                        ">Product Search</h3>
+                        <p style="
+                            margin: 0 0 24px 0;
+                            font-size: 16px;
+                            line-height: 1.5;
+                            max-width: 400px;
+                        ">Search for product reviews, comparisons, and detailed information from across the web</p>
+                        <div style="
+                            padding: 16px 20px;
+                            border-left: 4px solid #007bff;
+                            max-width: 500px;
+                            text-align: left;
+                        ">
+                            <div style="font-weight: 600; margin-bottom: 8px; color: #495057;">Try searching for:</div>
+                            <div style="color: #6c757d; font-size: 14px; line-height: 1.4;">
+                                • "iPhone 17 Pro camera quality"<br>
+                                • "Nike Air Max running shoes"<br>
+                                • "MacBook Air M3 performance"<br>
+                                • "Tesla Model 3 reviews"
+                            </div>
+                        </div>
+                        <div id="auth-status" style="
+                            margin-top: 20px;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            font-weight: 600;
+                        ">
+                            <span style="color: #28a745;">✓ Ready to search</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
         function switchTab(tabName) {
             const searchTabEl = document.getElementById('search-tab');
             const historyTabEl = document.getElementById('history-tab');
@@ -1372,6 +4138,9 @@
                 searchAreaEl.style.display = 'block';
                 resultsContainerEl.style.display = 'block';
                 historyContainerEl.style.display = 'none';
+
+                // Reset to clean search state
+                resetToCleanSearchState();
             } else if (tabName === 'history') {
                 // Update tab appearance
                 historyTabEl.style.background = 'white';
@@ -1407,7 +4176,13 @@
                 if (clearHistoryBtn) {
                     clearHistoryBtn.style.display = 'block';
                 }
-                renderHistoryList(history);
+                
+                // Initialize advanced filtering system
+                initializeAdvancedFiltering();
+                
+                // Apply current filters (if any) or show all
+                const filteredHistory = applyAdvancedFilters(history);
+                renderHistoryList(filteredHistory);
             }
         }
 
@@ -1489,6 +4264,7 @@
                     ">
                         ${item.date} • ${item.searchType === 'multi' ? 'Multi-product search' : 'Single search'}
                     </div>
+                    ${generateHistoryTagsAndProject(item)}
                     <div style="
                         font-size: 13px;
                         color: #6c757d;
@@ -1605,15 +4381,15 @@
                 displayResults(item.results, item.query);
             }
             showCollapseToggle();
+            
+            // Add edit organization interface for reopened searches
+            showEditOrganizationInterface(item);
         }
 
         function filterHistory() {
-            const searchTerm = document.getElementById('history-search').value.toLowerCase();
-            const history = loadSearchHistory();
-            const filteredHistory = history.filter(item => 
-                item.query.toLowerCase().includes(searchTerm)
-            );
-            renderHistoryList(filteredHistory);
+            // Legacy function - now redirects to advanced filtering
+            // This maintains compatibility with existing event listeners
+            applyFilters();
         }
 
         async function performSearch() {
@@ -1656,8 +4432,8 @@
                 const result = await searchProduct(query, token);
                 displayResults(result, query);
                 
-                // Save successful search to history
-                saveSearchToHistory(query, result, 'single');
+                // Show post-search tagging interface
+                showPostSearchTagging(query, result, 'single');
             } catch (error) {
                 displayError(error.message);
             } finally {
@@ -1768,7 +4544,7 @@
                 
                 displayMultiResults(results);
                 
-                // Save successful multi-search to history
+                // Show post-search tagging interface for multi-search
                 const queriesText = uniqueQueries.join('\n');
                 const combinedResults = {
                     summary: {
@@ -1781,7 +4557,7 @@
                     rationale: `Multi-product search for ${queries.length} products`,
                     reviewSummary: `Combined results from ${results.filter(r => r.success).length} successful searches`
                 };
-                saveSearchToHistory(queriesText, combinedResults, 'multi');
+                showPostSearchTagging(queriesText, combinedResults, 'multi');
             } catch (error) {
                 displayError(error.message);
             } finally {
@@ -1922,7 +4698,7 @@
             const button = document.createElement('button');
             button.id = 'openProductSearchModalBtn';
             button.innerHTML = '🛍️';
-            button.title = 'Open ChatGPT Product Info Search';
+            button.title = 'Open ChatGPT Product Info Research';
             document.body.appendChild(button);
             return button;
         }
@@ -1990,7 +4766,7 @@
             const button = document.createElement('button');
             button.id = 'openProductSearchModalBtn';
             button.innerHTML = '🛍️';
-            button.title = 'Open ChatGPT Product Info Search';
+            button.title = 'Open ChatGPT Product Info Research';
             document.body.appendChild(button);
             return button;
         }

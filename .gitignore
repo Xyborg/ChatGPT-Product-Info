@@ -57,3 +57,4 @@ temp/
 # Chrome extension
 *.crx
 *.pem
+IMPLEMENTATION_PLAN.md
