@@ -4413,42 +4413,6 @@
             return sortedCitations;
         }
 
-        function generateSearchTrendsReport(history) {
-            const trends = {
-                totalSearches: history.length,
-                dateRange: {
-                    first: history[history.length - 1]?.date || 'N/A',
-                    last: history[0]?.date || 'N/A'
-                },
-                searchTypes: new Map(),
-                averageResultsPerSearch: 0
-            };
-
-            let totalResults = 0;
-
-            history.forEach(item => {
-                // Count search types
-                const type = item.searchType || 'unknown';
-                trends.searchTypes.set(type, (trends.searchTypes.get(type) || 0) + 1);
-
-                // Count results
-                let resultCount = 0;
-                if (item.results) {
-                    if (item.results.citations) resultCount += item.results.citations.length;
-                    if (item.results.productLinks) resultCount += item.results.productLinks.length;
-                    if (item.results.reviews) resultCount += item.results.reviews.length;
-                }
-                totalResults += resultCount;
-            });
-
-            trends.averageResultsPerSearch = history.length > 0 ? (totalResults / history.length).toFixed(1) : 0;
-
-            // Convert maps to sorted arrays
-            trends.searchTypes = Array.from(trends.searchTypes.entries()).sort((a, b) => b[1] - a[1]);
-
-            return trends;
-        }
-
         function displayReportsModal(reports) {
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -4596,72 +4560,6 @@
             `;
         }
 
-        function generateSearchTrendsHTML(trends) {
-            return `
-                <div>
-                    <h3 style="margin: 0 0 16px 0; color: #495057; display: flex; align-items: center; gap: 8px;">
-                        📈 Search Trends & Statistics
-                    </h3>
-                    <div style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                        <div style="
-                            background: #f8f9fa;
-                            padding: 16px;
-                            border-radius: 8px;
-                            border: 1px solid #e9ecef;
-                        ">
-                            <h4 style="margin: 0 0 12px 0; color: #495057;">📊 Overview</h4>
-                            <div style="display: grid; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span>Total Searches:</span>
-                                    <strong>${trends.totalSearches}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span>Avg Results/Search:</span>
-                                    <strong>${trends.averageResultsPerSearch}</strong>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span>Date Range:</span>
-                                    <strong>${new Date(trends.dateRange.first).toLocaleDateString()} - ${new Date(trends.dateRange.last).toLocaleDateString()}</strong>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="
-                            background: #f8f9fa;
-                            padding: 16px;
-                            border-radius: 8px;
-                            border: 1px solid #e9ecef;
-                        ">
-                            <h4 style="margin: 0 0 12px 0; color: #495057;">🔍 Search Types</h4>
-                            <div style="display: grid; gap: 6px;">
-                                ${trends.searchTypes.map(([type, count]) => `
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="text-transform: capitalize;">${type}:</span>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="
-                                                background: #e9ecef;
-                                                height: 6px;
-                                                width: 60px;
-                                                border-radius: 3px;
-                                                overflow: hidden;
-                                            ">
-                                                <div style="
-                                                    background: #28a745;
-                                                    height: 100%;
-                                                    width: ${(count / trends.totalSearches) * 100}%;
-                                                "></div>
-                                            </div>
-                                            <strong>${count}</strong>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
-            `;
-        }
 
         function deleteHistoryItem(itemId) {
             try {
@@ -5101,7 +4999,7 @@
             searchBtn.textContent = 'Searching...';
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
-                    <div class="loading-spinner"></div>
+                    <div class="cpr-loading-spinner"></div>
                     <p>Searching for "${query}"...</p>
                 </div>
             `;
@@ -5178,7 +5076,7 @@
             multiSearchBtn.textContent = 'Searching...';
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
-                    <div class="loading-spinner"></div>
+                    <div class="cpr-loading-spinner"></div>
                     <p>Searching ${uniqueQueries.length} products...</p>
                     <div id="progress-status" style="font-size: 14px; color: #999; margin-top: 10px;">
                         Starting searches...
@@ -5866,6 +5764,55 @@
             }
         }
 
+        // Determine theme sentiment color styling for review themes
+        function getThemeColor(theme, reviews) {
+            if (!reviews || reviews.length === 0) {
+                return { background: '#f8f9fa', color: '#6c757d' };
+            }
+
+            const themeReviews = reviews.filter(review =>
+                review.theme && review.theme.toLowerCase() === theme.toLowerCase()
+            );
+
+            if (themeReviews.length === 0) {
+                const sentimentCounts = reviews.reduce((acc, review) => {
+                    acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const totalReviews = reviews.length;
+                const positivePercent = (sentimentCounts.positive || 0) / totalReviews;
+                const negativePercent = (sentimentCounts.negative || 0) / totalReviews;
+
+                if (positivePercent > 0.6) {
+                    return { background: '#d1f2d1', color: '#2d5a2d' };
+                }
+                if (negativePercent > 0.6) {
+                    return { background: '#f8d7da', color: '#721c24' };
+                }
+                
+                return { background: '#fff3cd', color: '#856404' };
+            }
+
+            const themeSentimentCounts = themeReviews.reduce((acc, review) => {
+                acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                return acc;
+            }, {});
+
+            const themeTotal = themeReviews.length;
+            const positivePercent = (themeSentimentCounts.positive || 0) / themeTotal;
+            const negativePercent = (themeSentimentCounts.negative || 0) / themeTotal;
+
+            if (positivePercent > negativePercent && positivePercent > 0.5) {
+                return { background: '#d1f2d1', color: '#2d5a2d' };
+            }
+            if (negativePercent > positivePercent && negativePercent > 0.5) {
+                return { background: '#f8d7da', color: '#721c24' };
+            }
+
+            return { background: '#fff3cd', color: '#856404' };
+        }
+
         function displayResults(data, query) {
             const resultsContainer = document.getElementById('results-container');
             if (!resultsContainer) {
@@ -6140,57 +6087,6 @@
             }
 
             if (data.summary.review_themes.length > 0) {
-                // Function to determine theme sentiment and color (same as in multi-results)
-                function getThemeColor(theme, reviews) {
-                    if (!reviews || reviews.length === 0) {
-                        return { background: '#f8f9fa', color: '#6c757d' }; // neutral gray
-                    }
-                    
-                    // Find reviews that mention this theme
-                    const themeReviews = reviews.filter(review => 
-                        review.theme && review.theme.toLowerCase() === theme.toLowerCase()
-                    );
-                    
-                    if (themeReviews.length === 0) {
-                        // If no direct theme match, analyze overall sentiment
-                        const sentimentCounts = reviews.reduce((acc, review) => {
-                            acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
-                            return acc;
-                        }, {});
-                        
-                        const totalReviews = reviews.length;
-                        const positivePercent = (sentimentCounts.positive || 0) / totalReviews;
-                        const negativePercent = (sentimentCounts.negative || 0) / totalReviews;
-                        
-                        if (positivePercent > 0.6) {
-                            return { background: '#d1f2d1', color: '#2d5a2d' }; // light green
-                        } else if (negativePercent > 0.6) {
-                            return { background: '#f8d7da', color: '#721c24' }; // light red  
-                        } else {
-                            return { background: '#fff3cd', color: '#856404' }; // light yellow
-                        }
-                    }
-                    
-                    // Calculate sentiment for theme-specific reviews
-                    const themeSentimentCounts = themeReviews.reduce((acc, review) => {
-                        acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
-                        return acc;
-                    }, {});
-                    
-                    const themeTotal = themeReviews.length;
-                    const positivePercent = (themeSentimentCounts.positive || 0) / themeTotal;
-                    const negativePercent = (themeSentimentCounts.negative || 0) / themeTotal;
-                    
-                    // Determine color based on dominant sentiment
-                    if (positivePercent > negativePercent && positivePercent > 0.5) {
-                        return { background: '#d1f2d1', color: '#2d5a2d' }; // light green for positive
-                    } else if (negativePercent > positivePercent && negativePercent > 0.5) {
-                        return { background: '#f8d7da', color: '#721c24' }; // light red for negative
-                    } else {
-                        return { background: '#fff3cd', color: '#856404' }; // light yellow for neutral/mixed
-                    }
-                }
-
                 html += `
                     <div style="margin-bottom: 20px;">
                         <div style="
@@ -6378,57 +6274,6 @@
                 
                 // Get all themes instead of just top 3
                 const topThemes = data.summary.review_themes;
-                
-                // Function to determine theme sentiment and color
-                function getThemeColor(theme, reviews) {
-                    if (!reviews || reviews.length === 0) {
-                        return { background: '#f8f9fa', color: '#6c757d' }; // neutral gray
-                    }
-                    
-                    // Find reviews that mention this theme
-                    const themeReviews = reviews.filter(review => 
-                        review.theme && review.theme.toLowerCase() === theme.toLowerCase()
-                    );
-                    
-                    if (themeReviews.length === 0) {
-                        // If no direct theme match, analyze overall sentiment
-                        const sentimentCounts = reviews.reduce((acc, review) => {
-                            acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
-                            return acc;
-                        }, {});
-                        
-                        const totalReviews = reviews.length;
-                        const positivePercent = (sentimentCounts.positive || 0) / totalReviews;
-                        const negativePercent = (sentimentCounts.negative || 0) / totalReviews;
-                        
-                        if (positivePercent > 0.6) {
-                            return { background: '#d1f2d1', color: '#2d5a2d' }; // light green
-                        } else if (negativePercent > 0.6) {
-                            return { background: '#f8d7da', color: '#721c24' }; // light red  
-                        } else {
-                            return { background: '#fff3cd', color: '#856404' }; // light yellow
-                        }
-                    }
-                    
-                    // Calculate sentiment for theme-specific reviews
-                    const themeSentimentCounts = themeReviews.reduce((acc, review) => {
-                        acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
-                        return acc;
-                    }, {});
-                    
-                    const themeTotal = themeReviews.length;
-                    const positivePercent = (themeSentimentCounts.positive || 0) / themeTotal;
-                    const negativePercent = (themeSentimentCounts.negative || 0) / themeTotal;
-                    
-                    // Determine color based on dominant sentiment
-                    if (positivePercent > negativePercent && positivePercent > 0.5) {
-                        return { background: '#d1f2d1', color: '#2d5a2d' }; // light green for positive
-                    } else if (negativePercent > positivePercent && negativePercent > 0.5) {
-                        return { background: '#f8d7da', color: '#721c24' }; // light red for negative
-                    } else {
-                        return { background: '#fff3cd', color: '#856404' }; // light yellow for neutral/mixed
-                    }
-                }
                 
                 html += `
                     <tr style="
