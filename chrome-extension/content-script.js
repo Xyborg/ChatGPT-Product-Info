@@ -445,28 +445,34 @@
                                     box-sizing: border-box;
                                     resize: vertical;
                                     font-family: inherit;
-                                    margin-bottom: 8px;
                                 "></textarea>
-                                <div style="display: flex; gap: 12px;">
-                                    <button id="multi-search-btn" style="
-                                        background: #007bff;
-                                        color: white;
-                                        border: none;
-                                        padding: 8px 16px;
-                                        border-radius: 4px;
-                                        font-size: 14px;
-                                        font-weight: 500;
-                                        cursor: pointer;
-                                        white-space: nowrap;
-                                    ">Search All Products</button>
+                                <div id="multi-product-actions" style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    gap: 12px;
+                                    margin-top: 12px;
+                                ">
                                     <div style="
                                         font-size: 12px;
                                         color: #6c757d;
-                                        align-self: center;
                                         font-style: italic;
                                     ">Results will be shown in a table format</div>
+                                    <div id="multi-product-controls" style="display: flex; gap: 12px; align-items: center;">
+                                        <div id="multi-market-select-mount" style="display: none; align-items: center; gap: 8px;"></div>
+                                        <button id="multi-search-btn" style="
+                                            background: #007bff;
+                                            color: white;
+                                            border: none;
+                                            padding: 8px 16px;
+                                            border-radius: 4px;
+                                            font-size: 14px;
+                                            font-weight: 500;
+                                            cursor: pointer;
+                                            white-space: nowrap;
+                                        ">Search All Products</button>
+                                    </div>
                                 </div>
-                                <div id="multi-market-select-mount" style="display: none; align-items: center; gap: 8px; margin-top: 12px;"></div>
                             </div>
                             </div> <!-- End search-controls -->
                             
