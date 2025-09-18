@@ -1444,6 +1444,9 @@
             
             // Initialize sidebar (Phase 2)
             initializeSidebar();
+            
+            // Recalculate counts to ensure consistency
+            recalculateAllCounts();
         }
 
         // Helper to read active tab id: 'search' | 'history' | 'reports'
@@ -2478,7 +2481,26 @@
         function clearAllHistory() {
             if (confirm('Are you sure you want to clear all search history? This action cannot be undone.')) {
                 localStorage.removeItem('chatgpt-product-search-history');
+                
+                // Reset all project search counts to 0
+                const projects = loadProjects();
+                projects.forEach(project => {
+                    project.searchCount = 0;
+                });
+                saveProjects(projects);
+                
+                // Reset all tag usage counts to 0
+                const tags = loadTags();
+                tags.forEach(tag => {
+                    tag.usageCount = 0;
+                });
+                saveTags(tags);
+                
                 loadHistory();
+                
+                // Update sidebar to reflect reset counts
+                populateProjectsList();
+                populateTagsList();
             }
         }
 
@@ -2617,6 +2639,62 @@
                 project.searchCount = (project.searchCount || 0) + 1;
                 saveProjects(projects);
             }
+        }
+        
+        function decrementTagUsage(tagId) {
+            const tags = loadTags();
+            const tag = tags.find(t => t.id === tagId);
+            if (tag) {
+                tag.usageCount = Math.max((tag.usageCount || 0) - 1, 0);
+                saveTags(tags);
+            }
+        }
+        
+        function decrementProjectSearchCount(projectId) {
+            const projects = loadProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                project.searchCount = Math.max((project.searchCount || 0) - 1, 0);
+                saveProjects(projects);
+            }
+        }
+        
+        function recalculateAllCounts() {
+            // Recalculate project and tag counts from actual search history
+            const history = loadSearchHistory();
+            const projects = loadProjects();
+            const tags = loadTags();
+            
+            // Reset all counts
+            projects.forEach(project => project.searchCount = 0);
+            tags.forEach(tag => tag.usageCount = 0);
+            
+            // Count actual usage from history
+            history.forEach(item => {
+                if (item.projectId) {
+                    const project = projects.find(p => p.id === item.projectId);
+                    if (project) {
+                        project.searchCount = (project.searchCount || 0) + 1;
+                    }
+                }
+                
+                if (item.tags && Array.isArray(item.tags)) {
+                    item.tags.forEach(tagId => {
+                        const tag = tags.find(t => t.id === tagId);
+                        if (tag) {
+                            tag.usageCount = (tag.usageCount || 0) + 1;
+                        }
+                    });
+                }
+            });
+            
+            // Save updated counts
+            saveProjects(projects);
+            saveTags(tags);
+            
+            // Update sidebar display
+            populateProjectsList();
+            populateTagsList();
         }
         
         // Migration function for existing data
@@ -4863,10 +4941,34 @@
         function deleteHistoryItem(itemId) {
             try {
                 const history = loadSearchHistory();
+                const itemToDelete = history.find(item => item.id === itemId);
+                
+                // Decrement counts before deleting
+                if (itemToDelete) {
+                    // Decrement project count
+                    if (itemToDelete.projectId) {
+                        decrementProjectSearchCount(itemToDelete.projectId);
+                    }
+                    
+                    // Decrement tag usage counts
+                    if (itemToDelete.tags && Array.isArray(itemToDelete.tags)) {
+                        itemToDelete.tags.forEach(tagId => {
+                            if (tagId) {
+                                decrementTagUsage(tagId);
+                            }
+                        });
+                    }
+                }
+                
                 const filteredHistory = history.filter(item => item.id !== itemId);
                 localStorage.setItem('chatgpt-product-search-history', JSON.stringify(filteredHistory));
                 loadHistory();
+                
+                // Update sidebar to reflect new counts
+                populateProjectsList();
+                populateTagsList();
             } catch (error) {
+                console.error('Error deleting history item:', error);
             }
         }
 
