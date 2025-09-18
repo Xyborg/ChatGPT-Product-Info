@@ -393,11 +393,12 @@
                                         gap: 6px;
                                         border: 1px solid #dee2e6;
                                         border-radius: 4px;
-                                        padding: 0 10px;
+                                        padding: 0 12px;
                                         background: white;
                                         position: relative;
                                         min-width: 120px;
                                         cursor: pointer;
+                                        height: 36px;
                                     ">
                                         <img id="market-select-flag" src="" alt="Selected market flag" style="
                                             width: 20px;
@@ -424,12 +425,15 @@
                                     background: #007bff;
                                     color: white;
                                     border: none;
-                                    padding: 8px 16px;
+                                    padding: 0 16px;
                                     border-radius: 4px;
                                     font-size: 14px;
                                     font-weight: 500;
                                     cursor: pointer;
                                     white-space: nowrap;
+                                    height: 36px;
+                                    display: flex;
+                                    align-items: center;
                                 ">Search</button>
                             </div>
                             
@@ -464,12 +468,15 @@
                                             background: #007bff;
                                             color: white;
                                             border: none;
-                                            padding: 8px 16px;
+                                            padding: 0 16px;
                                             border-radius: 4px;
                                             font-size: 14px;
                                             font-weight: 500;
                                             cursor: pointer;
                                             white-space: nowrap;
+                                            height: 36px;
+                                            display: flex;
+                                            align-items: center;
                                         ">Search All Products</button>
                                     </div>
                                 </div>
@@ -1201,7 +1208,7 @@
             }
 
             if (marketSelectContainer) {
-                marketSelectContainer.style.minHeight = '36px';
+                marketSelectContainer.style.height = '36px';
             }
 
             moveMarketSelector(multiProductToggle ? multiProductToggle.checked : false);
