@@ -1946,13 +1946,48 @@
 
         // Search functionality functions
         // History Management Functions
+        function sanitizeForStorage(data) {
+            try {
+                const seen = new WeakSet();
+                const json = JSON.stringify(data, (_, value) => {
+                    if (typeof value === 'bigint') {
+                        return value.toString();
+                    }
+                    if (typeof value === 'function' || typeof value === 'symbol') {
+                        return undefined;
+                    }
+                    if (value && typeof value === 'object') {
+                        if (seen.has(value)) {
+                            return undefined;
+                        }
+                        seen.add(value);
+                    }
+                    return value;
+                });
+                return JSON.parse(json);
+            } catch (error) {
+                console.error('ChatGPT Product Info: Failed to sanitize search results for history storage.', error);
+                return {
+                    summary: data?.summary || null,
+                    rationale: data?.rationale || null,
+                    reviewSummary: data?.reviewSummary || null,
+                    products: data?.products || [],
+                    productLinks: data?.productLinks || [],
+                    reviews: data?.reviews || [],
+                    multiResults: data?.multiResults || null,
+                    fallback: true
+                };
+            }
+        }
+
         function saveSearchToHistory(query, results, searchType = 'single', tags = [], projectId = null) {
             try {
                 const history = JSON.parse(localStorage.getItem('chatgpt-product-search-history') || '[]');
+                const sanitizedResults = sanitizeForStorage(results);
                 const historyItem = {
                     id: Date.now() + Math.random().toString(36).substr(2, 9),
                     query: query,
-                    results: results,
+                    results: sanitizedResults,
                     searchType: searchType,
                     timestamp: Date.now(),
                     date: new Date().toLocaleString(),
@@ -1961,28 +1996,67 @@
                     version: 2
                 };
                 
-                // Update tag usage counts
                 if (tags && Array.isArray(tags)) {
                     tags.forEach(tagId => {
                         if (tagId) updateTagUsage(tagId);
                     });
                 }
                 
-                // Update project search count
                 if (projectId) {
                     updateProjectSearchCount(projectId);
                 }
                 
-                // Add to beginning of array (most recent first)
                 history.unshift(historyItem);
                 
-                // Keep only last 50 searches
                 if (history.length > 50) {
                     history.splice(50);
                 }
                 
                 localStorage.setItem('chatgpt-product-search-history', JSON.stringify(history));
+                return historyItem.id;
             } catch (error) {
+                console.error('ChatGPT Product Info: Failed to save search history.', error);
+                alert('Unable to save this search to history. Check the console for details.');
+                return null;
+            }
+        }
+
+        function updateHistoryEntry(historyId, updates = {}) {
+            try {
+                const history = JSON.parse(localStorage.getItem('chatgpt-product-search-history') || '[]');
+                const index = history.findIndex(item => item.id === historyId);
+                if (index === -1) {
+                    return false;
+                }
+
+                const existingItem = history[index];
+                const updatedItem = { ...existingItem };
+
+                if (Object.prototype.hasOwnProperty.call(updates, 'results')) {
+                    updatedItem.results = sanitizeForStorage(updates.results);
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'query')) {
+                    updatedItem.query = updates.query;
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'searchType')) {
+                    updatedItem.searchType = updates.searchType;
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'tags')) {
+                    updatedItem.tags = Array.isArray(updates.tags) ? updates.tags : [];
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'projectId')) {
+                    updatedItem.projectId = updates.projectId;
+                }
+
+                updatedItem.updatedAt = Date.now();
+
+                history[index] = updatedItem;
+                localStorage.setItem('chatgpt-product-search-history', JSON.stringify(history));
+                return true;
+            } catch (error) {
+                console.error('ChatGPT Product Info: Failed to update search history.', error);
+                alert('Unable to update this search in history. Check the console for details.');
+                return false;
             }
         }
 
@@ -2927,7 +3001,7 @@
         
         // ===== POST-SEARCH TAGGING FUNCTIONALITY - Phase 4 =====
         
-        function showPostSearchTagging(query, results, searchType) {
+        function showPostSearchTagging(query, results, searchType, historyItemId = null) {
             // Remove any existing tagging or edit interfaces
             const existingInterface = document.getElementById('post-search-tagging');
             const existingToggle = document.getElementById('post-search-toggle');
@@ -2948,10 +3022,10 @@
             }
             
             // Add toggle button for post-search tagging
-            addPostSearchTaggingToggle(query, results, searchType);
+            addPostSearchTaggingToggle(query, results, searchType, historyItemId);
         }
-        
-        function addPostSearchTaggingToggle(query, results, searchType) {
+
+        function addPostSearchTaggingToggle(query, results, searchType, historyItemId) {
             const toggleHTML = `
                 <div id="post-search-toggle" style="
                     background: #f8f9fa;
@@ -3000,7 +3074,14 @@
                 const toggle = document.getElementById('post-search-toggle');
                 const content = document.getElementById('post-search-content');
                 const arrow = document.getElementById('post-search-arrow');
-                
+                if (toggle) {
+                    if (historyItemId) {
+                        toggle.dataset.historyId = historyItemId;
+                    } else {
+                        delete toggle.dataset.historyId;
+                    }
+                }
+
                 toggle.addEventListener('click', () => {
                     const isHidden = content.style.display === 'none';
                     content.style.display = isHidden ? 'block' : 'none';
@@ -3009,7 +3090,8 @@
                     
                     if (isHidden) {
                         // Show the tagging interface
-                        showActualPostSearchTagging(query, results, searchType);
+                        const currentHistoryId = toggle?.dataset?.historyId || historyItemId;
+                        showActualPostSearchTagging(query, results, searchType, currentHistoryId || null);
                     } else {
                         // Clear the content
                         content.innerHTML = '';
@@ -3017,8 +3099,8 @@
                 });
             }
         }
-        
-        function showActualPostSearchTagging(query, results, searchType) {
+
+        function showActualPostSearchTagging(query, results, searchType, historyItemId) {
             const tags = loadTags();
             const projects = loadProjects();
             
@@ -3146,14 +3228,29 @@
                 content.innerHTML = taggingHTML;
                 
                 // Initialize the interface
-                initializePostSearchTagging(query, results, searchType);
+                initializePostSearchTagging(query, results, searchType, historyItemId);
                 
                 // No auto-hide since it's now manually controlled
             }
         }
         
-        function initializePostSearchTagging(query, results, searchType) {
+        function initializePostSearchTagging(query, results, searchType, historyItemId) {
             const selectedTags = new Set();
+            let currentHistoryId = historyItemId || null;
+            const toggleElement = document.getElementById('post-search-toggle');
+
+            const setToggleHistoryId = (id) => {
+                if (!toggleElement) {
+                    return;
+                }
+                if (id) {
+                    toggleElement.dataset.historyId = id;
+                } else {
+                    delete toggleElement.dataset.historyId;
+                }
+            };
+
+            setToggleHistoryId(currentHistoryId);
             
             // Add tag button functionality
             const addTagBtn = document.getElementById('add-tag-to-search');
@@ -3167,7 +3264,10 @@
             const skipBtn = document.getElementById('skip-tagging');
             if (skipBtn) {
                 skipBtn.addEventListener('click', () => {
-                    saveSearchWithSelectedTags(query, results, searchType);
+                    if (!currentHistoryId) {
+                        currentHistoryId = saveSearchWithSelectedTags(null, query, results, searchType, selectedTags) || currentHistoryId;
+                        setToggleHistoryId(currentHistoryId);
+                    }
                     const taggingInterface = document.getElementById('post-search-tagging');
                     if (taggingInterface) {
                         taggingInterface.remove();
@@ -3179,7 +3279,8 @@
             const saveBtn = document.getElementById('save-with-tags');
             if (saveBtn) {
                 saveBtn.addEventListener('click', () => {
-                    saveSearchWithSelectedTags(query, results, searchType, selectedTags);
+                    currentHistoryId = saveSearchWithSelectedTags(currentHistoryId, query, results, searchType, selectedTags) || currentHistoryId;
+                    setToggleHistoryId(currentHistoryId);
                     const taggingInterface = document.getElementById('post-search-tagging');
                     if (taggingInterface) {
                         taggingInterface.remove();
@@ -3304,18 +3405,49 @@
             tagsContainer.appendChild(addButton);
         }
         
-        function saveSearchWithSelectedTags(query, results, searchType, selectedTags = new Set()) {
+        function saveSearchWithSelectedTags(historyId, query, results, searchType, selectedTags = new Set()) {
             const projectSelect = document.getElementById('tagging-project');
             const selectedProject = projectSelect ? projectSelect.value || null : null;
-            const tagsArray = Array.from(selectedTags);
-            
-            // Now save to history with tags and project
-            saveSearchToHistory(query, results, searchType, tagsArray, selectedProject);
-            
+            const normalizedTags = selectedTags instanceof Set ? Array.from(selectedTags) : Array.from(new Set(selectedTags || []));
+            let effectiveHistoryId = historyId || null;
+
+            if (effectiveHistoryId) {
+                const history = loadSearchHistory();
+                const existingItem = history.find(item => item.id === effectiveHistoryId);
+                const previousTags = existingItem ? existingItem.tags || [] : [];
+                const previousProject = existingItem ? existingItem.projectId || null : null;
+
+                const newTags = normalizedTags.filter(tag => !previousTags.includes(tag));
+                if (newTags.length > 0) {
+                    newTags.forEach(tagId => {
+                        if (tagId) updateTagUsage(tagId);
+                    });
+                }
+
+                if (selectedProject && selectedProject !== previousProject) {
+                    updateProjectSearchCount(selectedProject);
+                }
+
+                const updated = updateHistoryEntry(effectiveHistoryId, {
+                    results,
+                    query,
+                    searchType,
+                    tags: normalizedTags,
+                    projectId: selectedProject
+                });
+
+                if (!updated) {
+                    effectiveHistoryId = saveSearchToHistory(query, results, searchType, normalizedTags, selectedProject);
+                }
+            } else {
+                effectiveHistoryId = saveSearchToHistory(query, results, searchType, normalizedTags, selectedProject);
+            }
+
             // Update sidebar to reflect new usage
             populateProjectsList();
             populateTagsList();
-            
+
+            return effectiveHistoryId;
         }
         
         // ===== EDIT EXISTING SEARCH ORGANIZATION - Phase 4.6 =====
@@ -4997,6 +5129,7 @@
             // Show loading state
             searchBtn.disabled = true;
             searchBtn.textContent = 'Searching...';
+            resultsContainer.style.display = 'block';
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
                     <div class="cpr-loading-spinner"></div>
@@ -5007,9 +5140,10 @@
             try {
                 const result = await searchProduct(query, token);
                 displayResults(result, query);
+                const historyId = saveSearchToHistory(query, result, 'single');
                 
                 // Show post-search tagging interface
-                showPostSearchTagging(query, result, 'single');
+                showPostSearchTagging(query, result, 'single', historyId);
             } catch (error) {
                 displayError(error.message);
             } finally {
@@ -5074,6 +5208,7 @@
             // Show loading state
             multiSearchBtn.disabled = true;
             multiSearchBtn.textContent = 'Searching...';
+            resultsContainer.style.display = 'block';
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
                     <div class="cpr-loading-spinner"></div>
@@ -5117,7 +5252,7 @@
                 }
                 
                 displayMultiResults(results);
-                
+
                 // Show post-search tagging interface for multi-search
                 const queriesText = uniqueQueries.join('\n');
                 const combinedResults = {
@@ -5131,7 +5266,8 @@
                     rationale: `Multi-product search for ${queries.length} products`,
                     reviewSummary: `Combined results from ${results.filter(r => r.success).length} successful searches`
                 };
-                showPostSearchTagging(queriesText, combinedResults, 'multi');
+                const historyId = saveSearchToHistory(queriesText, combinedResults, 'multi');
+                showPostSearchTagging(queriesText, combinedResults, 'multi', historyId);
             } catch (error) {
                 displayError(error.message);
             } finally {
@@ -5203,7 +5339,7 @@
             const response = await fetch("https://chatgpt.com/backend-api/search/product_info", {
                 "headers": {
                     "accept": "text/event-stream",
-                    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,es-AR;q=0.7,es;q=0.6,de;q=0.5,it;q=0.4,zh-CN;q=0.3,zh;q=0.2,id;q=0.1,pt-BR;q=0.1,pt;q=0.1,fr;q=0.1,tr;q=0.1,pl;q=0.1,sv;q=0.1,ru;q=0.1,ar;q=0.1,el;q=0.1",
+                    "accept-language": "de-DE, de;q=0.9, en;q=0.8, es-AR;q=0.7, es;q=0.6, it;q=0.4, zh-CN;q=0.3, zh;q=0.2, id;q=0.1, pt-BR;q=0.1, pt;q=0.1, fr;q=0.1, tr;q=0.1, pl;q=0.1, sv;q=0.1, ru;q=0.1, ar;q=0.1, el;q=0.1",
                     "authorization": "Bearer " + token,
                     "content-type": "application/json",
                     "oai-client-version": "prod-43c98f917bf2c3e3a36183e9548cd048e4e40615",
