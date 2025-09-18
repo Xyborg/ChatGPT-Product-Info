@@ -2080,12 +2080,12 @@
                             </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #f8f9fa;">
-                            <td style="padding: 8px 12px; color: #6c757d; font-weight: 600;">😐 Neutral</td>
+                            <td style="padding: 8px 12px; color: #d39e00; font-weight: 600;">😐 Neutral</td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${neutralCount}</td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${neutralPercent}%</td>
                             <td style="padding: 8px 12px;">
                                 <div style="background: #e9ecef; border-radius: 4px; height: 8px; width: 100%; position: relative;">
-                                    <div style="background: #6c757d; height: 100%; border-radius: 4px; width: ${neutralPercent}%; transition: width 0.3s ease;"></div>
+                                    <div style="background: #ffc107; height: 100%; border-radius: 4px; width: ${neutralPercent}%; transition: width 0.3s ease;"></div>
                                 </div>
                             </td>
                         </tr>
