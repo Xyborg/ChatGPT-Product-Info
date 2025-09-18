@@ -1806,10 +1806,7 @@
             if (marketFilter) {
                 marketFilter.innerHTML = '<option value="all">All Markets</option>' +
                     MARKET_OPTIONS.map(option => `<option value="${option.value}">${option.label}</option>`).join('');
-                marketFilter.addEventListener('change', () => {
-                    updateAnalysisFilterSummary();
-                    updateAnalysisFilterChips();
-                });
+                marketFilter.addEventListener('change', updateAnalysisFilterSummary);
             }
 
             // Populate tags filter
@@ -1853,7 +1850,6 @@
                         
                         const checkbox = tagCheckbox.querySelector('input');
                         checkbox.addEventListener('change', updateAnalysisFilterSummary);
-                        checkbox.addEventListener('change', updateAnalysisFilterChips);
                         
                         tagsFilter.appendChild(tagCheckbox);
                     });
