@@ -1374,6 +1374,7 @@
 
             historyTab.addEventListener('click', () => {
                 switchTab('history');
+                syncHistoryFiltersWithAnalysisFilters();
                 loadHistory();
                 // Hide reports container and reset reports tab
                 const reportsContainer = document.getElementById('reports-container');
@@ -1888,7 +1889,58 @@
                 updateAnalysisFilterChips();
             }
         }
+        
+        function syncHistoryFiltersWithAnalysisFilters() {
+            if (!currentFilters) {
+                return;
+            }
 
+            // Sync filters from Analysis to History
+            const filterTextInput = document.getElementById('filter-text');
+            const projectFilterSelect = document.getElementById('filter-project');
+            const marketFilterSelect = document.getElementById('filter-market');
+            
+            if (filterTextInput) {
+                filterTextInput.value = currentFilters.rawText || '';
+            }
+            
+            if (projectFilterSelect) {
+                projectFilterSelect.value = currentFilters.project || '';
+            }
+            
+            if (marketFilterSelect) {
+                const targetMarket = currentFilters.market || 'all';
+                marketFilterSelect.value = marketFilterSelect.querySelector(`option[value="${targetMarket}"]`) ? targetMarket : 'all';
+            }
+            
+            // Sync tag checkboxes
+            const tagCheckboxes = document.querySelectorAll('.tag-checkbox');
+            if (tagCheckboxes.length > 0) {
+                const activeTags = new Set(currentFilters.tags || []);
+                tagCheckboxes.forEach(cb => {
+                    cb.checked = activeTags.has(cb.value);
+                });
+            }
+            
+            // Update filter display elements
+            if (typeof updateFilterSummary === 'function') {
+                updateFilterSummary();
+            }
+            if (typeof updateFilterChips === 'function') {
+                updateFilterChips();
+            }
+        }
+        
+        function syncAllFilterDisplays() {
+            // Update both History and Analysis filter displays to match global state
+            if (typeof syncAnalysisFiltersWithHistoryFilters === 'function') {
+                syncAnalysisFiltersWithHistoryFilters();
+            }
+            if (typeof syncHistoryFiltersWithAnalysisFilters === 'function') {
+                syncHistoryFiltersWithAnalysisFilters();
+            }
+        }
+        
         function updateAnalysisFilterSummary() {
             const projectFilter = document.getElementById('analysis-project-filter');
             const marketFilter = document.getElementById('analysis-market-filter');
@@ -2086,24 +2138,107 @@
                 return;
             }
             
-            // Generate reports
-            const citationSources = generateCitationSourcesReport(filteredHistory);
-            const reviewSources = generateReviewSourcesReport(filteredHistory);
+            // Generate simplified analysis reports
+            const citationSources = generateSimpleCitationSources(filteredHistory);
+            const reviewSources = generateSimpleReviewSources(filteredHistory);
             
-            // Display tables
+            // Display tables  
             const citationTable = document.getElementById('citation-sources-table');
             const reviewTable = document.getElementById('review-sources-table');
             
             if (citationTable) {
-                citationTable.innerHTML = generateCitationSourcesHTML(citationSources.slice(0, 10));
+                citationTable.innerHTML = generateSimpleSourcesHTML(citationSources.slice(0, 10), 'citations');
             }
             
             if (reviewTable) {
-                reviewTable.innerHTML = generateReviewSourcesHTML(reviewSources.slice(0, 10));
+                reviewTable.innerHTML = generateSimpleSourcesHTML(reviewSources.slice(0, 10), 'reviews');
             }
             
             // Generate sentiment analysis
             generateSimpleSentimentAnalysis(filteredHistory);
+        }
+        
+        // Simplified helper functions for analysis dashboard
+        function generateSimpleCitationSources(history) {
+            const domainCounts = new Map();
+            
+            history.forEach(item => {
+                if (item.results?.citations) {
+                    item.results.citations.forEach(citation => {
+                        if (citation.url) {
+                            const domain = extractDomainFromUrl(citation.url);
+                            if (domain && domain !== 'unknown') {
+                                domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
+                            }
+                        }
+                    });
+                }
+                if (item.results?.productLinks) {
+                    item.results.productLinks.forEach(link => {
+                        if (link.url) {
+                            const domain = extractDomainFromUrl(link.url);
+                            if (domain && domain !== 'unknown') {
+                                domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
+                            }
+                        }
+                    });
+                }
+            });
+            
+            return Array.from(domainCounts.entries())
+                .map(([domain, count]) => ({ domain, count }))
+                .sort((a, b) => b.count - a.count);
+        }
+        
+        function generateSimpleReviewSources(history) {
+            const domainCounts = new Map();
+            
+            history.forEach(item => {
+                if (item.results?.reviews) {
+                    item.results.reviews.forEach(review => {
+                        if (review.url) {
+                            const domain = extractDomainFromUrl(review.url);
+                            if (domain && domain !== 'unknown') {
+                                domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
+                            }
+                        }
+                    });
+                }
+            });
+            
+            return Array.from(domainCounts.entries())
+                .map(([domain, count]) => ({ domain, count }))
+                .sort((a, b) => b.count - a.count);
+        }
+        
+        function generateSimpleSourcesHTML(sources, type) {
+            if (sources.length === 0) {
+                return `<div style="text-align: center; padding: 40px; color: #6c757d;">No ${type} sources found</div>`;
+            }
+            
+            return `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
+                            <th style="padding: 8px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sources.map(source => `
+                            <tr style="border-bottom: 1px solid #f8f9fa;">
+                                <td style="padding: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
+                                        ${source.domain}
+                                    </div>
+                                </td>
+                                <td style="padding: 8px; text-align: right; font-weight: bold;">${source.count}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
         }
         
         function generateSimpleSentimentAnalysis(history) {
@@ -2194,15 +2329,6 @@
         
         
         // Legacy function for backward compatibility
-        function loadReports() {
-            initializeAnalysisDashboard();
-        }
-
-        // Global function for direct onclick access
-        window.switchTabToReports = function() {
-            switchTab('reports');
-            loadReports();
-        };
 
         // Function to show the collapse toggle after results are displayed
         function showCollapseToggle() {
@@ -4501,6 +4627,9 @@
             updateFilterChips();
             updateFilterSummary();
             
+            // Sync filters to Analysis tab
+            syncAnalysisFiltersWithHistoryFilters();
+            
             // Hide filter panel
             const panel = document.getElementById('filter-panel');
             const toggleText = document.getElementById('filter-toggle-text');
@@ -4725,317 +4854,10 @@
 
         // ===== END SIDEBAR FUNCTIONALITY =====
 
-        // Reports and Analytics Functions
-        function generateReports() {
-            const history = loadSearchHistory();
-            if (history.length === 0) {
-                alert('No search history available for reports.');
-                return;
-            }
-
-            // Debug: Log full data structure
-            
-            history.forEach((item, index) => {
-                
-                if (item.results) {
-                    if (item.results.productLinks) {
-                    }
-                    if (item.results.citations) {
-                    }
-                    if (item.results.reviews) {
-                    }
-                    
-                    // Check for any other properties that might contain URLs
-                    Object.keys(item.results).forEach(key => {
-                        if (Array.isArray(item.results[key]) && item.results[key].length > 0) {
-                            const firstItem = item.results[key][0];
-                            if (firstItem && typeof firstItem === 'object' && firstItem.url) {
-                            }
-                        }
-                    });
-                }
-            });
-
-            const reports = {
-                reviewSources: generateReviewSourcesReport(history),
-                citationSources: generateCitationSourcesReport(history)
-            };
-
-            displayReportsModal(reports);
-        }
-
-        function generateReviewSourcesReport(history) {
-            const sourceCounts = new Map();
-            const sourceDetails = new Map();
 
 
-            function addDomain(url, title, query, date) {
-                if (url) {
-                    const domain = extractDomainFromUrl(url);
-                    sourceCounts.set(domain, (sourceCounts.get(domain) || 0) + 1);
-                    
-                    if (!sourceDetails.has(domain)) {
-                        sourceDetails.set(domain, {
-                            domain: domain,
-                            sampleTitle: title || 'No title',
-                            firstSeen: date,
-                            queries: new Set()
-                        });
-                    }
-                    sourceDetails.get(domain).queries.add(query);
-                }
-            }
-
-            history.forEach(item => {
-                
-                // Check reviews only (single searches)
-                if (item.results && item.results.reviews) {
-                    item.results.reviews.forEach(review => {
-                        addDomain(review.url, review.title, item.query, item.date);
-                    });
-                }
-
-                // Check multiResults (multi-product searches)
-                if (item.results && item.results.multiResults) {
-                    item.results.multiResults.forEach(multiResult => {
-                        if (multiResult.data && multiResult.data.reviews) {
-                            multiResult.data.reviews.forEach(review => {
-                                addDomain(review.url, review.title, item.query, item.date);
-                            });
-                        }
-                    });
-                }
-            });
 
 
-            // Sort by count and convert to array
-            const sortedSources = Array.from(sourceCounts.entries())
-                .sort((a, b) => b[1] - a[1])
-                .map(([domain, count]) => ({
-                    domain,
-                    count,
-                    ...sourceDetails.get(domain),
-                    queries: Array.from(sourceDetails.get(domain).queries)
-                }));
-
-            return sortedSources;
-        }
-
-        function generateCitationSourcesReport(history) {
-            const citationsBySource = new Map();
-
-            function addCitation(url, title, query, date, snippet) {
-                if (url) {
-                    const domain = extractDomainFromUrl(url);
-                    if (!citationsBySource.has(domain)) {
-                        citationsBySource.set(domain, []);
-                    }
-                    citationsBySource.get(domain).push({
-                        title: title || 'No title',
-                        url: url,
-                        query: query,
-                        date: date,
-                        snippet: snippet || ''
-                    });
-                }
-            }
-
-            history.forEach(item => {
-                
-                // Check single search citations only
-                if (item.results && item.results.citations) {
-                    item.results.citations.forEach(citation => {
-                        addCitation(citation.url, citation.title, item.query, item.date, citation.snippet);
-                    });
-                }
-
-                // Check single search productLinks only
-                if (item.results && item.results.productLinks) {
-                    item.results.productLinks.forEach(link => {
-                        addCitation(link.url, link.title, item.query, item.date, link.snippet);
-                    });
-                }
-
-                // Check multiResults for citations and productLinks only (no reviews)
-                if (item.results && item.results.multiResults) {
-                    item.results.multiResults.forEach(multiResult => {
-                        if (multiResult.data) {
-                            // Check citations in multiResult
-                            if (multiResult.data.citations) {
-                                multiResult.data.citations.forEach(citation => {
-                                    addCitation(citation.url, citation.title, item.query, item.date, citation.snippet);
-                                });
-                            }
-                            // Check productLinks in multiResult
-                            if (multiResult.data.productLinks) {
-                                multiResult.data.productLinks.forEach(link => {
-                                    addCitation(link.url, link.title, item.query, item.date, link.snippet);
-                                });
-                            }
-                        }
-                    });
-                }
-            });
-
-
-            // Convert to array and sort by citation count
-            const sortedCitations = Array.from(citationsBySource.entries())
-                .map(([domain, citations]) => ({
-                    domain,
-                    citationCount: citations.length,
-                    citations: citations.sort((a, b) => new Date(b.date) - new Date(a.date))
-                }))
-                .sort((a, b) => b.citationCount - a.citationCount);
-
-            return sortedCitations;
-        }
-
-        function displayReportsModal(reports) {
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                z-index: 10001;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            `;
-
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background: white;
-                border-radius: 12px;
-                max-width: 90vw;
-                max-height: 90vh;
-                overflow-y: auto;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-                position: relative;
-            `;
-
-            modalContent.innerHTML = `
-                <div style="padding: 24px; border-bottom: 1px solid #e9ecef;">
-                    <h2 style="margin: 0; color: #212529; display: flex; align-items: center; gap: 12px;">
-                        📊 Search Analytics Reports
-                        <button id="closeReportsModal" style="
-                            margin-left: auto;
-                            background: none;
-                            border: none;
-                            font-size: 24px;
-                            cursor: pointer;
-                            color: #6c757d;
-                            padding: 0;
-                            width: 32px;
-                            height: 32px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            border-radius: 6px;
-                        " title="Close">×</button>
-                    </h2>
-                </div>
-                <div style="padding: 24px;">
-                    ${generateReportsHTML(reports)}
-                </div>
-            `;
-
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-
-            // Close modal functionality
-            modal.querySelector('#closeReportsModal').addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            });
-        }
-
-        function generateReportsHTML(reports) {
-            return `
-                <div style="display: grid; gap: 32px;">
-                    ${generateReviewSourcesHTML(reports.reviewSources)}
-                    ${generateCitationSourcesHTML(reports.citationSources)}
-                </div>
-            `;
-        }
-
-        function generateReviewSourcesHTML(reviewSources) {
-            return `
-                <div>
-                    <h3 style="margin: 0 0 16px 0; color: #495057;">Top Review Sources Domains</h3>
-                    <table style="
-                        width: 100%;
-                        border-collapse: collapse;
-                        border: 1px solid #e9ecef;
-                    ">
-                        <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
-                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
-                                <th style="padding: 6px 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reviewSources.map((source, index) => `
-                                <tr style="border-bottom: 1px solid #f8f9fa; transition: background-color 0.2s ease;" class="table-row-hover">
-                                    <td style="padding: 6px 12px; font-weight: bold;">${index + 1}</td>
-                                    <td style="padding: 6px 12px;">
-                                        <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
-                                            <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
-                                            ${source.domain}
-                                        </a>
-                                    </td>
-                                    <td style="padding: 6px 12px; text-align: right; font-weight: bold;">${source.count}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function generateCitationSourcesHTML(citationSources) {
-            return `
-                <div>
-                    <h3 style="margin: 0 0 16px 0; color: #495057;">Top Citations Sources Domains</h3>
-                    <table style="
-                        width: 100%;
-                        border-collapse: collapse;
-                        border: 1px solid #e9ecef;
-                    ">
-                        <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Rank</th>
-                                <th style="padding: 6px 12px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
-                                <th style="padding: 6px 12px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${citationSources.map((source, index) => `
-                                <tr style="border-bottom: 1px solid #f8f9fa; transition: background-color 0.2s ease;" class="table-row-hover">
-                                    <td style="padding: 6px 12px; font-weight: bold;">${index + 1}</td>
-                                    <td style="padding: 6px 12px;">
-                                        <a href="https://${source.domain}" target="_blank" rel="noopener noreferrer nofollow" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
-                                            <img src="${getFaviconUrl(`https://${source.domain}`)}" alt="${source.domain} favicon" style="width: 16px; height: 16px;" onerror="this.style.display='none'">
-                                            ${source.domain}
-                                        </a>
-                                    </td>
-                                    <td style="padding: 6px 12px; text-align: right; font-weight: bold;">${source.citationCount}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
 
 
         function deleteHistoryItem(itemId) {
@@ -7070,25 +6892,28 @@
             if (projectSelects.length > 0) {
                 projectSelects.forEach(select => {
                     select.value = projectId || '';
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
                 });
             }
 
             if (tagId) {
                 const tagChecks = document.querySelectorAll('.analysis-tag-checkbox');
-                tagChecks.forEach(cb => {
-                    cb.checked = cb.value === tagId;
-                });
+                const targetCheckbox = Array.from(tagChecks).find(cb => cb.value === tagId);
+                if (targetCheckbox) {
+                    // Toggle the tag - if it's checked, uncheck it; if unchecked, check it
+                    targetCheckbox.checked = !targetCheckbox.checked;
+                }
             }
 
-            if (typeof updateAnalysisFilterSummary === 'function') {
-                updateAnalysisFilterSummary();
-            }
-            if (typeof updateAnalysisFilterChips === 'function') {
-                updateAnalysisFilterChips();
-            }
+            // Apply the filters to actually trigger the filtering and update global state
             if (typeof applyAnalysisFilters === 'function') {
                 applyAnalysisFilters();
+            } else {
+                if (typeof updateAnalysisFilterSummary === 'function') {
+                    updateAnalysisFilterSummary();
+                }
+                if (typeof updateAnalysisFilterChips === 'function') {
+                    updateAnalysisFilterChips();
+                }
             }
 
             if (projectId || tagId) {
@@ -7122,13 +6947,19 @@
             }
 
             if (typeof tagId === 'string' && tagId.length > 0) {
-                nextTags = [tagId];
-                if (typeof projectId !== 'string') {
-                    nextProject = '';
+                // For sidebar tag selection, preserve existing tags and add/toggle the new one
+                if (nextTags.includes(tagId)) {
+                    // If tag is already selected, remove it (toggle off)
+                    nextTags = nextTags.filter(tag => tag !== tagId);
+                } else {
+                    // Add the tag to existing selection
+                    nextTags = [...nextTags, tagId];
                 }
+                // Don't clear project when selecting a tag from sidebar
             }
 
-            if (typeof projectId === 'string' && (!Array.isArray(tags) || tags.length === 0) && !tagId) {
+            // Only clear tags when explicitly setting a project with empty tags array
+            if (typeof projectId === 'string' && Array.isArray(tags) && tags.length === 0) {
                 nextTags = [];
             }
 
@@ -7170,6 +7001,11 @@
 
             if (typeof loadHistory === 'function') {
                 loadHistory();
+            }
+            
+            // Sync filters to Analysis tab
+            if (typeof syncAnalysisFiltersWithHistoryFilters === 'function') {
+                syncAnalysisFiltersWithHistoryFilters();
             }
 
             ['history-content', 'history-welcome-state', 'history-list'].forEach(id => {
