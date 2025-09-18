@@ -669,7 +669,7 @@
                                     ">
                                         <div style="
                                             display: grid;
-                                            grid-template-columns: 1fr 1fr;
+                                            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
                                             gap: 16px;
                                             margin-bottom: 12px;
                                         ">
@@ -709,6 +709,27 @@
                                                     box-sizing: border-box;
                                                 ">
                                                     <option value="">All Projects</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label style="
+                                                    display: block;
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #6c757d;
+                                                    margin-bottom: 6px;
+                                                ">Market</label>
+                                                <select id="filter-market" style="
+                                                    width: 100%;
+                                                    padding: 8px 12px;
+                                                    border: 1px solid #dee2e6;
+                                                    border-radius: 4px;
+                                                    font-size: 13px;
+                                                    background: white;
+                                                    box-sizing: border-box;
+                                                ">
+                                                    <option value="all">All Markets</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -892,7 +913,7 @@
                                 ">
                                     <div style="
                                         display: grid;
-                                        grid-template-columns: 1fr 1fr;
+                                        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
                                         gap: 16px;
                                         margin-bottom: 12px;
                                     ">
@@ -913,6 +934,25 @@
                                                 background: white;
                                             ">
                                                 <option value="">All Projects</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style="
+                                                display: block;
+                                                font-size: 12px;
+                                                font-weight: 600;
+                                                color: #6c757d;
+                                                margin-bottom: 4px;
+                                            ">Filter by Market</label>
+                                            <select id="analysis-market-filter" style="
+                                                width: 100%;
+                                                padding: 8px 12px;
+                                                border: 1px solid #dee2e6;
+                                                border-radius: 4px;
+                                                font-size: 14px;
+                                                background: white;
+                                            ">
+                                                <option value="all">All Markets</option>
                                             </select>
                                         </div>
                                         <div>
@@ -1095,6 +1135,9 @@
             if (container) {
                 container.title = option.label;
             }
+
+            updateAnalysisFilterSummary();
+            updateAnalysisFilterChips();
         }
 
         function setMarketSelection(value) {
@@ -1747,6 +1790,7 @@
         
         function initializeAnalysisFilters() {
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             const tagsFilter = document.getElementById('analysis-tags-filter');
             const projects = loadProjects();
             const tags = loadTags();
@@ -1758,7 +1802,16 @@
 
                 projectFilter.addEventListener('change', updateAnalysisFilterSummary);
             }
-            
+
+            if (marketFilter) {
+                marketFilter.innerHTML = '<option value="all">All Markets</option>' +
+                    MARKET_OPTIONS.map(option => `<option value="${option.value}">${option.label}</option>`).join('');
+                marketFilter.addEventListener('change', () => {
+                    updateAnalysisFilterSummary();
+                    updateAnalysisFilterChips();
+                });
+            }
+
             // Populate tags filter
             if (tagsFilter) {
                 tagsFilter.innerHTML = '';
@@ -1800,6 +1853,7 @@
                         
                         const checkbox = tagCheckbox.querySelector('input');
                         checkbox.addEventListener('change', updateAnalysisFilterSummary);
+                        checkbox.addEventListener('change', updateAnalysisFilterChips);
                         
                         tagsFilter.appendChild(tagCheckbox);
                     });
@@ -1813,8 +1867,14 @@
             }
 
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             if (projectFilter) {
                 projectFilter.value = currentFilters.project || '';
+            }
+
+            if (marketFilter) {
+                const targetMarket = currentFilters.market || 'all';
+                marketFilter.value = marketFilter.querySelector(`option[value="${targetMarket}"]`) ? targetMarket : 'all';
             }
 
             const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox');
@@ -1835,6 +1895,7 @@
 
         function updateAnalysisFilterSummary() {
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
             const summary = document.getElementById('analysis-filter-summary');
             
@@ -1842,6 +1903,7 @@
             
             let filterCount = 0;
             if (projectFilter && projectFilter.value) filterCount++;
+            if (marketFilter && marketFilter.value && marketFilter.value !== 'all') filterCount++;
             if (tagCheckboxes.length > 0) filterCount++;
             
             if (filterCount === 0) {
@@ -1851,6 +1913,9 @@
                     const projects = loadProjects();
                     const project = projects.find(p => p.id === projectFilter.value);
                     summary.textContent = `Filtered by: ${project?.name || 'Unknown Project'}`;
+                } else if (marketFilter && marketFilter.value && marketFilter.value !== 'all') {
+                    const marketOption = getMarketOption(marketFilter.value);
+                    summary.textContent = `Filtered by: ${marketOption.label}`;
                 } else {
                     summary.textContent = `Filtered by: ${tagCheckboxes.length} tag${tagCheckboxes.length > 1 ? 's' : ''}`;
                 }
@@ -1861,26 +1926,30 @@
         
         function applyAnalysisFilters() {
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             const checkedTagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
 
             const selectedProject = projectFilter ? projectFilter.value : '';
+            const selectedMarket = marketFilter ? marketFilter.value : 'all';
             const selectedTags = Array.from(checkedTagCheckboxes).map(cb => cb.value);
 
             // Keep shared filter state in sync so History reflects analysis selections
-            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
+            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], market: 'all', isActive: false };
             currentFilters = {
                 text: previousFilters.text || '',
                 rawText: previousFilters.rawText || '',
                 project: selectedProject,
                 tags: selectedTags,
+                market: selectedMarket,
                 isActive: Boolean(
                     (previousFilters.text && previousFilters.text.length) ||
                     selectedProject ||
-                    selectedTags.length
+                    selectedTags.length ||
+                    (selectedMarket && selectedMarket !== 'all')
                 )
             };
 
-            _applyToHistory({ projectId: selectedProject, tags: selectedTags, shouldSwitch: false });
+            _applyToHistory({ projectId: selectedProject, tags: selectedTags, market: selectedMarket, shouldSwitch: false });
 
             // Hide filter panel
             const panel = document.getElementById('analysis-filter-panel');
@@ -1890,6 +1959,7 @@
             
             // Update filter chips display
             updateAnalysisFilterChips();
+            updateAnalysisFilterSummary();
             
             // Generate filtered analysis
             generateAnalysisReports();
@@ -1897,22 +1967,26 @@
         
         function clearAnalysisFilters() {
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox');
             
             if (projectFilter) projectFilter.value = '';
+            if (marketFilter) marketFilter.value = 'all';
             tagCheckboxes.forEach(checkbox => checkbox.checked = false);
             
             updateAnalysisFilterSummary();
+            updateAnalysisFilterChips();
 
-            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
+            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], market: 'all', isActive: false };
             currentFilters = {
                 text: previousFilters.text || '',
                 rawText: previousFilters.rawText || '',
                 project: '',
                 tags: [],
+                market: 'all',
                 isActive: Boolean(previousFilters.text && previousFilters.text.length)
             };
-            _applyToHistory({ projectId: '', tags: [], shouldSwitch: false });
+            _applyToHistory({ projectId: '', tags: [], market: 'all', shouldSwitch: false });
         }
         
         function updateAnalysisFilterChips() {
@@ -1926,6 +2000,7 @@
             
             let hasActiveFilters = false;
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             const tagCheckboxes = document.querySelectorAll('.analysis-tag-checkbox:checked');
             
             // Project filter chip
@@ -1935,6 +2010,16 @@
                 const project = projects.find(p => p.id === projectFilter.value);
                 const chip = createFilterChip('project', `📁 ${project?.name || 'Unknown Project'}`, () => {
                     projectFilter.value = '';
+                    applyAnalysisFilters();
+                });
+                filterChips.appendChild(chip);
+            }
+
+            if (marketFilter && marketFilter.value && marketFilter.value !== 'all') {
+                hasActiveFilters = true;
+                const option = getMarketOption(marketFilter.value);
+                const chip = createFilterChip('market', `🌍 ${option.label}`, () => {
+                    marketFilter.value = 'all';
                     applyAnalysisFilters();
                 });
                 filterChips.appendChild(chip);
@@ -1963,6 +2048,7 @@
         function getFilteredSearchHistory() {
             const history = loadSearchHistory();
             const projectFilter = document.getElementById('analysis-project-filter');
+            const marketFilter = document.getElementById('analysis-market-filter');
             const selectedTags = Array.from(document.querySelectorAll('.analysis-tag-checkbox:checked'))
                 .map(cb => cb.value);
             
@@ -1971,7 +2057,13 @@
                 if (projectFilter && projectFilter.value && item.projectId !== projectFilter.value) {
                     return false;
                 }
-                
+
+                if (marketFilter && marketFilter.value && marketFilter.value !== 'all') {
+                    if ((item.market || null) !== marketFilter.value) {
+                        return false;
+                    }
+                }
+
                 // Filter by tags (AND logic)
                 if (selectedTags.length > 0) {
                     const itemTags = item.tags || [];
@@ -4202,6 +4294,7 @@
             rawText: '',
             project: '',
             tags: [],
+            market: 'all',
             isActive: false
         };
         
@@ -4215,6 +4308,7 @@
             const clearBtn = document.getElementById('clear-filters');
             const filterText = document.getElementById('filter-text');
             const filterProject = document.getElementById('filter-project');
+            const filterMarket = document.getElementById('filter-market');
             
             if (toggleBtn) {
                 toggleBtn.addEventListener('click', toggleFilterPanel);
@@ -4235,11 +4329,16 @@
             if (filterProject) {
                 filterProject.addEventListener('change', updateFilterSummary);
             }
+
+            if (filterMarket) {
+                filterMarket.addEventListener('change', updateFilterSummary);
+            }
         }
         
         function populateFilterOptions() {
             const projects = loadProjects();
             const tags = loadTags();
+            const marketSelect = document.getElementById('filter-market');
             
             // Populate projects dropdown
             const projectSelect = document.getElementById('filter-project');
@@ -4252,7 +4351,24 @@
                     projectSelect.appendChild(option);
                 });
             }
-            
+
+            if (marketSelect) {
+                const previousValue = currentFilters.market || 'all';
+                marketSelect.innerHTML = '<option value="all">All Markets</option>';
+                MARKET_OPTIONS.forEach(option => {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = option.value;
+                    optionEl.textContent = option.label;
+                    marketSelect.appendChild(optionEl);
+                });
+                if (previousValue && marketSelect.querySelector(`option[value="${previousValue}"]`)) {
+                    marketSelect.value = previousValue;
+                } else {
+                    marketSelect.value = 'all';
+                    currentFilters.market = 'all';
+                }
+            }
+
             // Populate tags checkboxes
             const tagsContainer = document.getElementById('filter-tags');
             if (tagsContainer) {
@@ -4300,6 +4416,8 @@
                     });
                 }
             }
+
+            updateFilterSummary();
         }
         
         function toggleFilterPanel() {
@@ -4316,6 +4434,7 @@
         function updateFilterSummary() {
             const filterText = document.getElementById('filter-text');
             const filterProject = document.getElementById('filter-project');
+            const filterMarket = document.getElementById('filter-market');
             const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]:checked');
             const summary = document.getElementById('filter-summary');
             
@@ -4334,7 +4453,13 @@
                 const selectedProject = loadProjects().find(p => p.id === filterProject.value);
                 summaryParts.push(`project: ${selectedProject?.name || 'Unknown'}`);
             }
-            
+
+            if (filterMarket && filterMarket.value && filterMarket.value !== 'all') {
+                activeCount++;
+                const marketOption = getMarketOption(filterMarket.value);
+                summaryParts.push(`market: ${marketOption.label}`);
+            }
+
             if (tagCheckboxes.length > 0) {
                 activeCount++;
                 summaryParts.push(`${tagCheckboxes.length} tag${tagCheckboxes.length > 1 ? 's' : ''}`);
@@ -4356,12 +4481,19 @@
             const normalizedText = rawText.toLowerCase();
 
             // Update global filter state
+            const filterMarket = document.getElementById('filter-market');
+
+            const nextProject = filterProject ? filterProject.value : '';
+            const nextTags = Array.from(tagCheckboxes).map(cb => cb.value);
+            const nextMarket = filterMarket ? filterMarket.value : 'all';
+
             currentFilters = {
                 text: normalizedText,
                 rawText: rawText,
-                project: filterProject ? filterProject.value : '',
-                tags: Array.from(tagCheckboxes).map(cb => cb.value),
-                isActive: true
+                project: nextProject,
+                tags: nextTags,
+                market: nextMarket,
+                isActive: Boolean(normalizedText || nextProject || nextTags.length > 0 || (nextMarket && nextMarket !== 'all'))
             };
             
             // Apply filters to history
@@ -4371,6 +4503,7 @@
             
             // Update filter chips display
             updateFilterChips();
+            updateFilterSummary();
             
             // Hide filter panel
             const panel = document.getElementById('filter-panel');
@@ -4381,7 +4514,7 @@
         }
         
         function applyAdvancedFilters(history) {
-            if (!currentFilters.isActive && !currentFilters.text && !currentFilters.project && currentFilters.tags.length === 0) {
+            if (!currentFilters.isActive && !currentFilters.text && !currentFilters.project && currentFilters.tags.length === 0 && (!currentFilters.market || currentFilters.market === 'all')) {
                 return history;
             }
             
@@ -4416,7 +4549,15 @@
                         return false;
                     }
                 }
-                
+
+                // Market filter - match stored market value (legacy entries may not have market)
+                if (currentFilters.market && currentFilters.market !== 'all') {
+                    const itemMarket = item.market || null;
+                    if (itemMarket !== currentFilters.market) {
+                        return false;
+                    }
+                }
+
                 return true;
             });
         }
@@ -4456,7 +4597,19 @@
                 });
                 filterChips.appendChild(chip);
             }
-            
+
+            if (currentFilters.market && currentFilters.market !== 'all') {
+                hasActiveFilters = true;
+                const option = getMarketOption(currentFilters.market);
+                const chip = createFilterChip('market', `🌍 ${option.label}`, () => {
+                    currentFilters.market = 'all';
+                    const filterMarket = document.getElementById('filter-market');
+                    if (filterMarket) filterMarket.value = 'all';
+                    applyFilters();
+                });
+                filterChips.appendChild(chip);
+            }
+
             // Tag filter chips
             if (currentFilters.tags.length > 0) {
                 hasActiveFilters = true;
@@ -4522,10 +4675,12 @@
             // Reset form
             const filterText = document.getElementById('filter-text');
             const filterProject = document.getElementById('filter-project');
+            const filterMarket = document.getElementById('filter-market');
             const tagCheckboxes = document.querySelectorAll('#filter-tags input[type="checkbox"]');
             
             if (filterText) filterText.value = '';
             if (filterProject) filterProject.value = '';
+            if (filterMarket) filterMarket.value = 'all';
             tagCheckboxes.forEach(cb => cb.checked = false);
             
             // Reset global state
@@ -4534,6 +4689,7 @@
                 rawText: '',
                 project: '',
                 tags: [],
+                market: 'all',
                 isActive: false
             };
             
@@ -6950,8 +7106,8 @@
             }
         }
 
-        function _applyToHistory({ projectId, tagId, tags, shouldSwitch = true } = {}) {
-            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], isActive: false };
+        function _applyToHistory({ projectId, tagId, tags, market, shouldSwitch = true } = {}) {
+            const previousFilters = currentFilters || { text: '', rawText: '', project: '', tags: [], market: 'all', isActive: false };
 
             const filterTextInput = document.getElementById('filter-text');
             const rawFromDom = filterTextInput ? filterTextInput.value.trim() : '';
@@ -6980,6 +7136,16 @@
                 nextTags = [];
             }
 
+            const filterMarketSelect = document.getElementById('filter-market');
+            let nextMarket = previousFilters.market || 'all';
+            const domMarket = filterMarketSelect ? filterMarketSelect.value : '';
+
+            if (typeof market === 'string') {
+                nextMarket = market;
+            } else if (domMarket) {
+                nextMarket = domMarket;
+            }
+
             const normalizedText = effectiveRawText.toLowerCase();
 
             currentFilters = {
@@ -6987,8 +7153,13 @@
                 rawText: effectiveRawText,
                 project: nextProject,
                 tags: nextTags,
-                isActive: Boolean(normalizedText || nextProject || nextTags.length)
+                market: nextMarket,
+                isActive: Boolean(normalizedText || nextProject || nextTags.length || (nextMarket && nextMarket !== 'all'))
             };
+
+            if (filterMarketSelect) {
+                filterMarketSelect.value = nextMarket || 'all';
+            }
 
             const historyIsActive = _activeTab() === 'history';
             const shouldRender = shouldSwitch || historyIsActive;
