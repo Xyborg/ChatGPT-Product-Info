@@ -377,15 +377,49 @@
                             </div>
                             
                             <!-- Single product input -->
-                            <div id="single-product-input" style="display: flex; gap: 12px; margin-bottom: 12px;">
-                                <input type="text" id="search-query" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" style="
-                                    flex: 1;
-                                    padding: 8px 12px;
-                                    border: 1px solid #dee2e6;
-                                    border-radius: 4px;
-                                    font-size: 14px;
-                                    box-sizing: border-box;
-                                " />
+                            <div id="single-product-input" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+                                <div id="single-input-group" style="flex: 1; display: flex; gap: 12px; align-items: center;">
+                                    <input type="text" id="search-query" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" style="
+                                        flex: 1;
+                                        padding: 8px 12px;
+                                        border: 1px solid #dee2e6;
+                                        border-radius: 4px;
+                                        font-size: 14px;
+                                        box-sizing: border-box;
+                                    " />
+                                    <div id="market-select-container" style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 6px;
+                                        border: 1px solid #dee2e6;
+                                        border-radius: 4px;
+                                        padding: 0 10px;
+                                        background: white;
+                                        position: relative;
+                                        min-width: 120px;
+                                        cursor: pointer;
+                                    ">
+                                        <img id="market-select-flag" src="" alt="Selected market flag" style="
+                                            width: 20px;
+                                            height: 14px;
+                                            object-fit: cover;
+                                            border-radius: 2px;
+                                        " />
+                                        <span id="market-select-code" style="font-size: 13px; font-weight: 600; color: #495057;">DE</span>
+                                        <span style="margin-left: auto; color: #6c757d; font-size: 12px;">▾</span>
+                                        <select id="market-select" aria-label="Select language and market" style="
+                                            position: absolute;
+                                            top: 0;
+                                            left: 0;
+                                            width: 100%;
+                                            height: 100%;
+                                            opacity: 0;
+                                            cursor: pointer;
+                                            border: none;
+                                            background: transparent;
+                                        "></select>
+                                    </div>
+                                </div>
                                 <button id="search-btn" style="
                                     background: #007bff;
                                     color: white;
@@ -432,6 +466,7 @@
                                         font-style: italic;
                                     ">Results will be shown in a table format</div>
                                 </div>
+                                <div id="multi-market-select-mount" style="display: none; align-items: center; gap: 8px; margin-top: 12px;"></div>
                             </div>
                             </div> <!-- End search-controls -->
                             
@@ -1006,6 +1041,108 @@
             </div>
         `;
 
+        const ACCEPT_LANGUAGE_FALLBACK = 'en;q=0.8, es-AR;q=0.7, es;q=0.6, it;q=0.4, zh-CN;q=0.3, zh;q=0.2, id;q=0.1, pt-BR;q=0.1, pt;q=0.1, fr;q=0.1, tr;q=0.1, pl;q=0.1, sv;q=0.1, ru;q=0.1, ar;q=0.1, el;q=0.1';
+        const MARKET_OPTIONS = [
+            { value: 'de-DE', label: 'German/Germany', code: 'DE', acceptLanguagePrefix: 'de-DE, de;q=0.9', oaiLanguage: 'de-DE', icon: 'assets/flags/de.svg' },
+            { value: 'de-CH', label: 'German/Switzerland', code: 'CH', acceptLanguagePrefix: 'de-CH, de;q=0.9', oaiLanguage: 'de-CH', icon: 'assets/flags/ch.svg' },
+            { value: 'de-AT', label: 'German/Austria', code: 'AT', acceptLanguagePrefix: 'de-AT, de;q=0.9', oaiLanguage: 'de-AT', icon: 'assets/flags/at.svg' },
+            { value: 'en-US', label: 'English/US', code: 'US', acceptLanguagePrefix: 'en-US, en;q=0.9', oaiLanguage: 'en-US', icon: 'assets/flags/us.svg' },
+            { value: 'en-GB', label: 'English/UK', code: 'UK', acceptLanguagePrefix: 'en-GB, en;q=0.9', oaiLanguage: 'en-GB', icon: 'assets/flags/gb.svg' },
+            { value: 'nl-NL', label: 'Dutch/Netherlands', code: 'NL', acceptLanguagePrefix: 'nl-NL, nl;q=0.9', oaiLanguage: 'nl-NL', icon: 'assets/flags/nl.svg' },
+            { value: 'nl-BE', label: 'Dutch/BE', code: 'BE/NL', acceptLanguagePrefix: 'nl-BE, nl;q=0.9', oaiLanguage: 'nl-BE', icon: 'assets/flags/be.svg' },
+            { value: 'fr-BE', label: 'French/BE', code: 'BE/FR', acceptLanguagePrefix: 'fr-BE, fr;q=0.9', oaiLanguage: 'fr-BE', icon: 'assets/flags/be.svg' },
+            { value: 'de-BE', label: 'German/BE', code: 'BE/DE', acceptLanguagePrefix: 'de-BE, de;q=0.9', oaiLanguage: 'de-BE', icon: 'assets/flags/be.svg' },
+            { value: 'es-ES', label: 'Spanish/ES', code: 'ES', acceptLanguagePrefix: 'es-ES, es;q=0.9', oaiLanguage: 'es-ES', icon: 'assets/flags/es.svg' }
+        ];
+
+        function getMarketOption(value) {
+            const match = MARKET_OPTIONS.find(option => option.value === value);
+            return match || MARKET_OPTIONS[0];
+        }
+
+        function buildAcceptLanguage(option) {
+            const prefixParts = option.acceptLanguagePrefix.split(',').map(part => part.trim().toLowerCase());
+            const fallbackParts = ACCEPT_LANGUAGE_FALLBACK.split(',').map(part => part.trim());
+            const filteredFallback = fallbackParts.filter(part => !prefixParts.includes(part.toLowerCase()));
+            return [option.acceptLanguagePrefix, filteredFallback.join(', ')].filter(Boolean).join(', ');
+        }
+
+        function updateMarketSelectorDisplay(value) {
+            const option = getMarketOption(value);
+            const flagEl = document.getElementById('market-select-flag');
+            const codeEl = document.getElementById('market-select-code');
+            const container = document.getElementById('market-select-container');
+            if (flagEl) {
+                flagEl.src = chrome.runtime.getURL(option.icon);
+                flagEl.alt = `${option.label} flag`;
+            }
+            if (codeEl) {
+                codeEl.textContent = option.code;
+            }
+            if (container) {
+                container.title = option.label;
+            }
+        }
+
+        function setMarketSelection(value) {
+            const option = getMarketOption(value);
+            const marketSelect = document.getElementById('market-select');
+            if (marketSelect) {
+                marketSelect.value = option.value;
+            }
+            localStorage.setItem('chatgpt-product-search-market', option.value);
+            updateMarketSelectorDisplay(option.value);
+            return option;
+        }
+
+        function getSelectedMarketSettings() {
+            const marketSelect = document.getElementById('market-select');
+            const storedValue = localStorage.getItem('chatgpt-product-search-market');
+            const selectedValue = marketSelect ? marketSelect.value : storedValue;
+            const option = getMarketOption(selectedValue);
+            return {
+                ...option,
+                acceptLanguage: buildAcceptLanguage(option)
+            };
+        }
+
+        function moveMarketSelector(isMultiMode) {
+            const marketSelectContainer = document.getElementById('market-select-container');
+            const singleInputGroup = document.getElementById('single-input-group');
+            const multiMarketMount = document.getElementById('multi-market-select-mount');
+            if (!marketSelectContainer) {
+                return;
+            }
+
+            if (isMultiMode) {
+                if (multiMarketMount) {
+                    multiMarketMount.style.display = 'flex';
+                    multiMarketMount.appendChild(marketSelectContainer);
+                }
+            } else {
+                if (singleInputGroup) {
+                    singleInputGroup.appendChild(marketSelectContainer);
+                }
+                if (multiMarketMount) {
+                    multiMarketMount.style.display = 'none';
+                }
+            }
+        }
+
+        function renderMarketBadge(marketValue, marketCode, marketLabel) {
+            if (!marketValue) {
+                return '';
+            }
+            const option = getMarketOption(marketValue);
+            if (!option) {
+                return '';
+            }
+            const codeText = marketCode || option.code;
+            const labelText = marketLabel || option.label;
+            const flagUrl = chrome.runtime.getURL(option.icon);
+            return '<span style="display:inline-flex;align-items:center;gap:4px;"><img src="' + flagUrl + '" alt="' + labelText + ' flag" style="width:16px;height:12px;object-fit:cover;border-radius:2px;" /><span>' + codeText + '</span></span>';
+        }
+
         // Function to create and show modal
         function createModal() {
             // Remove existing modal if present
@@ -1031,9 +1168,37 @@
             const toggleSlider = document.getElementById('toggle-slider');
             const singleProductInput = document.getElementById('single-product-input');
             const multiProductInput = document.getElementById('multi-product-input');
+            const marketSelect = document.getElementById('market-select');
+            const marketSelectContainer = document.getElementById('market-select-container');
+            const multiMarketMount = document.getElementById('multi-market-select-mount');
+            const singleInputGroup = document.getElementById('single-input-group');
             const collapseToggle = document.getElementById('collapse-toggle');
             const collapseText = document.getElementById('collapse-text');
             const searchControls = document.getElementById('search-controls');
+
+            if (marketSelect) {
+                marketSelect.innerHTML = '';
+                MARKET_OPTIONS.forEach(option => {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = option.value;
+                    optionEl.textContent = `${option.label}`;
+                    marketSelect.appendChild(optionEl);
+                });
+                const savedValue = localStorage.getItem('chatgpt-product-search-market') || MARKET_OPTIONS[0].value;
+                setMarketSelection(savedValue);
+                marketSelect.addEventListener('change', () => {
+                    setMarketSelection(marketSelect.value);
+                });
+            } else {
+                const savedValue = localStorage.getItem('chatgpt-product-search-market') || MARKET_OPTIONS[0].value;
+                setMarketSelection(savedValue);
+            }
+
+            if (marketSelectContainer) {
+                marketSelectContainer.style.minHeight = '36px';
+            }
+
+            moveMarketSelector(multiProductToggle ? multiProductToggle.checked : false);
 
             // Close modal functionality
             closeBtn.addEventListener('click', () => {
@@ -1071,6 +1236,8 @@
                     toggleBackground.style.background = '#dee2e6';
                     toggleSlider.style.transform = 'translateX(0px)';
                 }
+
+                moveMarketSelector(isMultiMode);
             });
 
             // Collapse/Expand functionality
@@ -1980,10 +2147,11 @@
             }
         }
 
-        function saveSearchToHistory(query, results, searchType = 'single', tags = [], projectId = null) {
+        function saveSearchToHistory(query, results, searchType = 'single', tags = [], projectId = null, marketValue = null) {
             try {
                 const history = JSON.parse(localStorage.getItem('chatgpt-product-search-history') || '[]');
                 const sanitizedResults = sanitizeForStorage(results);
+                const marketOption = marketValue ? getMarketOption(marketValue) : getSelectedMarketSettings();
                 const historyItem = {
                     id: Date.now() + Math.random().toString(36).substr(2, 9),
                     query: query,
@@ -1993,7 +2161,10 @@
                     date: new Date().toLocaleString(),
                     tags: Array.isArray(tags) ? tags : [],
                     projectId: projectId,
-                    version: 2
+                    version: 2,
+                    market: marketOption.value,
+                    marketLabel: marketOption.label,
+                    marketCode: marketOption.code
                 };
                 
                 if (tags && Array.isArray(tags)) {
@@ -2046,6 +2217,15 @@
                 }
                 if (Object.prototype.hasOwnProperty.call(updates, 'projectId')) {
                     updatedItem.projectId = updates.projectId;
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'market')) {
+                    updatedItem.market = updates.market;
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'marketLabel')) {
+                    updatedItem.marketLabel = updates.marketLabel;
+                }
+                if (Object.prototype.hasOwnProperty.call(updates, 'marketCode')) {
+                    updatedItem.marketCode = updates.marketCode;
                 }
 
                 updatedItem.updatedAt = Date.now();
@@ -4947,8 +5127,8 @@
                         font-size: 12px;
                         color: #6c757d;
                         margin-bottom: 8px;
-                    ">
-                        ${item.date} • ${item.searchType === 'multi' ? 'Multi-product search' : 'Single search'}
+                    " ${item.marketLabel ? `title="${item.marketLabel}"` : ''}>
+                        ${item.date} • ${item.searchType === 'multi' ? 'Multi-product search' : 'Single search'}${item.market ? ` • ${renderMarketBadge(item.market, item.marketCode, item.marketLabel)}` : (item.marketCode ? ` • ${item.marketCode}` : '')}
                     </div>
                     ${generateHistoryTagsAndProject(item)}
                     <div style="
@@ -5047,6 +5227,8 @@
                 if (toggleBackground) toggleBackground.style.background = '#dee2e6';
                 if (toggleSlider) toggleSlider.style.transform = 'translateX(0px)';
             }
+
+            moveMarketSelector(isMultiMode);
         }
 
         function reopenSearch(itemId) {
@@ -5056,6 +5238,10 @@
 
             // Switch to search tab
             switchTab('search');
+
+            if (item.market) {
+                setMarketSelection(item.market);
+            }
 
             // Fill search query
             const searchQuery = document.getElementById('search-query');
@@ -5116,6 +5302,8 @@
                 alert('Please enter a search query');
                 return;
             }
+
+            const marketSettings = getSelectedMarketSettings();
             
             // Get token automatically
             let token;
@@ -5138,9 +5326,9 @@
             `;
             
             try {
-                const result = await searchProduct(query, token);
+                const result = await searchProduct(query, token, marketSettings);
                 displayResults(result, query);
-                const historyId = saveSearchToHistory(query, result, 'single');
+                const historyId = saveSearchToHistory(query, result, 'single', [], null, marketSettings.value);
                 
                 // Show post-search tagging interface
                 showPostSearchTagging(query, result, 'single', historyId);
@@ -5195,7 +5383,9 @@
                 alert('Maximum 10 products allowed at once to avoid rate limiting');
                 return;
             }
-            
+
+            const marketSettings = getSelectedMarketSettings();
+
             // Get token automatically
             let token;
             try {
@@ -5231,7 +5421,7 @@
                     }
                     
                     try {
-                        const result = await searchProduct(query, token);
+                        const result = await searchProduct(query, token, marketSettings);
                         results.push({
                             query: query,
                             success: true,
@@ -5266,7 +5456,7 @@
                     rationale: `Multi-product search for ${queries.length} products`,
                     reviewSummary: `Combined results from ${results.filter(r => r.success).length} successful searches`
                 };
-                const historyId = saveSearchToHistory(queriesText, combinedResults, 'multi');
+                const historyId = saveSearchToHistory(queriesText, combinedResults, 'multi', [], null, marketSettings.value);
                 showPostSearchTagging(queriesText, combinedResults, 'multi', historyId);
             } catch (error) {
                 displayError(error.message);
@@ -5313,7 +5503,8 @@
             }
         }
 
-        async function searchProduct(query, token) {
+        async function searchProduct(query, token, marketSettings = getSelectedMarketSettings()) {
+            const effectiveMarket = marketSettings || getSelectedMarketSettings();
             const requestBody = {
                 "conversation_id": "",
                 "is_client_thread": true,
@@ -5339,12 +5530,12 @@
             const response = await fetch("https://chatgpt.com/backend-api/search/product_info", {
                 "headers": {
                     "accept": "text/event-stream",
-                    "accept-language": "de-DE, de;q=0.9, en;q=0.8, es-AR;q=0.7, es;q=0.6, it;q=0.4, zh-CN;q=0.3, zh;q=0.2, id;q=0.1, pt-BR;q=0.1, pt;q=0.1, fr;q=0.1, tr;q=0.1, pl;q=0.1, sv;q=0.1, ru;q=0.1, ar;q=0.1, el;q=0.1",
+                    "accept-language": effectiveMarket.acceptLanguage,
                     "authorization": "Bearer " + token,
                     "content-type": "application/json",
                     "oai-client-version": "prod-43c98f917bf2c3e3a36183e9548cd048e4e40615",
                     "oai-device-id": generateDeviceId(),
-                    "oai-language": "en-US",
+                    "oai-language": effectiveMarket.oaiLanguage || 'en-US',
                     "priority": "u=1, i",
                     "sec-ch-ua": '"Opera";v="120", "Not-A.Brand";v="8", "Chromium";v="135"',
                     "sec-ch-ua-arch": '"arm"',
