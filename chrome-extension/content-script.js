@@ -30,6 +30,29 @@
         // Migrate existing search history data to new format (Phase 1)
         migrateSearchHistoryData();
 
+        // Resolve extension assets
+        const settingsIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/settings.svg')
+            : 'assets/icons-ui/settings.svg';
+        const searchIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/search.svg')
+            : 'assets/icons-ui/search.svg';
+        const historyIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/history.svg')
+            : 'assets/icons-ui/history.svg';
+        const analysisIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/analysis.svg')
+            : 'assets/icons-ui/analysis.svg';
+        const projectIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/project.svg')
+            : 'assets/icons-ui/project.svg';
+        const tagIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/tag.svg')
+            : 'assets/icons-ui/tag.svg';
+        const editIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/edit.svg')
+            : 'assets/icons-ui/edit.svg';
+
         // Create modal HTML
         const modalHTML = `
             <div id="chatgpt-product-search-modal" style="
@@ -109,7 +132,10 @@
                             font-weight: 600;
                             margin: 0;
                             color: #495057;
-                        ">🔍 ChatGPT Product Info Research</h1>
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        "><img src="${searchIconUrl}" alt="Search" style="width: 20px; height: 20px;" />ChatGPT Product Info Research</h1>
                         <button id="close-modal-btn" style="
                             background: none;
                             border: none;
@@ -168,7 +194,7 @@
                                     align-items: center;
                                     justify-content: center;
                                     transition: all 0.2s ease;
-                                " title="Settings"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M41.43,178.09A99.14,99.14,0,0,1,31.36,153.8l16.78-21a81.59,81.59,0,0,1,0-9.64l-16.77-21a99.43,99.43,0,0,1,10.05-24.3l26.71-3a81,81,0,0,1,6.81-6.81l3-26.7A99.14,99.14,0,0,1,102.2,31.36l21,16.78a81.59,81.59,0,0,1,9.64,0l21-16.77a99.43,99.43,0,0,1,24.3,10.05l3,26.71a81,81,0,0,1,6.81,6.81l26.7,3a99.14,99.14,0,0,1,10.07,24.29l-16.78,21a81.59,81.59,0,0,1,0,9.64l16.77,21a99.43,99.43,0,0,1-10,24.3l-26.71,3a81,81,0,0,1-6.81,6.81l-3,26.7a99.14,99.14,0,0,1-24.29,10.07l-21-16.78a81.59,81.59,0,0,1-9.64,0l-21,16.77a99.43,99.43,0,0,1-24.3-10l-3-26.71a81,81,0,0,1-6.81-6.81Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></button>
+                                " title="Settings"><img src="${settingsIconUrl}" alt="Settings" style="width: 18px; height: 18px;" /></button>
                             </div>
                             
                             <div style="
@@ -272,7 +298,11 @@
                                 cursor: pointer;
                                 border-bottom: 2px solid #007bff;
                                 transition: all 0.2s ease;
-                            ">🔍 Search</button>
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            "><img src="${searchIconUrl}" alt="Search" style="width: 20px; height: 20px;" />Search</button>
                             <button id="history-tab" class="tab-button" style="
                                 flex: 1;
                                 padding: 12px 20px;
@@ -284,7 +314,11 @@
                                 cursor: pointer;
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
-                            ">📋 History</button>
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            "><img src="${historyIconUrl}" alt="History" style="width: 20px; height: 20px;" />History</button>
                             <button id="reports-tab" class="tab-button" style="
                                 flex: 1;
                                 padding: 12px 20px;
@@ -296,7 +330,11 @@
                                 cursor: pointer;
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
-                            ">📊 Analysis</button>
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            "><img src="${analysisIconUrl}" alt="Analysis" style="width: 20px; height: 20px;" />Analysis</button>
                         </div>
                         
                         <div id="search-area" style="
@@ -512,11 +550,7 @@
                                 height: 100%;
                                 min-height: 300px;
                             ">
-                                <div style="
-                                    font-size: 48px;
-                                    margin-bottom: 20px;
-                                    opacity: 0.7;
-                                ">🔍</div>
+                                <img src="${searchIconUrl}" alt="Search" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.7;" />
                                 <h3 style="
                                     margin: 0 0 12px 0;
                                     font-size: 20px;
@@ -574,11 +608,7 @@
                                 height: 100%;
                                 min-height: 300px;
                             ">
-                                <div style="
-                                    font-size: 48px;
-                                    margin-bottom: 20px;
-                                    opacity: 0.7;
-                                ">📋</div>
+                                <img src="${historyIconUrl}" alt="History" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.7;" />
                                 <h3 style="
                                     margin: 0 0 12px 0;
                                     font-size: 20px;
@@ -838,11 +868,7 @@
                                 height: 100%;
                                 min-height: 300px;
                             ">
-                                <div style="
-                                    font-size: 48px;
-                                    margin-bottom: 20px;
-                                    opacity: 0.7;
-                                ">📊</div>
+                                <img src="${analysisIconUrl}" alt="Analysis" style="width: 20px; height: 20px; margin-bottom: 20px; opacity: 0.7;" />
                                 <h3 style="
                                     margin: 0 0 12px 0;
                                     font-size: 20px;
@@ -1849,7 +1875,8 @@
                                    class="analysis-tag-checkbox" 
                                    value="${tag.id}" 
                                    style="margin: 0; width: 12px; height: 12px;">
-                            🏷️ <span>${tag.name}</span>
+                            <img src="${tagIconUrl}" alt="Tag" style="width: 14px; height: 14px;" />
+                            <span>${tag.name}</span>
                         `;
                         
                         const checkbox = tagCheckbox.querySelector('input');
@@ -2059,7 +2086,7 @@
                 hasActiveFilters = true;
                 const projects = loadProjects();
                 const project = projects.find(p => p.id === projectFilter.value);
-                const chip = createFilterChip('project', `📁 ${project?.name || 'Unknown Project'}`, () => {
+                const chip = createFilterChip('project', `<span style="display:flex; align-items:center; gap:4px;"><img src="${projectIconUrl}" alt="Project" style="width: 14px; height: 14px;" />${project?.name || 'Unknown Project'}</span>`, () => {
                     projectFilter.value = '';
                     applyAnalysisFilters();
                 });
@@ -2780,7 +2807,7 @@
                         justify-content: space-between;
                         align-items: center;
                     ">
-                        <span style="font-weight: 500;">📁 ${project.name}</span>
+                        <span style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><img src="${projectIconUrl}" alt="Project" style="width: 16px; height: 16px;" />${project.name}</span>
                         <span style="
                             font-size: 11px;
                             color: #6c757d;
@@ -2840,7 +2867,7 @@
                         align-items: center;
                         gap: 4px;
                     ">
-                        🏷️ ${tag.name}
+                        <img src="${tagIconUrl}" alt="Tag" style="width: 14px; height: 14px;" />${tag.name}
                     </span>
                     <span style="
                         font-size: 10px;
@@ -2937,7 +2964,7 @@
                                 font-size: 18px;
                                 font-weight: 600;
                                 margin: 0;
-                                color: #495057; display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" style="margin-right: 8px;"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M41.43,178.09A99.14,99.14,0,0,1,31.36,153.8l16.78-21a81.59,81.59,0,0,1,0-9.64l-16.77-21a99.43,99.43,0,0,1,10.05-24.3l26.71-3a81,81,0,0,1,6.81-6.81l3-26.7A99.14,99.14,0,0,1,102.2,31.36l21,16.78a81.59,81.59,0,0,1,9.64,0l21-16.77a99.43,99.43,0,0,1,24.3,10.05l3,26.71a81,81,0,0,1,6.81,6.81l26.7,3a99.14,99.14,0,0,1,10.07,24.29l-16.78,21a81.59,81.59,0,0,1,0,9.64l16.77,21a99.43,99.43,0,0,1-10,24.3l-26.71,3a81,81,0,0,1-6.81,6.81l-3,26.7a99.14,99.14,0,0,1-24.29,10.07l-21-16.78a81.59,81.59,0,0,1-9.64,0l-21,16.77a99.43,99.43,0,0,1-24.3-10l-3-26.71a81,81,0,0,1-6.81-6.81Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>Settings</h2>
+                                color: #495057; display: flex; align-items: center;"><img src="${settingsIconUrl}" alt="Settings" style="width: 20px;height: 20px;margin-right: 5px;" />Settings</h2>
                             <button id="close-settings-modal" style="
                                 background: none;
                                 border: none;
@@ -2970,7 +2997,11 @@
                                 cursor: pointer;
                                 border-bottom: 2px solid #007bff;
                                 transition: all 0.2s ease;
-                            ">🏷️ Tags</button>
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            "><img src="${tagIconUrl}" alt="Tags" style="width: 20px; height: 20px;" />Tags</button>
                             <button id="projects-settings-tab" class="settings-tab-button" style="
                                 flex: 1;
                                 padding: 12px 20px;
@@ -2982,7 +3013,11 @@
                                 cursor: pointer;
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
-                            ">📁 Projects</button>
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            "><img src="${projectIconUrl}" alt="Projects" style="width: 20px; height: 20px;" />Projects</button>
                         </div>
                         
                         <!-- Settings Content -->
@@ -3528,7 +3563,7 @@
                         align-items: center;
                         gap: 8px;
                     ">
-                        <span style="font-size: 16px;">🏷️</span>
+                        <img src="${tagIconUrl}" alt="Tags" style="width: 16px; height: 16px;" />
                         <span style="
                             font-weight: 600;
                             color: #155724;
@@ -3609,7 +3644,10 @@
                             color: #495057;
                             font-size: 14px;
                             font-weight: 600;
-                        ">🏷️ Organize This Search</h4>
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        "><img src="${tagIconUrl}" alt="Tags" style="width: 16px; height: 16px;" />Organize This Search</h4>
                         <div style="
                             font-size: 12px;
                             color: #6c757d;
@@ -3979,7 +4017,7 @@
                         align-items: center;
                         gap: 8px;
                     ">
-                        <span style="font-size: 16px;">🏷️</span>
+                        <img src="${tagIconUrl}" alt="Tags" style="width: 16px; height: 16px;" />
                         <span style="
                             font-weight: 600;
                             color: #856404;
@@ -4054,7 +4092,10 @@
                             color: #856404;
                             font-size: 14px;
                             font-weight: 600;
-                        ">✏️ Edit Organization</h4>
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        "><img src="${editIconUrl}" alt="Edit" style="width: 16px; height: 16px;" />Edit Organization</h4>
                         <div style="
                             font-size: 12px;
                             color: #856404;
@@ -4274,7 +4315,8 @@
                         gap: 4px;
                     `;
                     tagElement.innerHTML = `
-                        🏷️ ${tag.name}
+                        <img src="${tagIconUrl}" alt="Tag" style="width: 14px; height: 14px;" />
+                        <span>${tag.name}</span>
                         <button class="remove-edit-tag-btn" data-tag-id="${tagId}" style="
                             background: none;
                             border: none;
@@ -4448,7 +4490,7 @@
                             font-size: 11px;
                             color: #495057;
                         ">
-                            <span>📁</span>
+                            <img src="${projectIconUrl}" alt="Project" style="width: 14px; height: 14px;" />
                             <span>${project.name}</span>
                         </div>
                     `;
@@ -4470,9 +4512,10 @@
                                 font-size: 11px;
                                 display: flex;
                                 align-items: center;
-                                gap: 2px;
+                                gap: 4px;
                             ">
-                                🏷️ <span>${tag.name}</span>
+                                <img src="${tagIconUrl}" alt="Tag" style="width: 14px; height: 14px;" />
+                                <span>${tag.name}</span>
                             </div>
                         `;
                     }
@@ -4605,7 +4648,8 @@
                                 width: 12px;
                                 height: 12px;
                             " />
-                            🏷️ <span>${tag.name}</span>
+                            <img src="${tagIconUrl}" alt="Tag" style="width: 14px; height: 14px;" />
+                            <span>${tag.name}</span>
                         `;
                         
                         const checkbox = tagCheckbox.querySelector('input');
@@ -4791,7 +4835,7 @@
             if (currentFilters.project) {
                 hasActiveFilters = true;
                 const project = loadProjects().find(p => p.id === currentFilters.project);
-                const chip = createFilterChip('project', `📁 ${project?.name || 'Unknown Project'}`, () => {
+                const chip = createFilterChip('project', `<span style="display:flex; align-items:center; gap:4px;"><img src="${projectIconUrl}" alt="Project" style="width: 14px; height: 14px;" />${project?.name || 'Unknown Project'}</span>`, () => {
                     currentFilters.project = '';
                     const filterProject = document.getElementById('filter-project');
                     if (filterProject) filterProject.value = '';
@@ -5015,11 +5059,7 @@
                         height: 100%;
                         min-height: 300px;
                     ">
-                        <div style="
-                            font-size: 48px;
-                            margin-bottom: 20px;
-                            opacity: 0.7;
-                        ">🔍</div>
+                        <img src="${searchIconUrl}" alt="Search" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.7;" />
                         <h3 style="
                             margin: 0 0 12px 0;
                             font-size: 20px;
@@ -5199,7 +5239,7 @@
                                 font-size: 12px;
                                 cursor: pointer;
                                 white-space: nowrap;
-                            ">Reopen</button>
+                            ">Open</button>
                             <button class="delete-history-btn" data-id="${item.id}" style="
                                 background: #dc3545;
                                 color: white;

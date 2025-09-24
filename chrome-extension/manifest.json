@@ -41,7 +41,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["icons/*", "assets/flags/*"],
+      "resources": ["icons/*", "assets/flags/*", "assets/icons-ui/*"],
       "matches": ["https://chatgpt.com/*", "https://*.chatgpt.com/*"]
     }
   ]
