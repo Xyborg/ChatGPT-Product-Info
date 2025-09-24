@@ -4,8 +4,7 @@
   "version": "1.2.4",
   "description": "Research product reviews, comparisons, and detailed information directly within ChatGPT",
   "permissions": [
-    "activeTab",
-    "storage"
+    "activeTab"
   ],
   "host_permissions": [
     "https://chatgpt.com/*",
