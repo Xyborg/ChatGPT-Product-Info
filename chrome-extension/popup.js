@@ -1,4 +1,4 @@
-// ChatGPT Product Search Extension - Popup Script
+// ChatGPT Product Info Research Extension - Popup Script
 
 document.addEventListener('DOMContentLoaded', async () => {
     const statusEl = document.getElementById('status');
