@@ -2353,15 +2353,20 @@
         }
         
         function generateSimpleSourcesHTML(sources, type) {
+            const headerLabel = type === 'reviews' ? 'Review Sources' : 'Citation Sources';
+            const emptyMessage = type === 'reviews'
+                ? 'No review sources found'
+                : 'No citation sources found';
+
             if (sources.length === 0) {
-                return `<div style="text-align: center; padding: 40px; color: #6c757d;">No ${type} sources found</div>`;
+                return `<div style="text-align: center; padding: 40px; color: #6c757d;">${emptyMessage}</div>`;
             }
-            
+
             return `
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr style="background: #f8f9fa;">
-                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e9ecef;">Domain</th>
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #e9ecef;">${headerLabel}</th>
                             <th style="padding: 8px; text-align: right; border-bottom: 1px solid #e9ecef;">Count</th>
                         </tr>
                     </thead>
