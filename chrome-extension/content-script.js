@@ -52,6 +52,59 @@
         const editIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
             ? chrome.runtime.getURL('assets/icons-ui/edit.svg')
             : 'assets/icons-ui/edit.svg';
+        const positiveIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/positive.svg')
+            : 'assets/icons-ui/positive.svg';
+        const neutralIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/neutral.svg')
+            : 'assets/icons-ui/neutral.svg';
+        const negativeIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/negative.svg')
+            : 'assets/icons-ui/negative.svg';
+        const checkIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/check.svg')
+            : 'assets/icons-ui/check.svg';
+        const warningIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/warning.svg')
+            : 'assets/icons-ui/warning.svg';
+        const errorIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/error.svg')
+            : 'assets/icons-ui/error.svg';
+
+        function formatStatusMessage(iconType, message, size = 'medium') {
+            const sizeClass = size === 'large' ? 'status-icon--large' : 'status-icon--medium';
+            return `<span class="status-icon ${sizeClass} status-icon--${iconType}" aria-hidden="true"></span><span>${message}</span>`;
+        }
+
+        function applyInputStatusStyles(input, { text, iconUrl, color, backgroundColor, borderColor }) {
+            if (!input) {
+                return;
+            }
+
+            input.placeholder = text;
+            input.style.backgroundColor = backgroundColor;
+            input.style.borderColor = borderColor;
+            input.style.color = color;
+            input.style.backgroundImage = iconUrl ? `url('${iconUrl}')` : '';
+            input.style.backgroundRepeat = 'no-repeat';
+            input.style.backgroundPosition = '12px center';
+            input.style.backgroundSize = '16px';
+            input.style.paddingLeft = iconUrl ? '36px' : '12px';
+        }
+
+        function applyStatusBanner(element, { iconType, text, color, backgroundColor, borderColor }) {
+            if (!element) {
+                return;
+            }
+
+            element.innerHTML = formatStatusMessage(iconType, text);
+            element.style.display = 'inline-flex';
+            element.style.alignItems = 'center';
+            element.style.gap = '8px';
+            element.style.background = backgroundColor;
+            element.style.color = color;
+            element.style.borderColor = borderColor;
+        }
 
         // Create modal HTML
         const modalHTML = `
@@ -107,6 +160,37 @@
                     }
                     .analysis-tag-label:hover {
                         background-color: #f8f9fa !important;
+                    }
+                    .status-icon {
+                        display: inline-flex;
+                        background-color: currentColor;
+                        -webkit-mask-size: contain;
+                        -webkit-mask-repeat: no-repeat;
+                        -webkit-mask-position: center;
+                        mask-size: contain;
+                        mask-repeat: no-repeat;
+                        mask-position: center;
+                        flex-shrink: 0;
+                    }
+                    .status-icon--medium {
+                        width: 18px;
+                        height: 18px;
+                    }
+                    .status-icon--large {
+                        width: 48px;
+                        height: 48px;
+                    }
+                    .status-icon--success {
+                        -webkit-mask-image: url('${checkIconUrl}');
+                        mask-image: url('${checkIconUrl}');
+                    }
+                    .status-icon--warning {
+                        -webkit-mask-image: url('${warningIconUrl}');
+                        mask-image: url('${warningIconUrl}');
+                    }
+                    .status-icon--error {
+                        -webkit-mask-image: url('${errorIconUrl}');
+                        mask-image: url('${errorIconUrl}');
                     }
                 </style>
                 <div style="
@@ -424,6 +508,7 @@
                                         border-radius: 4px;
                                         font-size: 14px;
                                         box-sizing: border-box;
+                                        height: 36px;
                                     " />
                                     <div id="market-select-container" style="
                                         display: flex;
@@ -583,10 +668,13 @@
                                     border-radius: 20px;
                                     font-size: 13px;
                                     font-weight: 500;
-                                    background: #e3f2fd;
-                                    color: #1565c0;
-                                    border: 1px solid #bbdefb;
-                                ">🔐 Checking authentication...</div>
+                                    background: #fff3cd;
+                                    color: #856404;
+                                    border: 1px solid #ffeeba;
+                                    display: inline-flex;
+                                    align-items: center;
+                                    gap: 8px;
+                                "><span class="status-icon status-icon--medium status-icon--warning" aria-hidden="true"></span><span>Checking authentication...</span></div>
                             </div>
                         </div>
                         
@@ -2323,7 +2411,19 @@
                     </thead>
                     <tbody>
                         <tr style="border-bottom: 1px solid #f8f9fa;">
-                            <td style="padding: 8px 12px; color: #28a745; font-weight: 600;">😊 Positive</td>
+                            <td style="padding: 8px 12px; color: #28a745; font-weight: 600;">
+                                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="
+                                        width: 20px;
+                                        height: 20px;
+                                        display: inline-block;
+                                        background-color: currentColor;
+                                        mask: url(${positiveIconUrl}) no-repeat center / contain;
+                                        -webkit-mask: url(${positiveIconUrl}) no-repeat center / contain;
+                                    " aria-hidden="true"></span>
+                                    Positive
+                                </span>
+                            </td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${positiveCount}</td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${positivePercent}%</td>
                             <td style="padding: 8px 12px;">
@@ -2333,7 +2433,19 @@
                             </td>
                         </tr>
                         <tr style="border-bottom: 1px solid #f8f9fa;">
-                            <td style="padding: 8px 12px; color: #d39e00; font-weight: 600;">😐 Neutral</td>
+                            <td style="padding: 8px 12px; color: #d39e00; font-weight: 600;">
+                                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="
+                                        width: 20px;
+                                        height: 20px;
+                                        display: inline-block;
+                                        background-color: currentColor;
+                                        mask: url(${neutralIconUrl}) no-repeat center / contain;
+                                        -webkit-mask: url(${neutralIconUrl}) no-repeat center / contain;
+                                    " aria-hidden="true"></span>
+                                    Neutral
+                                </span>
+                            </td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${neutralCount}</td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${neutralPercent}%</td>
                             <td style="padding: 8px 12px;">
@@ -2343,7 +2455,19 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px 12px; color: #dc3545; font-weight: 600;">😞 Negative</td>
+                            <td style="padding: 8px 12px; color: #dc3545; font-weight: 600;">
+                                <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="
+                                        width: 20px;
+                                        height: 20px;
+                                        display: inline-block;
+                                        background-color: currentColor;
+                                        mask: url(${negativeIconUrl}) no-repeat center / contain;
+                                        -webkit-mask: url(${negativeIconUrl}) no-repeat center / contain;
+                                    " aria-hidden="true"></span>
+                                    Negative
+                                </span>
+                            </td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${negativeCount}</td>
                             <td style="padding: 8px 12px; text-align: center; font-weight: bold;">${negativePercent}%</td>
                             <td style="padding: 8px 12px;">
@@ -4436,7 +4560,11 @@
                         font-size: 13px;
                         text-align: center;
                     `;
-                    confirmation.textContent = '✅ Organization updated successfully!';
+                    confirmation.innerHTML = formatStatusMessage('success', 'Organization updated successfully!');
+                    confirmation.style.display = 'inline-flex';
+                    confirmation.style.alignItems = 'center';
+                    confirmation.style.justifyContent = 'center';
+                    confirmation.style.gap = '8px';
                     resultsContainer.insertAdjacentElement('afterbegin', confirmation);
                     
                     // Remove confirmation after 3 seconds
@@ -5610,9 +5738,15 @@
                 // Update the token input field to show it's been fetched
                 const tokenInput = document.getElementById('auth-token');
                 if (tokenInput) {
-                    tokenInput.placeholder = "✅ Token fetched from session";
-                    tokenInput.style.backgroundColor = "#f0f8ff";
-                    tokenInput.style.borderColor = "#007bff";
+                    applyInputStatusStyles(tokenInput, {
+                        text: 'Token fetched from session',
+                        iconUrl: checkIconUrl,
+                        color: '#155724',
+                        backgroundColor: '#d4edda',
+                        borderColor: '#c3e6cb'
+                    });
+                    tokenInput.readOnly = true;
+                    tokenInput.style.cursor = 'not-allowed';
                 }
                 
                 return sessionData.accessToken;
@@ -5620,9 +5754,13 @@
                 // Update the token input field to show error
                 const tokenInput = document.getElementById('auth-token');
                 if (tokenInput) {
-                    tokenInput.placeholder = "❌ Failed to fetch token automatically";
-                    tokenInput.style.backgroundColor = "#fff5f5";
-                    tokenInput.style.borderColor = "#ef4444";
+                    applyInputStatusStyles(tokenInput, {
+                        text: 'Failed to fetch token automatically',
+                        iconUrl: errorIconUrl,
+                        color: '#721c24',
+                        backgroundColor: '#f8d7da',
+                        borderColor: '#f5c6cb'
+                    });
                     tokenInput.readOnly = false;
                     tokenInput.style.cursor = "text";
                 }
@@ -5765,17 +5903,26 @@
                     if (sessionData.accessToken) {
                         // Update hidden token field
                         if (tokenInput) {
-                            tokenInput.placeholder = "✅ Token ready - session active";
-                            tokenInput.style.backgroundColor = "#f0f8ff";
-                            tokenInput.style.borderColor = "#007bff";
+                            applyInputStatusStyles(tokenInput, {
+                                text: 'Token ready - session active',
+                                iconUrl: checkIconUrl,
+                                color: '#155724',
+                                backgroundColor: '#d4edda',
+                                borderColor: '#c3e6cb'
+                            });
+                            tokenInput.readOnly = true;
+                            tokenInput.style.cursor = 'not-allowed';
                         }
                         
                         // Update visible auth status
                         if (authStatus) {
-                            authStatus.innerHTML = "✅ Ready to search";
-                            authStatus.style.background = "#d4edda";
-                            authStatus.style.color = "#155724";
-                            authStatus.style.borderColor = "#c3e6cb";
+                            applyStatusBanner(authStatus, {
+                                iconType: 'success',
+                                text: 'Ready to search',
+                                color: '#155724',
+                                backgroundColor: '#d4edda',
+                                borderColor: '#c3e6cb'
+                            });
                         }
                         
                     } else {
@@ -5787,17 +5934,26 @@
             } catch (error) {
                 // Update hidden token field
                 if (tokenInput) {
-                    tokenInput.placeholder = "❌ Please log in to ChatGPT first";
-                    tokenInput.style.backgroundColor = "#fff5f5";
-                    tokenInput.style.borderColor = "#ef4444";
+                    applyInputStatusStyles(tokenInput, {
+                        text: 'Please log in to ChatGPT first',
+                        iconUrl: errorIconUrl,
+                        color: '#721c24',
+                        backgroundColor: '#f8d7da',
+                        borderColor: '#f5c6cb'
+                    });
+                    tokenInput.readOnly = false;
+                    tokenInput.style.cursor = 'text';
                 }
                 
                 // Update visible auth status
                 if (authStatus) {
-                    authStatus.innerHTML = "❌ Please log in to ChatGPT first";
-                    authStatus.style.background = "#f8d7da";
-                    authStatus.style.color = "#721c24";
-                    authStatus.style.borderColor = "#f5c6cb";
+                    applyStatusBanner(authStatus, {
+                        iconType: 'error',
+                        text: 'Please log in to ChatGPT first',
+                        color: '#721c24',
+                        backgroundColor: '#f8d7da',
+                        borderColor: '#f5c6cb'
+                    });
                 }
             }
         }
@@ -6633,7 +6789,7 @@
                         padding: 60px 40px;
                         color: #6c757d;
                     ">
-                        <div style="font-size: 48px; margin-bottom: 20px; opacity: 0.7;">❌</div>
+                        <span class="status-icon status-icon--large status-icon--error" aria-hidden="true" style="margin-bottom: 20px; color: #dc3545; opacity: 0.8;"></span>
                         <h3 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 600; color: #495057;">No Results Found</h3>
                         <p style="margin: 0; font-size: 16px; line-height: 1.5;">None of the products could be found. Please try different search terms.</p>
                     </div>

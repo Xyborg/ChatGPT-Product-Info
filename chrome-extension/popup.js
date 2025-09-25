@@ -6,6 +6,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const openSearchBtn = document.getElementById('open-search');
     const goToChatGPTBtn = document.getElementById('go-to-chatgpt');
 
+    const statusIcons = {
+        success: { modifier: 'status-icon--success', label: 'Success status' },
+        warning: { modifier: 'status-icon--warning', label: 'Warning status' },
+        error: { modifier: 'status-icon--error', label: 'Error status' },
+    };
+
+    function setStatus(type, message) {
+        const icon = statusIcons[type];
+        if (!icon) {
+            statusTextEl.textContent = message;
+            return;
+        }
+
+        statusTextEl.innerHTML = `<span class="status-icon ${icon.modifier}" role="img" aria-label="${icon.label}"></span> <span>${message}</span>`;
+    }
+
     // Check if we're on a ChatGPT tab
     async function checkChatGPTStatus() {
         try {
@@ -13,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (!activeTab.url.includes('chatgpt.com')) {
                 statusEl.className = 'status status-bad';
-                statusTextEl.textContent = '❌ Please navigate to ChatGPT first';
+                setStatus('error', 'Please navigate to ChatGPT first');
                 openSearchBtn.disabled = true;
                 return false;
             }
@@ -22,18 +38,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await chrome.tabs.sendMessage(activeTab.id, { action: 'ping' });
                 statusEl.className = 'status status-good';
-                statusTextEl.textContent = '✅ Ready to search products';
+                setStatus('success', 'Ready to search products');
                 openSearchBtn.disabled = false;
                 return true;
             } catch (error) {
-                statusEl.className = 'status status-bad';
-                statusTextEl.textContent = '⚠️ Please refresh the ChatGPT page';
+                statusEl.className = 'status status-warning';
+                setStatus('warning', 'Please refresh the ChatGPT page');
                 openSearchBtn.disabled = true;
                 return false;
             }
         } catch (error) {
             statusEl.className = 'status status-bad';
-            statusTextEl.textContent = '❌ Unable to check status';
+            setStatus('error', 'Unable to check status');
             openSearchBtn.disabled = true;
             return false;
         }
@@ -48,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Failed to open search:', error);
             statusEl.className = 'status status-bad';
-            statusTextEl.textContent = '❌ Failed to open search. Please refresh the page.';
+            setStatus('error', 'Failed to open search. Please refresh the page.');
         }
     });
 

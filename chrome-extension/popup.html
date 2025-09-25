@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Product Search</title>
+    <title>ChatGPT Product Info Research</title>
     <style>
         body {
             width: 320px;
@@ -19,10 +19,19 @@
         }
         
         .header h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             font-size: 18px;
             font-weight: 600;
             color: #495057;
             margin: 0 0 8px 0;
+        }
+
+        .header-icon {
+            width: 20px;
+            height: 20px;
         }
         
         .header p {
@@ -39,17 +48,57 @@
             margin-bottom: 16px;
             border: 1px solid #e9ecef;
         }
-        
+
+        #status-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-icon {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            background-color: currentColor;
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+        }
+
         .status-good {
             background: #d4edda;
             border-color: #c3e6cb;
             color: #155724;
         }
-        
+
+        .status-warning {
+            background: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+
         .status-bad {
             background: #f8d7da;
             border-color: #f5c6cb;
             color: #721c24;
+        }
+
+        .status-icon--success {
+            -webkit-mask-image: url('assets/icons-ui/check.svg');
+            mask-image: url('assets/icons-ui/check.svg');
+        }
+
+        .status-icon--warning {
+            -webkit-mask-image: url('assets/icons-ui/warning.svg');
+            mask-image: url('assets/icons-ui/warning.svg');
+        }
+
+        .status-icon--error {
+            -webkit-mask-image: url('assets/icons-ui/error.svg');
+            mask-image: url('assets/icons-ui/error.svg');
         }
         
         .action-button {
@@ -127,7 +176,10 @@
 </head>
 <body>
     <div class="header">
-        <h1>🔍 Product Search</h1>
+        <h1>
+            <img src="assets/icons-ui/search.svg" alt="Search icon" class="header-icon">
+            Product Info Research
+        </h1>
         <p>Search for product reviews and information directly in ChatGPT</p>
     </div>
 
@@ -136,7 +188,7 @@
     </div>
 
     <button id="open-search" class="action-button" disabled>
-        Open Product Search
+        Open Product Info Research
     </button>
 
     <button id="go-to-chatgpt" class="action-button secondary-button">
@@ -147,7 +199,7 @@
         <h3>How to use:</h3>
         <ul>
             <li>Make sure you're logged in to ChatGPT</li>
-            <li>Click "Open Product Search" to show the search interface</li>
+            <li>Click "Open Product Info Research" to show the search interface</li>
             <li>Search for any product to get reviews and information</li>
             <li>Use multi-product search to compare multiple items</li>
         </ul>
