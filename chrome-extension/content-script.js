@@ -70,6 +70,15 @@
         const errorIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
             ? chrome.runtime.getURL('assets/icons-ui/error.svg')
             : 'assets/icons-ui/error.svg';
+        const xIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/x.svg')
+            : 'assets/icons-ui/x.svg';
+        const linkedinIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/linkedin.svg')
+            : 'assets/icons-ui/linkedin.svg';
+        const githubIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/github.svg')
+            : 'assets/icons-ui/github.svg';
 
         function formatStatusMessage(iconType, message, size = 'medium') {
             const sizeClass = size === 'large' ? 'status-icon--large' : 'status-icon--medium';
@@ -1196,11 +1205,25 @@
                         background: #f8f9fa;
                         border-top: 1px solid #e9ecef;
                         padding: 8px 0;
-                        text-align: center;
                         font-size: 14px;
                         z-index: 10001;
+                        display: flex;
+                        justify-content: center;
                     ">
-                        Created by <a href="https://www.martinaberastegue.com/" target="_blank" rel="noopener noreferrer">Martin Aberastegue (@Xyborg)</a>
+                        <div style="display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                            <span>Created by <a href="https://www.martinaberastegue.com/" target="_blank" rel="noopener noreferrer"><strong>Martin Aberastegue</strong></a></span>
+                            <span style="display: inline-flex; align-items: center; gap: 10px;">
+                                <a href="https://www.linkedin.com/in/aberastegue/" target="_blank" rel="noopener noreferrer" aria-label="Martin Aberastegue on LinkedIn">
+                                    <img src="${linkedinIconUrl}" alt="LinkedIn logo" style="width: 18px; height: 18px; display: block;" />
+                                </a>
+                                <a href="https://github.com/Xyborg" target="_blank" rel="noopener noreferrer" aria-label="Martin Aberastegue on GitHub">
+                                    <img src="${githubIconUrl}" alt="GitHub logo" style="width: 18px; height: 18px; display: block;" />
+                                </a>
+                                <a href="https://x.com/Xyborg" target="_blank" rel="noopener noreferrer" aria-label="Martin Aberastegue on X">
+                                    <img src="${xIconUrl}" alt="X logo" style="width: 18px; height: 18px; display: block;" />
+                                </a>
+                            </span>
+                        </div>
                     </div>
                         </div> <!-- End Main Content Area -->
                     </div> <!-- End Sidebar + Content Container -->
