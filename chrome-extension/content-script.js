@@ -633,7 +633,7 @@
                                         border-radius: 6px;
                                         background: white;
                                         position: relative;
-                                        min-width: 160px;
+                                        min-width: 180px;
                                         height: 36px;
                                         flex: 0 0 auto;
                                     ">
@@ -647,7 +647,7 @@
                                             " />
                                             <div class="market-select-text">
                                                 <span id="market-select-country" class="market-select-country">Deutschland</span>
-                                                <span id="market-select-language" class="market-select-language">Deutsch (DE)</span>
+                                                <span id="market-select-language" class="market-select-language">Deutsch</span>
                                             </div>
                                             <span class="market-select-caret" aria-hidden="true">▾</span>
                                         </button>
@@ -1344,15 +1344,20 @@
         const ACCEPT_LANGUAGE_FALLBACK = 'en;q=0.8, es-AR;q=0.7, es;q=0.6, it;q=0.4, zh-CN;q=0.3, zh;q=0.2, id;q=0.1, pt-BR;q=0.1, pt;q=0.1, fr;q=0.1, tr;q=0.1, pl;q=0.1, sv;q=0.1, ru;q=0.1, ar;q=0.1, el;q=0.1';
         const MARKET_OPTIONS = [
             { value: 'de-DE', label: 'Deutschland (Deutsch)', country: 'Deutschland', language: 'Deutsch', code: 'DE', acceptLanguagePrefix: 'de-DE, de;q=0.9', oaiLanguage: 'de-DE', icon: 'assets/flags/de.svg' },
+            { value: 'en-DE', label: 'Germany (English)', country: 'Germany', language: 'English', code: 'DE', acceptLanguagePrefix: 'en-DE, en;q=0.9', oaiLanguage: 'en-DE', icon: 'assets/flags/de.svg' },
+            { value: 'tr-DE', label: 'Almanya (Türkçe)', country: 'Almanya', language: 'Türkçe', code: 'DE', acceptLanguagePrefix: 'tr-DE, tr;q=0.9', oaiLanguage: 'tr-DE', icon: 'assets/flags/de.svg' },
+            { value: 'de-AT', label: 'Österreich (Deutsch)', country: 'Österreich', language: 'Deutsch', code: 'AT', acceptLanguagePrefix: 'de-AT, de;q=0.9', oaiLanguage: 'de-AT', icon: 'assets/flags/at.svg' },
             { value: 'de-CH', label: 'Schweiz (Deutsch)', country: 'Schweiz', language: 'Deutsch', code: 'CH', acceptLanguagePrefix: 'de-CH, de;q=0.9', oaiLanguage: 'de-CH', icon: 'assets/flags/ch.svg' },
-            { value: 'de-AT', label: 'Oesterreich (Deutsch)', country: 'Oesterreich', language: 'Deutsch', code: 'AT', acceptLanguagePrefix: 'de-AT, de;q=0.9', oaiLanguage: 'de-AT', icon: 'assets/flags/at.svg' },
-            { value: 'en-US', label: 'United States (English)', country: 'United States', language: 'English', code: 'US', acceptLanguagePrefix: 'en-US, en;q=0.9', oaiLanguage: 'en-US', icon: 'assets/flags/us.svg' },
-            { value: 'en-GB', label: 'United Kingdom (English)', country: 'United Kingdom', language: 'English', code: 'GB', acceptLanguagePrefix: 'en-GB, en;q=0.9', oaiLanguage: 'en-GB', icon: 'assets/flags/gb.svg' },
-            { value: 'nl-NL', label: 'Nederland (Nederlands)', country: 'Nederland', language: 'Nederlands', code: 'NL', acceptLanguagePrefix: 'nl-NL, nl;q=0.9', oaiLanguage: 'nl-NL', icon: 'assets/flags/nl.svg' },
-            { value: 'nl-BE', label: 'Belgie (Nederlands)', country: 'Belgie', language: 'Nederlands', code: 'BE', acceptLanguagePrefix: 'nl-BE, nl;q=0.9', oaiLanguage: 'nl-BE', icon: 'assets/flags/be.svg' },
-            { value: 'fr-BE', label: 'Belgique (Francais)', country: 'Belgique', language: 'Francais', code: 'BE', acceptLanguagePrefix: 'fr-BE, fr;q=0.9', oaiLanguage: 'fr-BE', icon: 'assets/flags/be.svg' },
             { value: 'de-BE', label: 'Belgien (Deutsch)', country: 'Belgien', language: 'Deutsch', code: 'BE', acceptLanguagePrefix: 'de-BE, de;q=0.9', oaiLanguage: 'de-BE', icon: 'assets/flags/be.svg' },
-            { value: 'es-ES', label: 'España (Espanol)', country: 'España', language: 'Español', code: 'ES', acceptLanguagePrefix: 'es-ES, es;q=0.9', oaiLanguage: 'es-ES', icon: 'assets/flags/es.svg' }
+            { value: 'fr-BE', label: 'Belgique (Français)', country: 'Belgique', language: 'Français', code: 'BE', acceptLanguagePrefix: 'fr-BE, fr;q=0.9', oaiLanguage: 'fr-BE', icon: 'assets/flags/be.svg' },
+            { value: 'nl-BE', label: 'België (Nederlands)', country: 'België', language: 'Nederlands', code: 'BE', acceptLanguagePrefix: 'nl-BE, nl;q=0.9', oaiLanguage: 'nl-BE', icon: 'assets/flags/be.svg' },
+            { value: 'es-ES', label: 'España (Español)', country: 'España', language: 'Español', code: 'ES', acceptLanguagePrefix: 'es-ES, es;q=0.9', oaiLanguage: 'es-ES', icon: 'assets/flags/es.svg' },
+            { value: 'es-AR', label: 'Argentina (Español)', country: 'Argentina', language: 'Español', code: 'AR', acceptLanguagePrefix: 'es-AR, es;q=0.9', oaiLanguage: 'es-AR', icon: 'assets/flags/ar.svg' },
+            { value: 'es-MX', label: 'México (Español)', country: 'México', language: 'Español', code: 'MX', acceptLanguagePrefix: 'es-MX, es;q=0.9', oaiLanguage: 'es-MX', icon: 'assets/flags/mx.svg' },
+            { value: 'nl-NL', label: 'Nederland (Nederlands)', country: 'Nederland', language: 'Nederlands', code: 'NL', acceptLanguagePrefix: 'nl-NL, nl;q=0.9', oaiLanguage: 'nl-NL', icon: 'assets/flags/nl.svg' },
+            { value: 'it-IT', label: 'Italia (Italiano)', country: 'Italia', language: 'Italiano', code: 'IT', acceptLanguagePrefix: 'it-IT, it;q=0.9', oaiLanguage: 'it-IT', icon: 'assets/flags/it.svg' },
+            { value: 'en-GB', label: 'United Kingdom (English)', country: 'United Kingdom', language: 'English', code: 'GB', acceptLanguagePrefix: 'en-GB, en;q=0.9', oaiLanguage: 'en-GB', icon: 'assets/flags/gb.svg' },
+            { value: 'en-US', label: 'United States (English)', country: 'United States', language: 'English', code: 'US', acceptLanguagePrefix: 'en-US, en;q=0.9', oaiLanguage: 'en-US', icon: 'assets/flags/us.svg' }
         ];
 
         function getMarketOption(value) {
