@@ -3271,6 +3271,18 @@
             }
         }
         
+        function escapeAttributeValue(value) {
+            if (typeof value !== 'string') {
+                return '';
+            }
+
+            return value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
         function populateProjectsList() {
             const projectsList = document.getElementById('projects-list');
             if (!projectsList) return;
@@ -3290,14 +3302,19 @@
                 return;
             }
             
-            projectsList.innerHTML = projects.map(project => `
+            projectsList.innerHTML = projects.map(project => {
+                const descriptionAttr = project.description
+                    ? ` title="${escapeAttributeValue(project.description)}"`
+                    : '';
+
+                return `
                 <div class="sidebar-project" data-project-id="${project.id}">
                     <div style="
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                     ">
-                        <span style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><img src="${projectIconUrl}" alt="Project" style="width: 16px; height: 16px;" />${project.name}</span>
+                        <span${descriptionAttr} style="font-weight: 500; display: flex; align-items: center; gap: 6px;"><img src="${projectIconUrl}" alt="Project" style="width: 16px; height: 16px;" />${project.name}</span>
                         <span style="
                             font-size: 11px;
                             color: #6c757d;
@@ -3306,18 +3323,9 @@
                             border-radius: 8px;
                         ">${project.searchCount || 0}</span>
                     </div>
-                    ${project.description ? `
-                        <div style="
-                            font-size: 11px;
-                            color: #6c757d;
-                            margin-top: 2px;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            white-space: nowrap;
-                        ">${project.description}</div>
-                    ` : ''}
                 </div>
-            `).join('');
+                `;
+            }).join('');
             
             // Add click handlers for project filtering
             document.querySelectorAll('.sidebar-project').forEach(element => {
