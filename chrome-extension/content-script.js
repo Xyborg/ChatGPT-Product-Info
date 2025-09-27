@@ -6365,7 +6365,7 @@
             
             // Map citations to reviews
             for (const review of reviews) {
-                if (review.cite && citations.has(review.cite)) {
+                if (!review.url && review.cite && citations.has(review.cite)) {
                     review.url = citations.get(review.cite).url;
                 }
             }
@@ -6645,8 +6645,8 @@
                                 sentiment: reviewData.sentiment || '',
                                 rating: reviewData.rating || null,
                                 num_reviews: reviewData.num_reviews || null,
-                                cite: reviewData.cite || `turn0search${eventIndex}`,
-                                url: null // Will be populated later from citations
+                                cite: reviewData.cite || null,
+                                url: reviewData.url || null
                             };
                             reviews.push(review);
                         }
@@ -6674,8 +6674,8 @@
                                     sentiment: reviewData.sentiment || '',
                                     rating: reviewData.rating || null,
                                     num_reviews: reviewData.num_reviews || null,
-                                    cite: reviewData.cite || `turn0search${eventIndex}`,
-                                    url: null // Will be populated later from citations
+                                    cite: reviewData.cite || null,
+                                    url: reviewData.url || null
                                 };
                                 reviews.push(review);
                             }
@@ -6699,8 +6699,8 @@
                                                 sentiment: reviewData.sentiment || '',
                                                 rating: reviewData.rating || null,
                                                 num_reviews: reviewData.num_reviews || null,
-                                                cite: reviewData.cite || `turn0search${eventIndex}`,
-                                                url: null // Will be populated later from citations
+                                                cite: reviewData.cite || null,
+                                                url: reviewData.url || null
                                             };
                                             reviews.push(review);
                                         }
@@ -6718,17 +6718,17 @@
                             if (Array.isArray(reviewList)) {
                                 for (const reviewData of reviewList) {
                                     if (typeof reviewData === 'object') {
-                                    const review = {
-                                        source: reviewData.source || '',
-                                        theme: reviewData.theme || '',
-                                        summary: reviewData.summary || '',
-                                        sentiment: reviewData.sentiment || '',
-                                        rating: reviewData.rating || null,
-                                        num_reviews: reviewData.num_reviews || null,
-                                        cite: reviewData.cite || `turn0search${eventIndex}`,
-                                        url: null // Will be populated later from citations
-                                    };
-                                    reviews.push(review);
+                                        const review = {
+                                            source: reviewData.source || '',
+                                            theme: reviewData.theme || '',
+                                            summary: reviewData.summary || '',
+                                            sentiment: reviewData.sentiment || '',
+                                            rating: reviewData.rating || null,
+                                            num_reviews: reviewData.num_reviews || null,
+                                            cite: reviewData.cite || null,
+                                            url: reviewData.url || null
+                                        };
+                                        reviews.push(review);
                                     }
                                 }
                             }
