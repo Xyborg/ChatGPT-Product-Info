@@ -203,32 +203,137 @@
                         -webkit-mask-image: url('${errorIconUrl}');
                         mask-image: url('${errorIconUrl}');
                     }
-                    .market-select-trigger {
+                    .search-input-group {
                         display: flex;
                         align-items: center;
                         gap: 10px;
-                        width: 100%;
-                        border: none;
+                        padding: 8px 14px;
+                        background: #f7f7f8;
+                        border: 1px solid #d9d9e3;
+                        border-radius: 18px;
+                        flex: 1;
+                        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+                    }
+                    .search-input-group:focus-within {
+                        border-color: #10a37f;
+                        box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.15);
+                        background: white;
+                    }
+                    .search-input-divider {
+                        width: 1px;
+                        height: 24px;
+                        background: #d1d5db;
+                    }
+                    .search-input-field {
+                        flex: 1;
                         background: transparent;
-                        padding: 6px 8px;
-                        border-radius: 6px;
+                        border: none;
+                        font-size: 14px;
+                        color: #111827;
+                        height: 32px;
+                        padding: 0;
+                        min-width: 0;
+                    }
+                    .search-input-field:focus {
+                        outline: none;
+                    }
+                    .search-btn {
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 50%;
+                        border: none;
+                        background: #343541;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+                        box-shadow: 0 4px 12px rgba(36, 37, 51, 0.15);
+                    }
+                    .search-btn:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 18px rgba(36, 37, 51, 0.25);
+                        background: #2b2c3b;
+                    }
+                    .search-btn:focus-visible {
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.35);
+                    }
+                    .search-btn:disabled,
+                    .search-btn[data-state="loading"] {
+                        cursor: not-allowed;
+                        opacity: 0.6;
+                        transform: none;
+                        box-shadow: none;
+                    }
+                    .search-btn-icon {
+                        width: 20px;
+                        height: 20px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .search-btn-spinner {
+                        display: none;
+                        width: 18px;
+                        height: 18px;
+                        border: 2px solid rgba(255, 255, 255, 0.3);
+                        border-top-color: white;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                    }
+                    .search-btn[data-state="loading"] .search-btn-icon {
+                        display: none;
+                    }
+                    .search-btn[data-state="loading"] .search-btn-spinner {
+                        display: inline-flex;
+                    }
+                    .visually-hidden {
+                        position: absolute;
+                        width: 1px;
+                        height: 1px;
+                        padding: 0;
+                        margin: -1px;
+                        overflow: hidden;
+                        clip: rect(0, 0, 0, 0);
+                        white-space: nowrap;
+                        border: 0;
+                    }
+                    @keyframes spin {
+                        to {
+                            transform: rotate(360deg);
+                        }
+                    }
+                    .market-select-trigger {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        border: none;
+                        background: white;
+                        padding: 6px 12px;
+                        border-radius: 14px;
                         cursor: pointer;
                         text-align: left;
-                        transition: background 0.2s ease;
+                        box-shadow: inset 0 0 0 1px #e5e7eb;
+                        transition: box-shadow 0.2s ease, transform 0.2s ease;
+                        min-width: 180px;
+                        min-height: 32px;
+                        white-space: nowrap;
                     }
                     .market-select-trigger:focus-visible {
-                        outline: 2px solid #80bdff;
-                        outline-offset: 1px;
+                        outline: none;
+                        box-shadow: inset 0 0 0 2px #10a37f;
                     }
                     .market-select-trigger:hover {
-                        background: #f1f3f5;
+                        box-shadow: inset 0 0 0 1px #10a37f, 0 2px 8px rgba(16, 163, 127, 0.12);
                     }
                     .market-select-text {
                         display: flex;
                         flex-direction: column;
                         align-items: flex-start;
                         min-width: 0;
-                        flex: 1;
+                        flex: 0 1 auto;
                     }
                     .market-select-country {
                         font-size: 13px;
@@ -618,27 +723,8 @@
                             
                             <!-- Single product input -->
                             <div id="single-product-input" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
-                                <div id="single-input-group" style="flex: 1; display: flex; gap: 12px; align-items: center;">
-                                    <input type="text" id="search-query" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" style="
-                                        flex: 1;
-                                        padding: 8px 12px;
-                                        border: 1px solid #dee2e6;
-                                        border-radius: 4px;
-                                        font-size: 14px;
-                                        box-sizing: border-box;
-                                        height: 36px;
-                                    " />
-                                    <div id="market-select-container" style="
-                                        display: flex;
-                                        align-items: stretch;
-                                        border: 1px solid #dee2e6;
-                                        border-radius: 6px;
-                                        background: white;
-                                        position: relative;
-                                        min-width: 180px;
-                                        height: 36px;
-                                        flex: 0 0 auto;
-                                    ">
+                                <div id="single-input-group" class="search-input-group" style="flex: 1;">
+                                    <div id="market-select-container" style="position: relative; flex-shrink: 0;">
                                         <button id="market-select-trigger" type="button" class="market-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="market-select-dropdown">
                                             <img id="market-select-flag" src="" alt="Selected market" style="
                                                 width: 20px;
@@ -651,7 +737,7 @@
                                                 <span id="market-select-country" class="market-select-country">Deutschland</span>
                                                 <span id="market-select-language" class="market-select-language">Deutsch</span>
                                             </div>
-                                            <span class="market-select-caret" aria-hidden="true">▾</span>
+                                            <span class="market-select-caret" aria-hidden="true"><svg aria-hidden="true" tabindex="-1" disabled="" data-ui-name="Globe" width="16" height="16" viewBox="0 0 16 16" data-name="Globe" data-group="m" color="#A9ABB6" data-at="db-flag" aria-label="" style="--color_yxgog: #A9ABB6;"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM3.201 4.398A5.99 5.99 0 0 1 8 2c1.801 0 3.417.794 4.517 2.05a4.578 4.578 0 0 0-.967.429v.02a2 2 0 0 0-1.27.16 3.87 3.87 0 0 0-1.55 1.63 1.51 1.51 0 0 0-.17 1.13c.108.308.364.465.619.623.286.176.572.352.651.738.03.157.034.317.039.478.006.217.012.435.081.642a.67.67 0 0 0 .65.56c.35 0 .57-.39.69-.69a6.38 6.38 0 0 1 .82-1.63c.176-.227 1.076-.705 1.59-.979.088-.046.164-.087.224-.12a6 6 0 1 1-11.893.35c.288.09.62.178.999.259a2.88 2.88 0 0 1 2 1.16 6.75 6.75 0 0 1 .89 2c.17.52.41 1.25 1.11 1.16.7-.09 1-1 1-1.63a1.64 1.64 0 0 0-.74-1.63 11.524 11.524 0 0 0-.26-.154C6.305 8.13 5.17 7.47 5.78 6.55a3.63 3.63 0 0 1 1.17-1l.093-.065c.288-.2.6-.417.637-.805a.62.62 0 0 0-.55-.67 4.46 4.46 0 0 0-1.21 0c-.323.04-.64.107-.955.173l-.225.047a7.6 7.6 0 0 1-1.539.168Z" shape-rendering="geometricPrecision"></path></svg></span>
                                         </button>
                                         <div id="market-select-dropdown" class="market-select-dropdown" role="listbox" aria-labelledby="market-select-trigger"></div>
                                         <select id="market-select" aria-label="Select language and market" style="
@@ -664,21 +750,18 @@
                                             background: transparent;
                                         "></select>
                                     </div>
+                                    <div id="market-input-divider" class="search-input-divider" aria-hidden="true"></div>
+                                    <input type="text" id="search-query" class="search-input-field" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" autocomplete="off" />
                                 </div>
-                                <button id="search-btn" style="
-                                    background: #007bff;
-                                    color: white;
-                                    border: none;
-                                    padding: 0 16px;
-                                    border-radius: 4px;
-                                    font-size: 14px;
-                                    font-weight: 500;
-                                    cursor: pointer;
-                                    white-space: nowrap;
-                                    height: 36px;
-                                    display: flex;
-                                    align-items: center;
-                                ">Search</button>
+                                <button id="search-btn" class="search-btn" type="button" aria-label="Run product search" data-state="ready" data-ready-aria-label="Run product search" data-loading-aria-label="Searching" data-ready-status="Search" data-loading-status="Searching">
+                                    <span class="search-btn-icon" aria-hidden="true">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon">
+                                            <path d="M8.99992 16V6.41407L5.70696 9.70704C5.31643 10.0976 4.68342 10.0976 4.29289 9.70704C3.90237 9.31652 3.90237 8.6835 4.29289 8.29298L9.29289 3.29298L9.36907 3.22462C9.76184 2.90427 10.3408 2.92686 10.707 3.29298L15.707 8.29298L15.7753 8.36915C16.0957 8.76192 16.0731 9.34092 15.707 9.70704C15.3408 10.0732 14.7618 10.0958 14.3691 9.7754L14.2929 9.70704L10.9999 6.41407V16C10.9999 16.5523 10.5522 17 9.99992 17C9.44764 17 8.99992 16.5523 8.99992 16Z"></path>
+                                        </svg>
+                                    </span>
+                                    <span class="search-btn-spinner" aria-hidden="true"></span>
+                                    <span class="visually-hidden search-btn-status">Search</span>
+                                </button>
                             </div>
                             
                             <!-- Multi product input -->
@@ -708,20 +791,18 @@
                                     ">Results will be shown in a table format</div>
                                     <div id="multi-product-controls" style="display: flex; gap: 12px; align-items: center;">
                                         <div id="multi-market-select-mount" style="display: none; align-items: center; gap: 8px;"></div>
-                                        <button id="multi-search-btn" style="
-                                            background: #007bff;
-                                            color: white;
-                                            border: none;
-                                            padding: 0 16px;
-                                            border-radius: 4px;
-                                            font-size: 14px;
-                                            font-weight: 500;
-                                            cursor: pointer;
-                                            white-space: nowrap;
-                                            height: 36px;
-                                            display: flex;
-                                            align-items: center;
-                                        ">Search All Products</button>
+
+                                        <button id="multi-search-btn" class="search-btn" type="button" aria-label="Run multi-product search" data-state="ready" data-ready-aria-label="Run multi-product search" data-loading-aria-label="Searching all products" data-ready-status="Search All Products" data-loading-status="Searching all products">
+                                            <span class="search-btn-icon" aria-hidden="true">
+                                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon">
+                                                    <path d="M8.99992 16V6.41407L5.70696 9.70704C5.31643 10.0976 4.68342 10.0976 4.29289 9.70704C3.90237 9.31652 3.90237 8.6835 4.29289 8.29298L9.29289 3.29298L9.36907 3.22462C9.76184 2.90427 10.3408 2.92686 10.707 3.29298L15.707 8.29298L15.7753 8.36915C16.0957 8.76192 16.0731 9.34092 15.707 9.70704C15.3408 10.0732 14.7618 10.0958 14.3691 9.7754L14.2929 9.70704L10.9999 6.41407V16C10.9999 16.5523 10.5522 17 9.99992 17C9.44764 17 8.99992 16.5523 8.99992 16Z"></path>
+                                                </svg>
+                                            </span>
+                                            <span class="search-btn-spinner" aria-hidden="true"></span>
+                                            <span class="visually-hidden search-btn-status">Search All Products</span>
+                                        </button>
+
+
                                     </div>
                                 </div>
                             </div>
@@ -1629,19 +1710,28 @@
         function moveMarketSelector(isMultiMode) {
             const marketSelectContainer = document.getElementById('market-select-container');
             const singleInputGroup = document.getElementById('single-input-group');
+            const divider = document.getElementById('market-input-divider');
             const multiMarketMount = document.getElementById('multi-market-select-mount');
             if (!marketSelectContainer) {
                 return;
             }
 
             if (isMultiMode) {
+                if (divider) {
+                    divider.style.display = 'none';
+                }
                 if (multiMarketMount) {
                     multiMarketMount.style.display = 'flex';
                     multiMarketMount.appendChild(marketSelectContainer);
                 }
             } else {
                 if (singleInputGroup) {
-                    singleInputGroup.appendChild(marketSelectContainer);
+                    if (divider) {
+                        divider.style.display = 'inline-flex';
+                        singleInputGroup.insertBefore(marketSelectContainer, divider);
+                    } else {
+                        singleInputGroup.insertBefore(marketSelectContainer, singleInputGroup.firstChild);
+                    }
                 }
                 if (multiMarketMount) {
                     multiMarketMount.style.display = 'none';
@@ -1728,7 +1818,7 @@
             }
 
             if (marketSelectContainer) {
-                marketSelectContainer.style.height = '36px';
+                marketSelectContainer.style.height = '100%';
             }
 
             moveMarketSelector(multiProductToggle ? multiProductToggle.checked : false);
@@ -5918,6 +6008,38 @@
             applyFilters();
         }
 
+        function setButtonLoadingState(button, isLoading, overrides = {}) {
+            if (!button) {
+                return;
+            }
+
+            const readyAriaLabel = overrides.readyAriaLabel
+                ?? button.getAttribute('data-ready-aria-label')
+                ?? button.getAttribute('aria-label')
+                ?? 'Run search';
+
+            const loadingAriaLabel = overrides.loadingAriaLabel
+                ?? button.getAttribute('data-loading-aria-label')
+                ?? 'Searching';
+
+            const readyStatusText = overrides.readyStatusText
+                ?? button.getAttribute('data-ready-status')
+                ?? readyAriaLabel;
+
+            const loadingStatusText = overrides.loadingStatusText
+                ?? button.getAttribute('data-loading-status')
+                ?? loadingAriaLabel;
+
+            const statusText = button.querySelector('.search-btn-status');
+            button.dataset.state = isLoading ? 'loading' : 'ready';
+            button.disabled = isLoading;
+            button.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+            button.setAttribute('aria-label', isLoading ? loadingAriaLabel : readyAriaLabel);
+            if (statusText) {
+                statusText.textContent = isLoading ? loadingStatusText : readyStatusText;
+            }
+        }
+
         async function performSearch() {
             const searchQuery = document.getElementById('search-query');
             const searchBtn = document.getElementById('search-btn');
@@ -5945,10 +6067,8 @@
                 alert('Failed to get authentication token. Please make sure you\'re logged in to ChatGPT.');
                 return;
             }
-            
             // Show loading state
-            searchBtn.disabled = true;
-            searchBtn.textContent = 'Searching...';
+            setButtonLoadingState(searchBtn, true);
             resultsContainer.style.display = 'block';
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
@@ -5967,8 +6087,7 @@
             } catch (error) {
                 displayError(error.message);
             } finally {
-                searchBtn.disabled = false;
-                searchBtn.textContent = 'Search';
+                setButtonLoadingState(searchBtn, false);
                 showCollapseToggle();
             }
         }
@@ -6005,8 +6124,15 @@
                 const singleQuery = document.getElementById('search-query');
                 if (singleQuery) {
                     singleQuery.value = uniqueQueries[0];
-                    // Trigger single search instead
-                    await performSearch();
+                    setButtonLoadingState(multiSearchBtn, true, {
+                        loadingAriaLabel: 'Searching product',
+                        loadingStatusText: 'Searching product'
+                    });
+                    try {
+                        await performSearch();
+                    } finally {
+                        setButtonLoadingState(multiSearchBtn, false);
+                    }
                     return;
                 }
             }
@@ -6028,8 +6154,10 @@
             }
             
             // Show loading state
-            multiSearchBtn.disabled = true;
-            multiSearchBtn.textContent = 'Searching...';
+            setButtonLoadingState(multiSearchBtn, true, {
+                loadingAriaLabel: `Searching ${uniqueQueries.length} products`,
+                loadingStatusText: `Searching ${uniqueQueries.length} products`
+            });
             resultsContainer.style.display = 'block';
             resultsContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #666;">
@@ -6093,8 +6221,7 @@
             } catch (error) {
                 displayError(error.message);
             } finally {
-                multiSearchBtn.disabled = false;
-                multiSearchBtn.textContent = 'Search All Products';
+                setButtonLoadingState(multiSearchBtn, false);
                 showCollapseToggle();
             }
         }
