@@ -123,7 +123,9 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgb(230 237 248 / 80%);
+                background: #f6eede52;
+                backdrop-filter: blur(2px);
+                -webkit-backdrop-filter: blur(2px);
                 display: flex;
                 align-items: center;
                 justify-content: center;
