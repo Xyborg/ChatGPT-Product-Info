@@ -5611,7 +5611,10 @@
             const searchQuery = document.getElementById('search-query');
             const multiSearchQuery = document.getElementById('multi-search-query');
             const multiProductToggle = document.getElementById('multi-product-toggle');
-            
+            const searchControls = document.getElementById('search-controls');
+            const collapseToggle = document.getElementById('collapse-toggle');
+            const collapseText = document.getElementById('collapse-text');
+
             if (searchQuery) {
                 searchQuery.value = '';
             }
@@ -5623,7 +5626,20 @@
                 // Trigger change event to update UI
                 multiProductToggle.dispatchEvent(new Event('change'));
             }
-            
+
+            if (searchControls) {
+                searchControls.style.display = 'block';
+            }
+            if (collapseText) {
+                collapseText.textContent = '▲ Hide';
+            }
+            if (collapseToggle) {
+                collapseToggle.style.display = 'none';
+                collapseToggle.style.background = 'rgba(0, 123, 255, 0.1)';
+                collapseToggle.style.border = '1px solid rgba(0, 123, 255, 0.2)';
+                collapseToggle.style.color = '#007bff';
+            }
+
             // Remove any organization interfaces
             const editToggle = document.getElementById('edit-organization-toggle');
             const editContent = document.getElementById('edit-organization-content');
