@@ -791,7 +791,6 @@
                                     ">Results will be shown in a table format</div>
                                     <div id="multi-product-controls" style="display: flex; gap: 12px; align-items: center;">
                                         <div id="multi-market-select-mount" style="display: none; align-items: center; gap: 8px;"></div>
-
                                         <button id="multi-search-btn" class="search-btn" type="button" aria-label="Run multi-product search" data-state="ready" data-ready-aria-label="Run multi-product search" data-loading-aria-label="Searching all products" data-ready-status="Search All Products" data-loading-status="Searching all products">
                                             <span class="search-btn-icon" aria-hidden="true">
                                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="icon">
@@ -801,8 +800,6 @@
                                             <span class="search-btn-spinner" aria-hidden="true"></span>
                                             <span class="visually-hidden search-btn-status">Search All Products</span>
                                         </button>
-
-
                                     </div>
                                 </div>
                             </div>
