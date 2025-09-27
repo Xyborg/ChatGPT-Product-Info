@@ -201,6 +201,113 @@
                         -webkit-mask-image: url('${errorIconUrl}');
                         mask-image: url('${errorIconUrl}');
                     }
+                    .market-select-trigger {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+                        border: none;
+                        background: transparent;
+                        padding: 6px 8px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        text-align: left;
+                        transition: background 0.2s ease;
+                    }
+                    .market-select-trigger:focus-visible {
+                        outline: 2px solid #80bdff;
+                        outline-offset: 1px;
+                    }
+                    .market-select-trigger:hover {
+                        background: #f1f3f5;
+                    }
+                    .market-select-text {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        min-width: 0;
+                        flex: 1;
+                    }
+                    .market-select-country {
+                        font-size: 13px;
+                        font-weight: 600;
+                        color: #343a40;
+                        line-height: 1.1;
+                    }
+                    .market-select-language {
+                        font-size: 12px;
+                        color: #6c757d;
+                        line-height: 1.1;
+                    }
+                    .market-select-caret {
+                        margin-left: auto;
+                        font-size: 12px;
+                        color: #6c757d;
+                    }
+                    .market-select-dropdown {
+                        position: absolute;
+                        top: calc(100% + 4px);
+                        left: 0;
+                        width: 100%;
+                        background: white;
+                        border: 1px solid #dee2e6;
+                        border-radius: 8px;
+                        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+                        padding: 4px 0;
+                        max-height: 260px;
+                        overflow-y: auto;
+                        z-index: 25;
+                        display: none;
+                    }
+                    .market-select-dropdown.open {
+                        display: block;
+                    }
+                    .market-select-option {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        width: 100%;
+                        border: none;
+                        background: transparent;
+                        padding: 8px 12px;
+                        font-size: 13px;
+                        text-align: left;
+                        cursor: pointer;
+                        transition: background 0.15s ease;
+                    }
+                    .market-select-option:focus-visible {
+                        outline: none;
+                        background: #e7f1ff;
+                    }
+                    .market-select-option:hover {
+                        background: #f1f3f5;
+                    }
+                    .market-select-option--selected {
+                        background: #e9f5ff;
+                    }
+                    .market-select-option-flag {
+                        width: 20px;
+                        height: 14px;
+                        object-fit: cover;
+                        border-radius: 2px;
+                        flex-shrink: 0;
+                    }
+                    .market-select-option-text {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        min-width: 0;
+                    }
+                    .market-select-option-country {
+                        font-weight: 600;
+                        color: #343a40;
+                        line-height: 1.1;
+                    }
+                    .market-select-option-language {
+                        font-size: 12px;
+                        color: #6c757d;
+                        line-height: 1.1;
+                    }
                 </style>
                 <div style="
                     background: white;
@@ -521,33 +628,36 @@
                                     " />
                                     <div id="market-select-container" style="
                                         display: flex;
-                                        align-items: center;
-                                        gap: 6px;
+                                        align-items: stretch;
                                         border: 1px solid #dee2e6;
-                                        border-radius: 4px;
-                                        padding: 0 12px;
+                                        border-radius: 6px;
                                         background: white;
                                         position: relative;
-                                        min-width: 120px;
-                                        cursor: pointer;
+                                        min-width: 160px;
                                         height: 36px;
+                                        flex: 0 0 auto;
                                     ">
-                                        <img id="market-select-flag" src="" alt="Selected market flag" style="
-                                            width: 20px;
-                                            height: 14px;
-                                            object-fit: cover;
-                                            border-radius: 2px;
-                                        " />
-                                        <span id="market-select-code" style="font-size: 13px; font-weight: 600; color: #495057;">DE</span>
-                                        <span style="margin-left: auto; color: #6c757d; font-size: 12px;">▾</span>
+                                        <button id="market-select-trigger" type="button" class="market-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="market-select-dropdown">
+                                            <img id="market-select-flag" src="" alt="Selected market" style="
+                                                width: 20px;
+                                                height: 14px;
+                                                object-fit: cover;
+                                                border-radius: 2px;
+                                                flex-shrink: 0;
+                                            " />
+                                            <div class="market-select-text">
+                                                <span id="market-select-country" class="market-select-country">Deutschland</span>
+                                                <span id="market-select-language" class="market-select-language">Deutsch (DE)</span>
+                                            </div>
+                                            <span class="market-select-caret" aria-hidden="true">▾</span>
+                                        </button>
+                                        <div id="market-select-dropdown" class="market-select-dropdown" role="listbox" aria-labelledby="market-select-trigger"></div>
                                         <select id="market-select" aria-label="Select language and market" style="
                                             position: absolute;
-                                            top: 0;
-                                            left: 0;
-                                            width: 100%;
-                                            height: 100%;
+                                            width: 1px;
+                                            height: 1px;
                                             opacity: 0;
-                                            cursor: pointer;
+                                            pointer-events: none;
                                             border: none;
                                             background: transparent;
                                         "></select>
@@ -1233,16 +1343,16 @@
 
         const ACCEPT_LANGUAGE_FALLBACK = 'en;q=0.8, es-AR;q=0.7, es;q=0.6, it;q=0.4, zh-CN;q=0.3, zh;q=0.2, id;q=0.1, pt-BR;q=0.1, pt;q=0.1, fr;q=0.1, tr;q=0.1, pl;q=0.1, sv;q=0.1, ru;q=0.1, ar;q=0.1, el;q=0.1';
         const MARKET_OPTIONS = [
-            { value: 'de-DE', label: 'German/Germany', code: 'DE', acceptLanguagePrefix: 'de-DE, de;q=0.9', oaiLanguage: 'de-DE', icon: 'assets/flags/de.svg' },
-            { value: 'de-CH', label: 'German/Switzerland', code: 'CH', acceptLanguagePrefix: 'de-CH, de;q=0.9', oaiLanguage: 'de-CH', icon: 'assets/flags/ch.svg' },
-            { value: 'de-AT', label: 'German/Austria', code: 'AT', acceptLanguagePrefix: 'de-AT, de;q=0.9', oaiLanguage: 'de-AT', icon: 'assets/flags/at.svg' },
-            { value: 'en-US', label: 'English/US', code: 'US', acceptLanguagePrefix: 'en-US, en;q=0.9', oaiLanguage: 'en-US', icon: 'assets/flags/us.svg' },
-            { value: 'en-GB', label: 'English/UK', code: 'UK', acceptLanguagePrefix: 'en-GB, en;q=0.9', oaiLanguage: 'en-GB', icon: 'assets/flags/gb.svg' },
-            { value: 'nl-NL', label: 'Dutch/Netherlands', code: 'NL', acceptLanguagePrefix: 'nl-NL, nl;q=0.9', oaiLanguage: 'nl-NL', icon: 'assets/flags/nl.svg' },
-            { value: 'nl-BE', label: 'Dutch/BE', code: 'BE/NL', acceptLanguagePrefix: 'nl-BE, nl;q=0.9', oaiLanguage: 'nl-BE', icon: 'assets/flags/be.svg' },
-            { value: 'fr-BE', label: 'French/BE', code: 'BE/FR', acceptLanguagePrefix: 'fr-BE, fr;q=0.9', oaiLanguage: 'fr-BE', icon: 'assets/flags/be.svg' },
-            { value: 'de-BE', label: 'German/BE', code: 'BE/DE', acceptLanguagePrefix: 'de-BE, de;q=0.9', oaiLanguage: 'de-BE', icon: 'assets/flags/be.svg' },
-            { value: 'es-ES', label: 'Spanish/ES', code: 'ES', acceptLanguagePrefix: 'es-ES, es;q=0.9', oaiLanguage: 'es-ES', icon: 'assets/flags/es.svg' }
+            { value: 'de-DE', label: 'Deutschland (Deutsch)', country: 'Deutschland', language: 'Deutsch', code: 'DE', acceptLanguagePrefix: 'de-DE, de;q=0.9', oaiLanguage: 'de-DE', icon: 'assets/flags/de.svg' },
+            { value: 'de-CH', label: 'Schweiz (Deutsch)', country: 'Schweiz', language: 'Deutsch', code: 'CH', acceptLanguagePrefix: 'de-CH, de;q=0.9', oaiLanguage: 'de-CH', icon: 'assets/flags/ch.svg' },
+            { value: 'de-AT', label: 'Oesterreich (Deutsch)', country: 'Oesterreich', language: 'Deutsch', code: 'AT', acceptLanguagePrefix: 'de-AT, de;q=0.9', oaiLanguage: 'de-AT', icon: 'assets/flags/at.svg' },
+            { value: 'en-US', label: 'United States (English)', country: 'United States', language: 'English', code: 'US', acceptLanguagePrefix: 'en-US, en;q=0.9', oaiLanguage: 'en-US', icon: 'assets/flags/us.svg' },
+            { value: 'en-GB', label: 'United Kingdom (English)', country: 'United Kingdom', language: 'English', code: 'GB', acceptLanguagePrefix: 'en-GB, en;q=0.9', oaiLanguage: 'en-GB', icon: 'assets/flags/gb.svg' },
+            { value: 'nl-NL', label: 'Nederland (Nederlands)', country: 'Nederland', language: 'Nederlands', code: 'NL', acceptLanguagePrefix: 'nl-NL, nl;q=0.9', oaiLanguage: 'nl-NL', icon: 'assets/flags/nl.svg' },
+            { value: 'nl-BE', label: 'Belgie (Nederlands)', country: 'Belgie', language: 'Nederlands', code: 'BE', acceptLanguagePrefix: 'nl-BE, nl;q=0.9', oaiLanguage: 'nl-BE', icon: 'assets/flags/be.svg' },
+            { value: 'fr-BE', label: 'Belgique (Francais)', country: 'Belgique', language: 'Francais', code: 'BE', acceptLanguagePrefix: 'fr-BE, fr;q=0.9', oaiLanguage: 'fr-BE', icon: 'assets/flags/be.svg' },
+            { value: 'de-BE', label: 'Belgien (Deutsch)', country: 'Belgien', language: 'Deutsch', code: 'BE', acceptLanguagePrefix: 'de-BE, de;q=0.9', oaiLanguage: 'de-BE', icon: 'assets/flags/be.svg' },
+            { value: 'es-ES', label: 'España (Espanol)', country: 'España', language: 'Español', code: 'ES', acceptLanguagePrefix: 'es-ES, es;q=0.9', oaiLanguage: 'es-ES', icon: 'assets/flags/es.svg' }
         ];
 
         function getMarketOption(value) {
@@ -1260,21 +1370,231 @@
         function updateMarketSelectorDisplay(value) {
             const option = getMarketOption(value);
             const flagEl = document.getElementById('market-select-flag');
-            const codeEl = document.getElementById('market-select-code');
+            const countryEl = document.getElementById('market-select-country');
+            const languageEl = document.getElementById('market-select-language');
             const container = document.getElementById('market-select-container');
+            const trigger = document.getElementById('market-select-trigger');
             if (flagEl) {
                 flagEl.src = chrome.runtime.getURL(option.icon);
-                flagEl.alt = `${option.label} flag`;
+                flagEl.alt = `${option.country} flag`;
             }
-            if (codeEl) {
-                codeEl.textContent = option.code;
+            if (countryEl) {
+                countryEl.textContent = option.country;
+            }
+            if (languageEl) {
+                languageEl.textContent = option.language;
             }
             if (container) {
-                container.title = option.label;
+                container.title = `${option.country} • ${option.language}`;
+            }
+            if (trigger) {
+                trigger.setAttribute('aria-label', `${option.country}, ${option.language}`);
             }
 
+            updateMarketDropdownSelection(option.value);
             updateAnalysisFilterSummary();
             updateAnalysisFilterChips();
+        }
+
+        function updateMarketDropdownSelection(value) {
+            const dropdown = document.getElementById('market-select-dropdown');
+            if (!dropdown) {
+                return;
+            }
+            dropdown.querySelectorAll('.market-select-option').forEach(optionEl => {
+                const isSelected = optionEl.getAttribute('data-value') === value;
+                optionEl.setAttribute('aria-selected', String(isSelected));
+                optionEl.classList.toggle('market-select-option--selected', isSelected);
+            });
+        }
+
+        function initializeMarketDropdownControls() {
+            const container = document.getElementById('market-select-container');
+            const dropdown = document.getElementById('market-select-dropdown');
+            const trigger = document.getElementById('market-select-trigger');
+            const marketSelect = document.getElementById('market-select');
+            if (!container || !dropdown || !trigger || !marketSelect) {
+                return;
+            }
+
+            dropdown.innerHTML = '';
+
+            MARKET_OPTIONS.forEach((option, index) => {
+                const optionButton = document.createElement('button');
+                optionButton.type = 'button';
+                optionButton.className = 'market-select-option';
+                optionButton.setAttribute('role', 'option');
+                optionButton.setAttribute('aria-selected', 'false');
+                optionButton.setAttribute('data-value', option.value);
+                optionButton.setAttribute('data-index', String(index));
+                const iconUrl = chrome.runtime.getURL(option.icon);
+                optionButton.innerHTML = `
+                    <img src="${iconUrl}" alt="${option.country} flag" class="market-select-option-flag" />
+                    <span class="market-select-option-text">
+                        <span class="market-select-option-country">${option.country}</span>
+                        <span class="market-select-option-language">${option.language}</span>
+                    </span>
+                `;
+                optionButton.addEventListener('click', () => {
+                    selectOption(option.value);
+                });
+                dropdown.appendChild(optionButton);
+            });
+
+            const optionButtons = Array.from(dropdown.querySelectorAll('.market-select-option'));
+            let isOpen = false;
+            let activeIndex = -1;
+            const outsideClickOptions = { capture: true };
+
+            function setActiveIndex(index) {
+                if (index < 0 || index >= optionButtons.length) {
+                    return;
+                }
+                activeIndex = index;
+                optionButtons[index].focus();
+            }
+
+            function openDropdown() {
+                if (isOpen) {
+                    return;
+                }
+                dropdown.classList.add('open');
+                trigger.setAttribute('aria-expanded', 'true');
+                isOpen = true;
+                const currentValue = marketSelect.value || MARKET_OPTIONS[0].value;
+                const currentIndex = optionButtons.findIndex(btn => btn.getAttribute('data-value') === currentValue);
+                setActiveIndex(currentIndex >= 0 ? currentIndex : 0);
+                document.addEventListener('mousedown', handleOutsideClick, outsideClickOptions);
+            }
+
+            function closeDropdown() {
+                if (!isOpen) {
+                    return;
+                }
+                dropdown.classList.remove('open');
+                trigger.setAttribute('aria-expanded', 'false');
+                isOpen = false;
+                activeIndex = -1;
+                document.removeEventListener('mousedown', handleOutsideClick, outsideClickOptions);
+            }
+
+            function selectOption(value) {
+                setMarketSelection(value);
+                closeDropdown();
+                trigger.focus();
+            }
+
+            function handleOutsideClick(event) {
+                if (!container.contains(event.target)) {
+                    closeDropdown();
+                }
+            }
+
+            function focusNext(offset) {
+                if (!isOpen) {
+                    return;
+                }
+                if (activeIndex === -1) {
+                    setActiveIndex(offset >= 0 ? 0 : optionButtons.length - 1);
+                    return;
+                }
+                const nextIndex = activeIndex + offset;
+                if (nextIndex < 0) {
+                    setActiveIndex(0);
+                } else if (nextIndex >= optionButtons.length) {
+                    setActiveIndex(optionButtons.length - 1);
+                } else {
+                    setActiveIndex(nextIndex);
+                }
+            }
+
+            function handleTriggerKeydown(event) {
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    if (!isOpen) {
+                        openDropdown();
+                    } else {
+                        focusNext(1);
+                    }
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    if (!isOpen) {
+                        openDropdown();
+                    } else {
+                        focusNext(-1);
+                    }
+                } else if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    if (isOpen) {
+                        closeDropdown();
+                    } else {
+                        openDropdown();
+                    }
+                } else if (event.key === 'Escape' && isOpen) {
+                    event.preventDefault();
+                    closeDropdown();
+                }
+            }
+
+            function handleOptionKeydown(event, index) {
+                switch (event.key) {
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        focusNext(1);
+                        break;
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        focusNext(-1);
+                        break;
+                    case 'Home':
+                        event.preventDefault();
+                        setActiveIndex(0);
+                        break;
+                    case 'End':
+                        event.preventDefault();
+                        setActiveIndex(optionButtons.length - 1);
+                        break;
+                    case 'Enter':
+                    case ' ':
+                        event.preventDefault();
+                        selectOption(optionButtons[index].getAttribute('data-value'));
+                        break;
+                    case 'Escape':
+                        event.preventDefault();
+                        closeDropdown();
+                        trigger.focus();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            trigger.addEventListener('click', (event) => {
+                event.preventDefault();
+                if (isOpen) {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
+            });
+
+            trigger.addEventListener('keydown', handleTriggerKeydown);
+
+            optionButtons.forEach((button, index) => {
+                button.addEventListener('keydown', (event) => handleOptionKeydown(event, index));
+            });
+
+            container.addEventListener('focusout', (event) => {
+                if (!isOpen) {
+                    return;
+                }
+                const nextFocus = event.relatedTarget;
+                if (!nextFocus || !container.contains(nextFocus)) {
+                    closeDropdown();
+                }
+            });
+
+            updateMarketDropdownSelection(marketSelect.value || MARKET_OPTIONS[0].value);
         }
 
         function setMarketSelection(value) {
@@ -1330,10 +1650,21 @@
             if (!option) {
                 return '';
             }
+            let countryText = option.country;
+            if (typeof marketLabel === 'string' && marketLabel.length) {
+                if (marketLabel.includes('(')) {
+                    const parsed = marketLabel.split('(')[0].trim();
+                    if (parsed) {
+                        countryText = parsed;
+                    }
+                } else if (!marketLabel.includes('/')) {
+                    countryText = marketLabel;
+                }
+            }
             const codeText = marketCode || option.code;
-            const labelText = marketLabel || option.label;
+            const languageText = codeText ? `${option.language}` : option.language;
             const flagUrl = chrome.runtime.getURL(option.icon);
-            return '<span style="display:inline-flex;align-items:center;gap:4px;"><img src="' + flagUrl + '" alt="' + labelText + ' flag" style="width:16px;height:12px;object-fit:cover;border-radius:2px;" /><span>' + codeText + '</span></span>';
+            return `<span style="display:inline-flex;align-items:center;gap:8px;"><img src="${flagUrl}" alt="${countryText} flag" style="width:16px;height:12px;object-fit:cover;border-radius:2px;flex-shrink:0;" /><span style="display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-weight:600;color:#343a40;line-height:1.1;">${countryText}</span><span style="font-size:12px;color:#6c757d;line-height:1.1;">${languageText}</span></span></span>`;
         }
 
         // Function to create and show modal
@@ -1378,6 +1709,8 @@
                     marketSelect.appendChild(optionEl);
                 });
                 const savedValue = localStorage.getItem('chatgpt-product-search-market') || MARKET_OPTIONS[0].value;
+                marketSelect.value = savedValue;
+                initializeMarketDropdownControls();
                 setMarketSelection(savedValue);
                 marketSelect.addEventListener('change', () => {
                     setMarketSelection(marketSelect.value);
