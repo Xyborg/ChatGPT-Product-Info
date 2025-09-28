@@ -247,8 +247,8 @@
                         font-weight: 600;
                         letter-spacing: 0.08em;
                         text-transform: uppercase;
-                        color: #4b5b87;
-                        background: rgba(245, 247, 255, 0.92);
+                        color: #ffffff;
+                        background: rgb(164 155 189);
                         border-radius: 8px;
                         box-shadow: 0 1px 2px rgba(79, 130, 223, 0.08);
                     }
