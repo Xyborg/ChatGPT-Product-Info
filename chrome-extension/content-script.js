@@ -123,18 +123,20 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: #f6eede52;
-                backdrop-filter: blur(2px);
-                -webkit-backdrop-filter: blur(2px);
+                background: rgba(255, 244, 214, 0.55);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 10000;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                padding: 24px;
+                box-sizing: border-box;
             ">
                 <style>
                     .table-row-hover:hover {
-                        background-color: #fffbf0 !important;
+                        background-color: #edf2ff !important;
                     }
                     .sidebar-project {
                         padding: 6px 8px;
@@ -143,11 +145,11 @@
                         cursor: pointer;
                         transition: background-color 0.2s;
                         font-size: 13px;
-                        color: #495057;
+                        color: #35426b;
                         border: 1px solid transparent;
                     }
                     .sidebar-project:hover {
-                        background-color: #e9ecef !important;
+                        background-color: rgba(91, 141, 239, 0.16) !important;
                     }
                     .sidebar-tag {
                         padding: 4px 8px;
@@ -156,21 +158,42 @@
                         cursor: pointer;
                         transition: all 0.2s;
                         font-size: 12px;
-                        color: #495057;
+                        color: #1f2a52;
+                        background-color: rgba(91, 141, 239, 0.22);
+                        border: 1px solid rgba(91, 141, 239, 0.35);
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                     }
                     .sidebar-tag:hover {
-                        filter: brightness(0.95);
-                        transform: scale(1.02);
+                        filter: brightness(1);
+                        transform: translateY(-1px);
+                        background-color: rgba(91, 141, 239, 0.32);
+                        border-color: rgba(91, 141, 239, 0.55);
                     }
                     #toggle-filters:hover {
-                        color: #0056b3 !important;
+                        color: #3f6fe0 !important;
                         text-decoration: underline;
                     }
                     .analysis-tag-label:hover {
-                        background-color: #f8f9fa !important;
+                        background-color: rgba(91, 141, 239, 0.12) !important;
+                    }
+                    #settings-btn:hover {
+                        background: rgba(91, 141, 239, 0.22) !important;
+                        color: #1f2a52 !important;
+                        transform: translateY(-1px);
+                    }
+                    #settings-btn:focus-visible {
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.35);
+                    }
+                    #close-modal-btn:hover {
+                        background: rgba(91, 141, 239, 0.28) !important;
+                        color: #1f2a52 !important;
+                    }
+                    #close-modal-btn:focus-visible {
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.35);
                     }
                     .status-icon {
                         display: inline-flex;
@@ -207,22 +230,22 @@
                         display: flex;
                         align-items: center;
                         gap: 10px;
-                        padding: 8px 14px;
-                        background: #f7f7f8;
-                        border: 1px solid #d9d9e3;
-                        border-radius: 18px;
+                        padding: 10px 16px;
+                        background: rgba(238, 243, 255, 0.9);
+                        border: 1px solid rgba(91, 141, 239, 0.35);
+                        border-radius: 20px;
                         flex: 1;
                         transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
                     }
                     .search-input-group:focus-within {
-                        border-color: #10a37f;
-                        box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.15);
-                        background: white;
+                        border-color: #5b8def;
+                        box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.18);
+                        background: rgba(255, 255, 255, 0.98);
                     }
                     .search-input-divider {
                         width: 1px;
                         height: 24px;
-                        background: #d1d5db;
+                        background: rgba(91, 141, 239, 0.3);
                     }
                     .search-input-field {
                         flex: 1;
@@ -242,23 +265,23 @@
                         height: 44px;
                         border-radius: 50%;
                         border: none;
-                        background: #343541;
+                        background: #000000;
                         color: white;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         cursor: pointer;
                         transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-                        box-shadow: 0 4px 12px rgba(36, 37, 51, 0.15);
+                        box-shadow: 0 10px 24px rgba(87, 125, 238, 0.25);
                     }
                     .search-btn:hover {
-                        transform: translateY(-1px);
-                        box-shadow: 0 6px 18px rgba(36, 37, 51, 0.25);
-                        background: #2b2c3b;
+                        transform: translateY(-2px);
+                        box-shadow: 0 14px 30px rgba(87, 125, 238, 0.35);
+                        background: #000000;
                     }
                     .search-btn:focus-visible {
                         outline: none;
-                        box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.35);
+                        box-shadow: 0 0 0 3px rgba(121, 161, 255, 0.45);
                     }
                     .search-btn:disabled,
                     .search-btn[data-state="loading"] {
@@ -266,6 +289,7 @@
                         opacity: 0.6;
                         transform: none;
                         box-shadow: none;
+                        background: #000000;
                     }
                     .search-btn-icon {
                         width: 20px;
@@ -278,8 +302,8 @@
                         display: none;
                         width: 18px;
                         height: 18px;
-                        border: 2px solid rgba(255, 255, 255, 0.3);
-                        border-top-color: white;
+                        border: 2px solid rgba(255, 255, 255, 0.35);
+                        border-top-color: #ffffff;
                         border-radius: 50%;
                         animation: spin 1s linear infinite;
                     }
@@ -417,44 +441,47 @@
                     }
                 </style>
                 <div style="
-                    background: white;
-                    width: 90%;
-                    height:85%;
-                    border-radius: 8px;
+                    background: linear-gradient(140deg, #f5f8ff 0%, #ffffff 60%);
+                    width: min(1600px, 90vw);
+                    height: min(820px, 88vh);
+                    border-radius: 20px;
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 28px 68px rgba(32, 42, 92, 0.28);
+                    border: 1px solid rgba(74, 105, 183, 0.32);
+                    position: relative;
                 ">
                     <div style="
-                        background: #f8f9fa;
-                        padding: 12px 20px;
+                        background: linear-gradient(90deg, rgba(91, 141, 239, 0.16), rgba(232, 238, 255, 0.9));
+                        padding: 16px 24px;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        border-bottom: 1px solid #e9ecef;
+                        border-bottom: 1px solid rgba(91, 141, 239, 0.18);
                     ">
                         <h1 style="
-                            font-size: 18px;
+                            font-size: 19px;
                             font-weight: 600;
                             margin: 0;
-                            color: #495057;
+                            color: #27325f;
                             display: flex;
                             align-items: center;
-                            gap: 8px;
-                        "><img src="${searchIconUrl}" alt="Search" style="width: 20px; height: 20px;" />ChatGPT Product Info Research</h1>
+                            gap: 10px;
+                            letter-spacing: 0.15px;
+                        "><img src="${searchIconUrl}" alt="Search" style="width: 20px; height: 20px; filter: hue-rotate(18deg) saturate(1.1);" />ChatGPT Product Info Research</h1>
                         <button id="close-modal-btn" style="
-                            background: none;
                             border: none;
-                            color: #6c757d;
+                            color: #3c4b7c;
                             font-size: 20px;
-                            width: 30px;
-                            height: 30px;
-                            border-radius: 4px;
+                            width: 34px;
+                            height: 34px;
+                            border-radius: 50%;
                             cursor: pointer;
                             display: flex;
                             align-items: center;
                             justify-content: center;
+                            transition: all 0.2s ease;
                         ">&times;</button>
                     </div>
                     
@@ -468,16 +495,16 @@
                         <div id="sidebar" style="
                             width: 200px;
                             min-width: 200px;
-                            background: #f8f9fa;
-                            border-right: 1px solid #e9ecef;
+                            background: linear-gradient(180deg, rgba(91, 141, 239, 0.14), rgba(232, 238, 255, 0.35));
+                            border-right: 1px solid rgba(91, 141, 239, 0.18);
                             display: flex;
                             flex-direction: column;
                             overflow: hidden;
                         ">
                             <div style="
-                                padding: 12px 16px;
-                                background: #ffffff;
-                                border-bottom: 1px solid #e9ecef;
+                                padding: 14px 18px;
+                                background: rgba(255, 255, 255, 0.96);
+                                border-bottom: 1px solid rgba(91, 141, 239, 0.18);
                                 display: flex;
                                 justify-content: space-between;
                                 align-items: center;
@@ -486,16 +513,16 @@
                                     margin: 0;
                                     font-size: 14px;
                                     font-weight: 600;
-                                    color: #495057;
+                                    color: #27325f;
                                 ">Organization</h3>
                                 <button id="settings-btn" style="
-                                    background: none;
+                                    background: rgba(91, 141, 239, 0.12);
                                     border: none;
-                                    color: #6c757d;
+                                    color: #3c4b7c;
                                     font-size: 16px;
                                     width: 24px;
                                     height: 24px;
-                                    border-radius: 4px;
+                                    border-radius: 6px;
                                     cursor: pointer;
                                     display: flex;
                                     align-items: center;
@@ -528,7 +555,7 @@
                                         <button id="add-project-btn" style="
                                             background: none;
                                             border: none;
-                                            color: #007bff;
+                                            color: #5b8def;
                                             font-size: 12px;
                                             cursor: pointer;
                                             padding: 2px 4px;
@@ -563,7 +590,7 @@
                                         <button id="add-tag-btn" style="
                                             background: none;
                                             border: none;
-                                            color: #007bff;
+                                            color: #5b8def;
                                             font-size: 12px;
                                             cursor: pointer;
                                             padding: 2px 4px;
@@ -591,19 +618,20 @@
                         <!-- Tab Navigation -->
                         <div id="tab-navigation" style="
                             display: flex;
-                            background: #f8f9fa;
-                            border-bottom: 1px solid #e9ecef;
+                            background: rgba(91, 141, 239, 0.12);
+                            border-bottom: 1px solid rgba(91, 141, 239, 0.18);
+                            backdrop-filter: blur(6px);
                         ">
                             <button id="search-tab" class="tab-button active-tab" style="
                                 flex: 1;
-                                padding: 12px 20px;
+                                padding: 14px 24px;
                                 border: none;
-                                background: white;
-                                color: #495057;
+                                background: rgba(255, 255, 255, 0.96);
+                                color: #27325f;
                                 font-size: 14px;
-                                font-weight: 500;
+                                font-weight: 600;
                                 cursor: pointer;
-                                border-bottom: 2px solid #007bff;
+                                border-bottom: 3px solid #5b8def;
                                 transition: all 0.2s ease;
                                 display: flex;
                                 align-items: center;
@@ -612,12 +640,12 @@
                             "><img src="${searchIconUrl}" alt="Search" style="width: 20px; height: 20px;" />Search</button>
                             <button id="history-tab" class="tab-button" style="
                                 flex: 1;
-                                padding: 12px 20px;
+                                padding: 14px 24px;
                                 border: none;
-                                background: #f8f9fa;
-                                color: #6c757d;
+                                background: transparent;
+                                color: #5e6f9b;
                                 font-size: 14px;
-                                font-weight: 500;
+                                font-weight: 600;
                                 cursor: pointer;
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
@@ -628,12 +656,12 @@
                             "><img src="${historyIconUrl}" alt="History" style="width: 20px; height: 20px;" />History</button>
                             <button id="reports-tab" class="tab-button" style="
                                 flex: 1;
-                                padding: 12px 20px;
+                                padding: 14px 24px;
                                 border: none;
-                                background: #f8f9fa;
-                                color: #6c757d;
+                                background: transparent;
+                                color: #5e6f9b;
                                 font-size: 14px;
-                                font-weight: 500;
+                                font-weight: 600;
                                 cursor: pointer;
                                 border-bottom: 2px solid transparent;
                                 transition: all 0.2s ease;
@@ -646,9 +674,9 @@
                         
                         <div id="search-area" style="
                             position: relative;
-                            padding: 20px;
-                            border-bottom: 1px solid #e9ecef;
-                            background: white;
+                            padding: 24px;
+                            border-bottom: 1px solid rgba(91, 141, 239, 0.18);
+                            background: rgba(255, 255, 255, 0.9);
                             transition: all 0.3s ease;
                         ">
                             <!-- Collapse/Expand Button - positioned absolutely -->
@@ -658,14 +686,14 @@
                                 top: 8px;
                                 right: 20px;
                                 cursor: pointer;
-                                color: #007bff;
+                                color: #5b8def;
                                 font-size: 12px;
                                 font-weight: 500;
                                 transition: all 0.2s ease;
                                 border-radius: 4px;
                                 padding: 4px 8px;
-                                background: rgba(0, 123, 255, 0.1);
-                                border: 1px solid rgba(0, 123, 255, 0.2);
+                                background: rgba(91, 141, 239, 0.1);
+                                border: 1px solid rgba(91, 141, 239, 0.18);
                                 z-index: 10;
                             ">
                                 <span id="collapse-text">▲ Hide</span>
@@ -821,12 +849,12 @@
                         <div id="results-container" style="
                             flex: 1;
                             overflow-y: auto;
-                            padding: 20px;
+                            padding: 24px;
                         ">
                             <div id="welcome-state" style="
                                 text-align: center; 
                                 padding: 60px 40px; 
-                                color: #6c757d;
+                                color: #5e6f9b;
                                 display: flex;
                                 flex-direction: column;
                                 align-items: center;
@@ -834,27 +862,28 @@
                                 height: 100%;
                                 min-height: 300px;
                             ">
-                                <img src="${searchIconUrl}" alt="Search" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.7;" />
+                                <img src="${searchIconUrl}" alt="Search" style="width: 52px; height: 52px; margin-bottom: 22px; opacity: 0.9; filter: hue-rotate(18deg) saturate(1.1);" />
                                 <h3 style="
                                     margin: 0 0 12px 0;
                                     font-size: 20px;
                                     font-weight: 600;
-                                    color: #495057;
+                                    color: #27325f;
                                 ">Product Search</h3>
                                 <p style="
                                     margin: 0 0 24px 0;
                                     font-size: 16px;
                                     line-height: 1.5;
                                     max-width: 400px;
+                                    color: #465584;
                                 ">Search for product reviews, comparisons, and detailed information from across the web</p>
                                 <div style="
-                                    padding: 16px 20px;
-                                    border-left: 4px solid #007bff;
-                                    max-width: 500px;
+                                    padding: 4px 0 4px 18px;
+                                    border-left: 4px solid #5b8def;
+                                    max-width: 520px;
                                     text-align: left;
                                 ">
-                                    <div style="font-weight: 600; margin-bottom: 8px; color: #495057;">Try searching for:</div>
-                                    <div style="color: #6c757d; font-size: 14px; line-height: 1.4;">
+                                    <div style="font-weight: 600; margin-bottom: 8px; color: #27325f;">Try searching for:</div>
+                                    <div style="color: #556694; font-size: 14px; line-height: 1.6;">
                                         • "iPhone 17 Pro camera quality"<br>
                                         • "Nike Air Max running shoes"<br>
                                         • "MacBook Air M3 performance"<br>
@@ -881,13 +910,13 @@
                         <div id="history-container" style="
                             flex: 1;
                             overflow-y: auto;
-                            padding: 20px;
+                            padding: 24px;
                             display: none;
                         ">
                             <div id="history-welcome-state" style="
                                 text-align: center; 
                                 padding: 60px 40px; 
-                                color: #6c757d;
+                                color: #5e6f9b;
                                 display: flex;
                                 flex-direction: column;
                                 align-items: center;
@@ -895,18 +924,19 @@
                                 height: 100%;
                                 min-height: 300px;
                             ">
-                                <img src="${historyIconUrl}" alt="History" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.7;" />
+                                <img src="${historyIconUrl}" alt="History" style="width: 52px; height: 52px; margin-bottom: 22px; opacity: 0.9; filter: hue-rotate(18deg) saturate(1.05);" />
                                 <h3 style="
                                     margin: 0 0 12px 0;
                                     font-size: 20px;
                                     font-weight: 600;
-                                    color: #495057;
+                                    color: #27325f;
                                 ">Search History</h3>
                                 <p style="
                                     margin: 0 0 24px 0;
                                     font-size: 16px;
                                     line-height: 1.5;
                                     max-width: 400px;
+                                    color: #465584;
                                 ">Your search history will appear here. Start searching to build your history!</p>
                                 <button id="clear-history-btn" style="
                                     background: #dc3545;
@@ -935,7 +965,7 @@
                                         <div style="display: flex; gap: 10px; align-items: center;">
                                             <button id="toggle-filters" style="
                                                 background: none;
-                                                color: #007bff;
+                                                color: #5b8def;
                                                 border: none;
                                                 padding: 6px 8px;
                                             font-size: 13px;
@@ -978,11 +1008,12 @@
                                     <!-- Advanced Filter Panel -->
                                     <div id="filter-panel" style="
                                         display: none;
-                                        background: #f8f9fa;
-                                        border: 1px solid #e9ecef;
-                                        border-radius: 8px;
-                                        padding: 16px;
+                                        background: rgba(238, 243, 255, 0.85);
+                                        border: 1px solid rgba(91, 141, 239, 0.18);
+                                        border-radius: 12px;
+                                        padding: 18px;
                                         margin-bottom: 16px;
+                                        box-shadow: 0 12px 28px rgba(79, 130, 223, 0.08);
                                     ">
                                         <div style="
                                             display: grid;
@@ -995,14 +1026,14 @@
                                                     display: block;
                                                     font-size: 12px;
                                                     font-weight: 600;
-                                                    color: #6c757d;
+                                                    color: #4f6091;
                                                     margin-bottom: 6px;
                                                 ">Search Text</label>
                                                 <input type="text" id="filter-text" placeholder="Search in queries and results..." style="
                                                     width: 100%;
                                                     padding: 8px 12px;
-                                                    border: 1px solid #dee2e6;
-                                                    border-radius: 4px;
+                                                    border: 1px solid rgba(91, 141, 239, 0.3);
+                                                    border-radius: 8px;
                                                     font-size: 13px;
                                                     box-sizing: border-box;
                                                 " />
@@ -1181,7 +1212,7 @@
                                             color: #6c757d;
                                         "></span>
                                         <button id="history-detail-open-search" style="
-                                            background: #007bff;
+                                            background: #5b8def;
                                             color: white;
                                             border: none;
                                             padding: 6px 12px;
@@ -1251,7 +1282,7 @@
                                     <div style="display: flex; gap: 8px;">
                                         <button id="toggle-analysis-filters" style="
                                             background: none;
-                                            color: #007bff;
+                                            color: #5b8def;
                                             border: none;
                                             padding: 6px 12px;
                                             border-radius: 4px;
@@ -1921,7 +1952,7 @@
                     // Switch to multi-product mode
                     singleProductInput.style.display = 'none';
                     multiProductInput.style.display = 'block';
-                    toggleBackground.style.background = '#007bff';
+                    toggleBackground.style.background = '#5b8def';
                     toggleSlider.style.transform = 'translateX(20px)';
                 } else {
                     // Switch to single-product mode
@@ -1944,7 +1975,7 @@
                     collapseText.textContent = '▲ Hide';
                     collapseToggle.style.background = 'rgba(0, 123, 255, 0.1)';
                     collapseToggle.style.border = '1px solid rgba(0, 123, 255, 0.2)';
-                    collapseToggle.style.color = '#007bff';
+                    collapseToggle.style.color = '#5b8def';
                 } else {
                     // Collapse
                     searchControls.style.display = 'none';
@@ -2018,9 +2049,9 @@
                 const reportsContainer = document.getElementById('reports-container');
                 if (reportsContainer) reportsContainer.style.display = 'none';
                 if (reportsTab) {
-                    reportsTab.style.background = '#f8f9fa';
-                    reportsTab.style.color = '#6c757d';
-                    reportsTab.style.borderBottom = '2px solid transparent';
+                    reportsTab.style.background = 'rgba(91, 141, 239, 0.08)';
+                    reportsTab.style.color = '#5e6f9b';
+                    reportsTab.style.borderBottom = '3px solid transparent';
                     reportsTab.classList.remove('active-tab');
                 }
             });
@@ -2033,9 +2064,9 @@
                 const reportsContainer = document.getElementById('reports-container');
                 if (reportsContainer) reportsContainer.style.display = 'none';
                 if (reportsTab) {
-                    reportsTab.style.background = '#f8f9fa';
-                    reportsTab.style.color = '#6c757d';
-                    reportsTab.style.borderBottom = '2px solid transparent';
+                    reportsTab.style.background = 'rgba(91, 141, 239, 0.08)';
+                    reportsTab.style.color = '#5e6f9b';
+                    reportsTab.style.borderBottom = '3px solid transparent';
                     reportsTab.classList.remove('active-tab');
                 }
             });
@@ -2044,17 +2075,17 @@
                 // Reset all tabs first
                 [searchTab, historyTab, reportsTab].forEach(t => {
                     if (t) {
-                        t.style.background = '#f8f9fa';
-                        t.style.color = '#6c757d';
-                        t.style.borderBottom = '2px solid transparent';
+                        t.style.background = 'rgba(91, 141, 239, 0.08)';
+                        t.style.color = '#5e6f9b';
+                        t.style.borderBottom = '3px solid transparent';
                         t.classList.remove('active-tab');
                     }
                 });
-                
+
                 // Set reports tab as active
-                reportsTab.style.background = 'white';
-                reportsTab.style.color = '#495057';
-                reportsTab.style.borderBottom = '2px solid #007bff';
+                reportsTab.style.background = 'rgba(255, 255, 255, 0.96)';
+                reportsTab.style.color = '#27325f';
+                reportsTab.style.borderBottom = '3px solid #5b8def';
                 reportsTab.classList.add('active-tab');
                 
                 // Hide all containers
@@ -2120,9 +2151,9 @@
             // Reset all tabs
             [searchTab, historyTab, reportsTab].forEach(t => {
                 if (t) {
-                    t.style.background = '#f8f9fa';
-                    t.style.color = '#6c757d';
-                    t.style.borderBottom = '2px solid transparent';
+                    t.style.background = 'rgba(91, 141, 239, 0.08)';
+                    t.style.color = '#5e6f9b';
+                    t.style.borderBottom = '3px solid transparent';
                     t.classList.remove('active-tab');
                 }
             });
@@ -2173,9 +2204,9 @@
             }
 
             if (tab === 'search') {
-                searchTab.style.background = 'white';
-                searchTab.style.color = '#495057';
-                searchTab.style.borderBottom = '2px solid #007bff';
+                searchTab.style.background = 'rgba(255, 255, 255, 0.96)';
+                searchTab.style.color = '#27325f';
+                searchTab.style.borderBottom = '3px solid #5b8def';
                 searchTab.classList.add('active-tab');
 
                 if (searchArea) searchArea.style.display = 'block';
@@ -2187,9 +2218,9 @@
                     resetToCleanSearchState();
                 }
             } else if (tab === 'history') {
-                historyTab.style.background = 'white';
-                historyTab.style.color = '#495057';
-                historyTab.style.borderBottom = '2px solid #007bff';
+                historyTab.style.background = 'rgba(255, 255, 255, 0.96)';
+                historyTab.style.color = '#27325f';
+                historyTab.style.borderBottom = '3px solid #5b8def';
                 historyTab.classList.add('active-tab');
 
                 showHistoryListView();
@@ -2237,9 +2268,9 @@
                     });
                 }
             } else if (tab === 'reports') {
-                reportsTab.style.background = 'white';
-                reportsTab.style.color = '#495057';
-                reportsTab.style.borderBottom = '2px solid #007bff';
+                reportsTab.style.background = 'rgba(255, 255, 255, 0.96)';
+                reportsTab.style.color = '#27325f';
+                reportsTab.style.borderBottom = '3px solid #5b8def';
                 reportsTab.classList.add('active-tab');
                 
                 // CRITICAL: Completely hide and clear history content when switching to reports
@@ -3238,7 +3269,7 @@
             }
         }
         
-        function createTag(name, color = '#007bff') {
+        function createTag(name, color = '#5b8def') {
             const tags = loadTags();
             
             // Check for duplicate names
@@ -3537,8 +3568,9 @@
             
             tagsList.innerHTML = tags.map(tag => `
                 <div class="sidebar-tag" data-tag-id="${tag.id}" style="
-                    border: 1px solid ${tag.color}20;
-                    background: ${tag.color}10;
+                    border: 1px solid ${tag.color}55;
+                    background: ${tag.color}26;
+                    color: #142049;
                 ">
                     <span style="
                         display: flex;
@@ -3549,8 +3581,8 @@
                     </span>
                     <span style="
                         font-size: 10px;
-                        color: #6c757d;
-                        background: #f8f9fa;
+                        color: #2d3d6e;
+                        background: rgba(255, 255, 255, 0.8);
                         padding: 1px 4px;
                         border-radius: 6px;
                     ">${tag.usageCount || 0}</span>
@@ -3673,7 +3705,7 @@
                                 font-size: 14px;
                                 font-weight: 500;
                                 cursor: pointer;
-                                border-bottom: 2px solid #007bff;
+                                border-bottom: 2px solid #5b8def;
                                 transition: all 0.2s ease;
                                 display: flex;
                                 align-items: center;
@@ -3720,7 +3752,7 @@
                                 ">
                                     <h3 style="margin: 0; color: #495057;">Manage Tags</h3>
                                     <button id="create-tag-btn" style="
-                                        background: #007bff;
+                                        background: #5b8def;
                                         color: white;
                                         border: none;
                                         padding: 8px 16px;
@@ -3749,7 +3781,7 @@
                                 ">
                                     <h3 style="margin: 0; color: #495057;">Manage Projects</h3>
                                     <button id="create-project-btn" style="
-                                        background: #007bff;
+                                        background: #5b8def;
                                         color: white;
                                         border: none;
                                         padding: 8px 16px;
@@ -3867,7 +3899,7 @@
             if (tab === 'tags') {
                 tagsTab.style.background = 'white';
                 tagsTab.style.color = '#495057';
-                tagsTab.style.borderBottom = '2px solid #007bff';
+                tagsTab.style.borderBottom = '2px solid #5b8def';
                 projectsTab.style.background = '#f8f9fa';
                 projectsTab.style.color = '#6c757d';
                 projectsTab.style.borderBottom = '2px solid transparent';
@@ -3877,7 +3909,7 @@
             } else {
                 projectsTab.style.background = 'white';
                 projectsTab.style.color = '#495057';
-                projectsTab.style.borderBottom = '2px solid #007bff';
+                projectsTab.style.borderBottom = '2px solid #5b8def';
                 tagsTab.style.background = '#f8f9fa';
                 tagsTab.style.color = '#6c757d';
                 tagsTab.style.borderBottom = '2px solid transparent';
@@ -4080,7 +4112,7 @@
             const name = prompt('Enter tag name:');
             if (!name || !name.trim()) return;
             
-            const color = prompt('Enter tag color (hex):', '#007bff');
+            const color = prompt('Enter tag color (hex):', '#5b8def');
             if (!color) return;
             
             try {
@@ -4382,8 +4414,8 @@
                             ">
                                 <button id="add-tag-to-search" style="
                                     background: none;
-                                    border: 1px dashed #007bff;
-                                    color: #007bff;
+                                    border: 1px dashed #5b8def;
+                                    color: #5b8def;
                                     padding: 2px 6px;
                                     border-radius: 12px;
                                     font-size: 11px;
@@ -4593,8 +4625,8 @@
             addButton.id = 'add-tag-to-search';
             addButton.style.cssText = `
                 background: none;
-                border: 1px dashed #007bff;
-                color: #007bff;
+                border: 1px dashed #5b8def;
+                color: #5b8def;
                 padding: 2px 6px;
                 border-radius: 12px;
                 font-size: 11px;
@@ -5575,7 +5607,7 @@
             activeFiltersDiv.style.display = hasActiveFilters ? 'block' : 'none';
         }
         
-        function createFilterChip(type, text, onRemove, color = '#007bff') {
+        function createFilterChip(type, text, onRemove, color = '#5b8def') {
             const chip = document.createElement('div');
             chip.style.cssText = `
                 display: flex;
@@ -5743,7 +5775,7 @@
                 collapseToggle.style.display = 'none';
                 collapseToggle.style.background = 'rgba(0, 123, 255, 0.1)';
                 collapseToggle.style.border = '1px solid rgba(0, 123, 255, 0.2)';
-                collapseToggle.style.color = '#007bff';
+                collapseToggle.style.color = '#5b8def';
             }
 
             // Remove any organization interfaces
@@ -5787,7 +5819,7 @@
                         ">Search for product reviews, comparisons, and detailed information from across the web</p>
                         <div style="
                             padding: 16px 20px;
-                            border-left: 4px solid #007bff;
+                            border-left: 4px solid #5b8def;
                             max-width: 500px;
                             text-align: left;
                         ">
@@ -5946,7 +5978,7 @@
                         }</div>
                         <div style="display: flex; gap: 8px;">
                             <button class="reopen-search-btn" data-id="${item.id}" style="
-                                background: #007bff;
+                                background: #5b8def;
                                 color: white;
                                 border: none;
                                 padding: 4px 8px;
@@ -6061,7 +6093,7 @@
                 // Switch to multi-product mode
                 if (singleProductInput) singleProductInput.style.display = 'none';
                 if (multiProductInput) multiProductInput.style.display = 'block';
-                if (toggleBackground) toggleBackground.style.background = '#007bff';
+                if (toggleBackground) toggleBackground.style.background = '#5b8def';
                 if (toggleSlider) toggleSlider.style.transform = 'translateX(20px)';
             } else {
                 // Switch to single-product mode
@@ -6185,7 +6217,7 @@
                     toggleButton.id = 'history-detail-toggle';
                     toggleButton.style.background = 'none';
                     toggleButton.style.border = 'none';
-                    toggleButton.style.color = '#007bff';
+                    toggleButton.style.color = '#5b8def';
                     toggleButton.style.fontSize = '13px';
                     toggleButton.style.cursor = 'pointer';
                     toggleButton.textContent = `Show all (${queries.length})`;
@@ -7281,7 +7313,7 @@
                         background: #f8f9fa;
                         padding: 10px 14px;
                         margin-bottom: 16px;
-                        border-left: 4px solid #007bff;
+                        border-left: 4px solid #5b8def;
                         display: flex;
                         flex-wrap: wrap;
                         justify-content: space-between;
@@ -7381,7 +7413,7 @@
                                          onerror="this.style.display='none'" />
                                     <span style="
                                         font-weight: 600;
-                                        color: #007bff;
+                                        color: #5b8def;
                                         font-size: 14px;
                                     ">${link.title}</span>
                                     <a href="${link.url}" target="_blank" style="
@@ -7517,7 +7549,7 @@
                                     <div style="
                                         font-size: 13px;
                                         font-weight: 600;
-                                        color: #007bff;
+                                        color: #5b8def;
                                         margin-bottom: 6px;
                                     ">${review.theme}</div>
                                     <div style="color: #6c757d; line-height: 1.4; font-size: 13px;">${review.summary}</div>
@@ -7743,7 +7775,7 @@
                         ">
                             <div style="
                                 font-weight: 600;
-                                color: #007bff;
+                                color: #5b8def;
                                 margin-bottom: 4px;
                                 cursor: pointer;
                             " data-product-index="${index}" class="product-name-link">${result.query}</div>
@@ -7838,7 +7870,7 @@
                             <div style="font-size: 11px; color: #6c757d;">links</div>
                             ${(data.reviews.length > 0 || data.products.length > 0 || data.rationale || data.reviewSummary) ? `
                                 <button data-product-index="${index}" class="view-details-btn" style="
-                                    background: #007bff;
+                                    background: #5b8def;
                                     color: white;
                                     border: none;
                                     padding: 2px 6px;
@@ -7947,7 +7979,7 @@
                     background: #f8f9fa;
                     padding: 10px 14px;
                     margin-bottom: 16px;
-                    border-left: 4px solid #007bff;
+                    border-left: 4px solid #5b8def;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
