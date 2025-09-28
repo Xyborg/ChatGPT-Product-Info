@@ -752,6 +752,8 @@
                             <!-- Single product input -->
                             <div id="single-product-input" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
                                 <div id="single-input-group" class="search-input-group" style="flex: 1;">
+                                    <input type="text" id="search-query" class="search-input-field" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" autocomplete="off" />
+                                    <div id="market-input-divider" class="search-input-divider" aria-hidden="true"></div>
                                     <div id="market-select-container" style="position: relative; flex-shrink: 0;">
                                         <button id="market-select-trigger" type="button" class="market-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="market-select-dropdown">
                                             <img id="market-select-flag" src="" alt="Selected market" style="
@@ -778,8 +780,6 @@
                                             background: transparent;
                                         "></select>
                                     </div>
-                                    <div id="market-input-divider" class="search-input-divider" aria-hidden="true"></div>
-                                    <input type="text" id="search-query" class="search-input-field" placeholder="Search query (e.g., iPhone 17, Nike shoes, Pets Deli Hundefutter)" autocomplete="off" />
                                 </div>
                                 <button id="search-btn" class="search-btn" type="button" aria-label="Run product search" data-state="ready" data-ready-aria-label="Run product search" data-loading-aria-label="Searching" data-ready-status="Search" data-loading-status="Searching">
                                     <span class="search-btn-icon" aria-hidden="true">
@@ -1828,9 +1828,9 @@
                 if (singleInputGroup) {
                     if (divider) {
                         divider.style.display = 'inline-flex';
-                        singleInputGroup.insertBefore(marketSelectContainer, divider);
+                        singleInputGroup.insertBefore(marketSelectContainer, divider.nextSibling);
                     } else {
-                        singleInputGroup.insertBefore(marketSelectContainer, singleInputGroup.firstChild);
+                        singleInputGroup.appendChild(marketSelectContainer);
                     }
                 }
                 if (multiMarketMount) {
