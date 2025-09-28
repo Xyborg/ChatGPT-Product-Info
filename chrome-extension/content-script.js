@@ -49,6 +49,9 @@
         const tagIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
             ? chrome.runtime.getURL('assets/icons-ui/tag.svg')
             : 'assets/icons-ui/tag.svg';
+        const databaseIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+            ? chrome.runtime.getURL('assets/icons-ui/database.svg')
+            : 'assets/icons-ui/database.svg';
         const editIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
             ? chrome.runtime.getURL('assets/icons-ui/edit.svg')
             : 'assets/icons-ui/edit.svg';
@@ -3721,6 +3724,380 @@
         
         // ===== END ENHANCED DATA MANAGEMENT FUNCTIONS =====
 
+        // ===== EXPORT/IMPORT FUNCTIONALITY =====
+        
+        function initializeExportImportTab() {
+            // Update data counts
+            updateDataCounts();
+            
+            // Set up event listeners
+            const exportBtn = document.getElementById('export-data-btn');
+            const importBtn = document.getElementById('import-data-btn');
+            const selectFileBtn = document.getElementById('select-import-file-btn');
+            const fileInput = document.getElementById('import-file-input');
+            
+            if (exportBtn) {
+                exportBtn.addEventListener('click', exportData);
+            }
+            
+            if (importBtn) {
+                importBtn.addEventListener('click', importData);
+            }
+            
+            if (selectFileBtn && fileInput) {
+                selectFileBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', handleFileSelect);
+            }
+        }
+        
+        function updateDataCounts() {
+            const tags = loadTags();
+            const projects = loadProjects();
+            const history = loadSearchHistory();
+            
+            const tagsCountEl = document.getElementById('tags-count');
+            const projectsCountEl = document.getElementById('projects-count');
+            const historyCountEl = document.getElementById('history-count');
+            
+            if (tagsCountEl) tagsCountEl.textContent = tags.length;
+            if (projectsCountEl) projectsCountEl.textContent = projects.length;
+            if (historyCountEl) historyCountEl.textContent = history.length;
+        }
+        
+        function exportData() {
+            try {
+                const exportTagsChecked = document.getElementById('export-tags')?.checked;
+                const exportProjectsChecked = document.getElementById('export-projects')?.checked;
+                const exportHistoryChecked = document.getElementById('export-history')?.checked;
+                
+                if (!exportTagsChecked && !exportProjectsChecked && !exportHistoryChecked) {
+                    showExportImportStatus('Please select at least one data type to export.', 'error');
+                    return;
+                }
+                
+                const exportData = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    data: {}
+                };
+                
+                if (exportTagsChecked) {
+                    exportData.data.tags = loadTags();
+                }
+                
+                if (exportProjectsChecked) {
+                    exportData.data.projects = loadProjects();
+                }
+                
+                if (exportHistoryChecked) {
+                    exportData.data.history = loadSearchHistory();
+                }
+                
+                // Create and download file
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `chatgpt-product-search-backup-${new Date().toISOString().split('T')[0]}.json`;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+                
+                showExportImportStatus('Data exported successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Export failed:', error);
+                showExportImportStatus('Export failed. Please try again.', 'error');
+            }
+        }
+        
+        let pendingImportData = null;
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const fileInfo = document.getElementById('selected-file-info');
+            if (fileInfo) {
+                fileInfo.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                fileInfo.style.display = 'block';
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (validateImportData(importedData)) {
+                        pendingImportData = importedData;
+                        displayImportPreview(importedData);
+                        enableImportButton();
+                    } else {
+                        showExportImportStatus('Invalid file format. Please select a valid export file.', 'error');
+                        disableImportButton();
+                    }
+                } catch (error) {
+                    showExportImportStatus('Error reading file. Please ensure it\'s a valid JSON file.', 'error');
+                    disableImportButton();
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function validateImportData(data) {
+            if (!data || typeof data !== 'object') return false;
+            if (!data.version || !data.data) return false;
+            
+            const { tags, projects, history } = data.data;
+            
+            // Validate tags structure
+            if (tags && (!Array.isArray(tags) || !tags.every(tag => 
+                tag.id && tag.name && typeof tag.created === 'number'))) {
+                return false;
+            }
+            
+            // Validate projects structure  
+            if (projects && (!Array.isArray(projects) || !projects.every(project => 
+                project.id && project.name && typeof project.created === 'number'))) {
+                return false;
+            }
+            
+            // Validate history structure
+            if (history && (!Array.isArray(history) || !history.every(item => 
+                item.id && item.query && item.timestamp))) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function displayImportPreview(importedData) {
+            const preview = document.getElementById('import-preview');
+            const previewContent = document.getElementById('import-preview-content');
+            
+            if (!preview || !previewContent) return;
+            
+            const { tags, projects, history } = importedData.data;
+            let previewHTML = '';
+            
+            if (tags && tags.length > 0) {
+                previewHTML += `<div><strong>Tags:</strong> ${tags.length} items</div>`;
+            }
+            
+            if (projects && projects.length > 0) {
+                previewHTML += `<div><strong>Projects:</strong> ${projects.length} items</div>`;
+            }
+            
+            if (history && history.length > 0) {
+                previewHTML += `<div><strong>History:</strong> ${history.length} items</div>`;
+            }
+            
+            previewHTML += `<div style="margin-top: 8px; font-size: 12px; color: #6c757d;">Export Date: ${new Date(importedData.exportDate).toLocaleString()}</div>`;
+            
+            previewContent.innerHTML = previewHTML;
+            preview.style.display = 'block';
+        }
+        
+        function enableImportButton() {
+            const importBtn = document.getElementById('import-data-btn');
+            if (importBtn) {
+                importBtn.style.background = '#28a745';
+                importBtn.style.cursor = 'pointer';
+                importBtn.disabled = false;
+            }
+        }
+        
+        function disableImportButton() {
+            const importBtn = document.getElementById('import-data-btn');
+            if (importBtn) {
+                importBtn.style.background = '#6c757d';
+                importBtn.style.cursor = 'not-allowed';
+                importBtn.disabled = true;
+            }
+            
+            const preview = document.getElementById('import-preview');
+            if (preview) {
+                preview.style.display = 'none';
+            }
+        }
+        
+        function importData() {
+            if (!pendingImportData) {
+                showExportImportStatus('No file selected for import.', 'error');
+                return;
+            }
+            
+            try {
+                const { tags, projects, history } = pendingImportData.data;
+                let importResults = { added: 0, skipped: 0 };
+                
+                // ID mappings to maintain relationships
+                const tagIdMapping = {}; // oldId -> newId
+                const projectIdMapping = {}; // oldId -> newId
+                
+                // Import tags
+                if (tags && tags.length > 0) {
+                    const existingTags = loadTags();
+                    const existingTagNames = existingTags.map(t => t.name.toLowerCase());
+                    
+                    tags.forEach(tag => {
+                        if (!existingTagNames.includes(tag.name.toLowerCase())) {
+                            const newId = Date.now() + Math.random().toString(36).substr(2, 9);
+                            tagIdMapping[tag.id] = newId; // Map old ID to new ID
+                            
+                            existingTags.push({
+                                ...tag,
+                                id: newId
+                            });
+                            importResults.added++;
+                        } else {
+                            // Find existing tag ID for mapping
+                            const existingTag = existingTags.find(t => t.name.toLowerCase() === tag.name.toLowerCase());
+                            if (existingTag) {
+                                tagIdMapping[tag.id] = existingTag.id; // Map old ID to existing ID
+                            }
+                            importResults.skipped++;
+                        }
+                    });
+                    
+                    saveTags(existingTags);
+                }
+                
+                // Import projects
+                if (projects && projects.length > 0) {
+                    const existingProjects = loadProjects();
+                    const existingProjectNames = existingProjects.map(p => p.name.toLowerCase());
+                    
+                    projects.forEach(project => {
+                        if (!existingProjectNames.includes(project.name.toLowerCase())) {
+                            const newId = Date.now() + Math.random().toString(36).substr(2, 9);
+                            projectIdMapping[project.id] = newId; // Map old ID to new ID
+                            
+                            existingProjects.push({
+                                ...project,
+                                id: newId
+                            });
+                            importResults.added++;
+                        } else {
+                            // Find existing project ID for mapping
+                            const existingProject = existingProjects.find(p => p.name.toLowerCase() === project.name.toLowerCase());
+                            if (existingProject) {
+                                projectIdMapping[project.id] = existingProject.id; // Map old ID to existing ID
+                            }
+                            importResults.skipped++;
+                        }
+                    });
+                    
+                    saveProjects(existingProjects);
+                }
+                
+                // Import history with updated ID references
+                if (history && history.length > 0) {
+                    const existingHistory = loadSearchHistory();
+                    
+                    // Create a set of unique signatures from existing history for better duplicate detection
+                    const existingSignatures = new Set(
+                        existingHistory.map(h => `${h.query}|${h.timestamp}|${h.searchType || 'single'}`)
+                    );
+                    
+                    history.forEach(item => {
+                        // Create unique signature for this item
+                        const itemSignature = `${item.query}|${item.timestamp}|${item.searchType || 'single'}`;
+                        
+                        if (!existingSignatures.has(itemSignature)) {
+                            const newHistoryItem = {
+                                ...item,
+                                id: Date.now() + Math.random().toString(36).substr(2, 9) // Generate new ID to avoid conflicts
+                            };
+                            
+                            // Update project reference if it exists and we have a mapping
+                            if (item.projectId && projectIdMapping[item.projectId]) {
+                                newHistoryItem.projectId = projectIdMapping[item.projectId];
+                            } else if (item.projectId && !projectIdMapping[item.projectId]) {
+                                // Project reference exists but no mapping found, remove reference
+                                newHistoryItem.projectId = null;
+                            }
+                            
+                            // Update tag references if they exist and we have mappings
+                            if (item.tags && Array.isArray(item.tags)) {
+                                newHistoryItem.tags = item.tags
+                                    .map(tagId => tagIdMapping[tagId]) // Map to new IDs
+                                    .filter(tagId => tagId !== undefined); // Remove unmapped tags
+                            }
+                            
+                            existingHistory.push(newHistoryItem);
+                            existingSignatures.add(itemSignature); // Add to signatures to prevent duplicates in this import batch
+                            importResults.added++;
+                        } else {
+                            importResults.skipped++;
+                        }
+                    });
+                    
+                    localStorage.setItem('chatgpt-product-search-history', JSON.stringify(existingHistory));
+                }
+                
+                // Update UI
+                updateDataCounts();
+                populateTagsManagement();
+                populateProjectsManagement();
+                populateProjectsList();
+                populateTagsList();
+                
+                // Recalculate counts to reflect the imported history associations
+                recalculateAllCounts();
+                
+                // Clear pending data
+                pendingImportData = null;
+                disableImportButton();
+                
+                // Clear file input
+                const fileInput = document.getElementById('import-file-input');
+                if (fileInput) fileInput.value = '';
+                
+                const fileInfo = document.getElementById('selected-file-info');
+                if (fileInfo) fileInfo.style.display = 'none';
+                
+                showExportImportStatus(
+                    `Import completed! Added ${importResults.added} items, skipped ${importResults.skipped} duplicates.`, 
+                    'success'
+                );
+                
+            } catch (error) {
+                console.error('Import failed:', error);
+                showExportImportStatus('Import failed. Please try again.', 'error');
+            }
+        }
+        
+        function showExportImportStatus(message, type) {
+            const statusEl = document.getElementById('export-import-status');
+            if (!statusEl) return;
+            
+            statusEl.textContent = message;
+            statusEl.style.display = 'block';
+            
+            if (type === 'success') {
+                statusEl.style.background = '#d4edda';
+                statusEl.style.color = '#155724';
+                statusEl.style.border = '1px solid #c3e6cb';
+            } else if (type === 'error') {
+                statusEl.style.background = '#f8d7da';
+                statusEl.style.color = '#721c24';
+                statusEl.style.border = '1px solid #f5c6cb';
+            }
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // ===== END EXPORT/IMPORT FUNCTIONALITY =====
+
         // ===== SIDEBAR FUNCTIONALITY - Phase 2 =====
         
         function initializeSidebar() {
@@ -3926,7 +4303,7 @@
                 ">
                     <div style="
                         background: white;
-                        width: 600px;
+                        width: 700px;
                         max-width: 90vw;
                         height: 500px;
                         max-height: 90vh;
@@ -4003,6 +4380,22 @@
                                 justify-content: center;
                                 gap: 8px;
                             "><img src="${projectIconUrl}" alt="Projects" style="width: 20px; height: 20px;" />Projects</button>
+                            <button id="export-import-settings-tab" class="settings-tab-button" style="
+                                flex: 1;
+                                padding: 12px 20px;
+                                border: none;
+                                background: #f8f9fa;
+                                color: #6c757d;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                border-bottom: 2px solid transparent;
+                                transition: all 0.2s ease;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            "><img src="${databaseIconUrl}" alt="Export/Import" style="width: 20px; height: 20px;" />Export/Import</button>
                         </div>
                         
                         <!-- Settings Content -->
@@ -4069,6 +4462,171 @@
                                     <!-- Projects list will be populated here -->
                                 </div>
                             </div>
+                            
+                            <!-- Export/Import Settings -->
+                            <div id="export-import-settings-content" style="
+                                flex: 1;
+                                padding: 20px;
+                                overflow-y: auto;
+                                display: none;
+                            ">
+                                <h3 style="margin: 0 0 20px 0; color: #495057;">Export/Import Data</h3>
+                                
+                                <!-- Export Section -->
+                                <div style="
+                                    background: #f8f9fa;
+                                    border-radius: 6px;
+                                    padding: 16px;
+                                    margin-bottom: 24px;
+                                    border: 1px solid #e9ecef;
+                                ">
+                                    <h4 style="
+                                        margin: 0 0 12px 0;
+                                        color: #495057;
+                                        font-size: 16px;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                    ">📤 Export Data</h4>
+                                    <p style="
+                                        margin: 0 0 16px 0;
+                                        color: #6c757d;
+                                        font-size: 14px;
+                                        line-height: 1.4;
+                                    ">Export your tags, projects, and search history to a JSON file for backup or transfer to another browser.</p>
+                                    
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                                        <label style="
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                            font-size: 14px;
+                                            color: #495057;
+                                            cursor: pointer;
+                                        ">
+                                            <input type="checkbox" id="export-tags" checked style="margin: 0;">
+                                            Tags (<span id="tags-count">0</span>)
+                                        </label>
+                                        <label style="
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                            font-size: 14px;
+                                            color: #495057;
+                                            cursor: pointer;
+                                        ">
+                                            <input type="checkbox" id="export-projects" checked style="margin: 0;">
+                                            Projects (<span id="projects-count">0</span>)
+                                        </label>
+                                        <label style="
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                            font-size: 14px;
+                                            color: #495057;
+                                            cursor: pointer;
+                                        ">
+                                            <input type="checkbox" id="export-history" checked style="margin: 0;">
+                                            History (<span id="history-count">0</span>)
+                                        </label>
+                                    </div>
+                                    
+                                    <button id="export-data-btn" style="
+                                        background: #28a745;
+                                        color: white;
+                                        border: none;
+                                        padding: 10px 20px;
+                                        border-radius: 4px;
+                                        font-size: 14px;
+                                        cursor: pointer;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                    ">Export Selected Data</button>
+                                </div>
+                                
+                                <!-- Import Section -->
+                                <div style="
+                                    background: #f8f9fa;
+                                    border-radius: 6px;
+                                    padding: 16px;
+                                    border: 1px solid #e9ecef;
+                                ">
+                                    <h4 style="
+                                        margin: 0 0 12px 0;
+                                        color: #495057;
+                                        font-size: 16px;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                    ">📥 Import Data</h4>
+                                    <p style="
+                                        margin: 0 0 16px 0;
+                                        color: #6c757d;
+                                        font-size: 14px;
+                                        line-height: 1.4;
+                                    ">Import data from a previously exported JSON file. Duplicate items will be skipped automatically.</p>
+                                    
+                                    <div style="margin-bottom: 16px;">
+                                        <input type="file" id="import-file-input" accept=".json" style="
+                                            display: none;
+                                        ">
+                                        <button id="select-import-file-btn" style="
+                                            background: #007bff;
+                                            color: white;
+                                            border: none;
+                                            padding: 10px 20px;
+                                            border-radius: 4px;
+                                            font-size: 14px;
+                                            cursor: pointer;
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 8px;
+                                        ">Select JSON File</button>
+                                        <div id="selected-file-info" style="
+                                            margin-top: 8px;
+                                            font-size: 13px;
+                                            color: #6c757d;
+                                            display: none;
+                                        "></div>
+                                    </div>
+                                    
+                                    <div id="import-preview" style="
+                                        display: none;
+                                        background: white;
+                                        border: 1px solid #dee2e6;
+                                        border-radius: 4px;
+                                        padding: 12px;
+                                        margin-bottom: 16px;
+                                        max-height: 200px;
+                                        overflow-y: auto;
+                                    ">
+                                        <h5 style="margin: 0 0 8px 0; color: #495057; font-size: 14px;">Import Preview:</h5>
+                                        <div id="import-preview-content"></div>
+                                    </div>
+                                    
+                                    <button id="import-data-btn" style="
+                                        background: #6c757d;
+                                        color: white;
+                                        border: none;
+                                        padding: 10px 20px;
+                                        border-radius: 4px;
+                                        font-size: 14px;
+                                        cursor: not-allowed;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 8px;
+                                    " disabled>Import Data</button>
+                                </div>
+                                
+                                <div id="export-import-status" style="
+                                    margin-top: 16px;
+                                    padding: 8px 12px;
+                                    border-radius: 4px;
+                                    font-size: 14px;
+                                    display: none;
+                                "></div>
+                            </div>
                         </div>
                         
                         <!-- Modal Footer -->
@@ -4120,6 +4678,7 @@
             const saveBtn = document.getElementById('save-settings');
             const tagsTab = document.getElementById('tags-settings-tab');
             const projectsTab = document.getElementById('projects-settings-tab');
+            const exportImportTab = document.getElementById('export-import-settings-tab');
             const createTagBtn = document.getElementById('create-tag-btn');
             const createProjectBtn = document.getElementById('create-project-btn');
             
@@ -4140,6 +4699,9 @@
             }
             if (projectsTab) {
                 projectsTab.addEventListener('click', () => switchSettingsTab('projects'));
+            }
+            if (exportImportTab) {
+                exportImportTab.addEventListener('click', () => switchSettingsTab('export-import'));
             }
             
             // Create buttons
@@ -4163,34 +4725,51 @@
             // Populate initial content
             populateTagsManagement();
             populateProjectsManagement();
+            initializeExportImportTab();
         }
         
         function switchSettingsTab(tab) {
             const tagsTab = document.getElementById('tags-settings-tab');
             const projectsTab = document.getElementById('projects-settings-tab');
+            const exportImportTab = document.getElementById('export-import-settings-tab');
             const tagsContent = document.getElementById('tags-settings-content');
             const projectsContent = document.getElementById('projects-settings-content');
+            const exportImportContent = document.getElementById('export-import-settings-content');
             
-            if (tab === 'tags') {
+            // Reset all tabs to inactive state
+            const tabs = [tagsTab, projectsTab, exportImportTab];
+            const contents = [tagsContent, projectsContent, exportImportContent];
+            
+            tabs.forEach(tabEl => {
+                if (tabEl) {
+                    tabEl.style.background = '#f8f9fa';
+                    tabEl.style.color = '#6c757d';
+                    tabEl.style.borderBottom = '2px solid transparent';
+                }
+            });
+            
+            contents.forEach(contentEl => {
+                if (contentEl) {
+                    contentEl.style.display = 'none';
+                }
+            });
+            
+            // Activate selected tab
+            if (tab === 'tags' && tagsTab && tagsContent) {
                 tagsTab.style.background = 'white';
                 tagsTab.style.color = '#495057';
                 tagsTab.style.borderBottom = '2px solid #5b8def';
-                projectsTab.style.background = '#f8f9fa';
-                projectsTab.style.color = '#6c757d';
-                projectsTab.style.borderBottom = '2px solid transparent';
-                
                 tagsContent.style.display = 'block';
-                projectsContent.style.display = 'none';
-            } else {
+            } else if (tab === 'projects' && projectsTab && projectsContent) {
                 projectsTab.style.background = 'white';
                 projectsTab.style.color = '#495057';
                 projectsTab.style.borderBottom = '2px solid #5b8def';
-                tagsTab.style.background = '#f8f9fa';
-                tagsTab.style.color = '#6c757d';
-                tagsTab.style.borderBottom = '2px solid transparent';
-                
-                tagsContent.style.display = 'none';
                 projectsContent.style.display = 'block';
+            } else if (tab === 'export-import' && exportImportTab && exportImportContent) {
+                exportImportTab.style.background = 'white';
+                exportImportTab.style.color = '#495057';
+                exportImportTab.style.borderBottom = '2px solid #5b8def';
+                exportImportContent.style.display = 'block';
             }
         }
         

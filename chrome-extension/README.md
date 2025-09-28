@@ -12,6 +12,8 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 - **Citation Links**: Direct links to source websites for more information
 - **Review Themes**: Categorized review themes for easy browsing
 - **Projects & Tags**: Organize every search with project assignments and tag labels for richer filtering
+- **Backup & Restore**: Export your search history, projects, and tags to a JSON file for backup or transfer between devices
+
 
 ### Chrome Extension Features
 - **Search History**: Automatically save searches (up to 50) and reopen them instantly
