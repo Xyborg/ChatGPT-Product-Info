@@ -887,7 +887,7 @@
                                         • "iPhone 17 Pro camera quality"<br>
                                         • "Nike Air Max running shoes"<br>
                                         • "MacBook Air M3 performance"<br>
-                                        • "Tesla Model 3 reviews"
+                                        • "Pets Deli Hunde Nassfutter reviews"
                                     </div>
                                 </div>
                                 <div id="auth-status" style="
