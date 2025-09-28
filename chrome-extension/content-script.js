@@ -124,8 +124,8 @@
                 width: 100%;
                 height: 100%;
                 background: rgba(255, 244, 214, 0.55);
-                backdrop-filter: blur(4px);
-                -webkit-backdrop-filter: blur(4px);
+                backdrop-filter: blur(1.5px);
+                -webkit-backdrop-filter: blur(1.5px);
                 display: flex;
                 align-items: center;
                 justify-content: center;
