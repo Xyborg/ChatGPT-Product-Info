@@ -443,7 +443,7 @@
                 <div style="
                     background: linear-gradient(140deg, #f5f8ff 0%, #ffffff 60%);
                     width: min(1600px, 90vw);
-                    height: min(820px, 88vh);
+                    height: min(1000px, 90vh);
                     border-radius: 20px;
                     display: flex;
                     flex-direction: column;
