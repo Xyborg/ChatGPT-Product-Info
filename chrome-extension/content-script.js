@@ -73,6 +73,7 @@
         const xIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
             ? chrome.runtime.getURL('assets/icons-ui/x.svg')
             : 'assets/icons-ui/x.svg';
+        const clockIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" aria-hidden="true"><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 72 128 128 184 128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>';
         const linkedinIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
             ? chrome.runtime.getURL('assets/icons-ui/linkedin.svg')
             : 'assets/icons-ui/linkedin.svg';
@@ -286,11 +287,8 @@
                     .history-row-left {
                         display: flex;
                         flex-direction: column;
-                        gap: 6px;
+                        gap: 8px;
                         min-width: 0;
-                    }
-                    .history-row-title {
-                        display: none;
                     }
                     .history-query-group {
                         display: flex;
@@ -397,6 +395,18 @@
                     .history-meta {
                         font-weight: 600;
                         color: #243356;
+                    }
+                    .history-time {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        color: #97a1b8;
+                        font-weight: 500;
+                        letter-spacing: 0.01em;
+                    }
+                    .history-time svg {
+                        width: 14px;
+                        height: 14px;
                     }
                     .history-market {
                         display: inline-flex;
@@ -6523,11 +6533,11 @@
             const marketMarkup = renderHistoryMarketInfo(item);
 
             const metaPieces = [];
-            if (timeLabel) {
-                metaPieces.push(`<span class="history-meta">${escapeHTML(timeLabel)}</span>`);
-            }
             if (marketMarkup) {
                 metaPieces.push(marketMarkup);
+            }
+            if (timeLabel) {
+                metaPieces.push(`<span class="history-time">${clockIconSvg}<span>${escapeHTML(timeLabel)}</span></span>`);
             }
             const metaHtml = metaPieces.length ? `<div class="history-meta-group">${metaPieces.join('')}</div>` : '';
 
