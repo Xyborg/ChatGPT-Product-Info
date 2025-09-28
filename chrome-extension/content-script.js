@@ -267,10 +267,7 @@
                         cursor: pointer;
                         transition: background 0.18s ease, box-shadow 0.18s ease;
                     }
-                    #history-list[data-density="comfortable"] .history-row {
-                        padding: 14px 18px;
-                    }
-                    #history-list[data-density="compact"] .history-row {
+                    .history-row {
                         padding: 10px 14px;
                     }
                     .history-row + .history-row {
@@ -464,36 +461,6 @@
                         border: 1px dashed #d4dcf6;
                         border-radius: 12px;
                         background: rgba(255, 255, 255, 0.6);
-                    }
-                    .history-density-toggle {
-                        display: inline-flex;
-                        align-items: center;
-                        padding: 2px;
-                        border-radius: 999px;
-                        border: 1px solid #e0e4f2;
-                        background: rgba(255, 255, 255, 0.85);
-                        box-shadow: 0 1px 2px rgba(43, 67, 148, 0.05);
-                        gap: 2px;
-                    }
-                    .history-density-btn {
-                        border: none;
-                        background: transparent;
-                        border-radius: 999px;
-                        padding: 4px 10px;
-                        font-size: 12px;
-                        font-weight: 500;
-                        color: #4a5b8f;
-                        cursor: pointer;
-                        transition: background 0.18s ease, color 0.18s ease;
-                    }
-                    .history-density-btn.is-active {
-                        background: #5b8def;
-                        color: white;
-                        box-shadow: 0 4px 10px rgba(91, 141, 239, 0.2);
-                    }
-                    .history-density-btn:focus-visible {
-                        outline: none;
-                        box-shadow: 0 0 0 2px rgba(91, 141, 239, 0.4);
                     }
                     .history-icon-btn {
                         border: 1px solid transparent;
@@ -1289,10 +1256,6 @@
                                                 </svg>
                                                 <span id="filter-toggle-text">Filters</span>
                                             </button>
-                                            <div id="history-density-toggle" class="history-density-toggle" role="group" aria-label="History density">
-                                                <button type="button" class="history-density-btn" data-density="comfortable" aria-pressed="false">Comfortable</button>
-                                                <button type="button" class="history-density-btn" data-density="compact" aria-pressed="false">Compact</button>
-                                            </div>
                                         <button id="clear-history-btn-header" style="
                                             background: #dc3545;
                                             color: white;
@@ -5539,22 +5502,8 @@
         
         // ===== ADVANCED FILTERING SYSTEM - Phase 5 =====
         
-        const HISTORY_DENSITY_STORAGE_KEY = 'chatgpt-product-search-history-density';
-        const HISTORY_DENSITY_DEFAULT = 'comfortable';
-        const HISTORY_DENSITY_OPTIONS = new Set(['comfortable', 'compact']);
-        let historyDisplayDensity = HISTORY_DENSITY_DEFAULT;
-        let lastRenderedHistory = [];
         let historyDayFormatter;
         let historyTimeFormatter;
-
-        try {
-            const storedDensity = localStorage.getItem(HISTORY_DENSITY_STORAGE_KEY);
-            if (storedDensity && HISTORY_DENSITY_OPTIONS.has(storedDensity)) {
-                historyDisplayDensity = storedDensity;
-            }
-        } catch (error) {
-            historyDisplayDensity = HISTORY_DENSITY_DEFAULT;
-        }
 
         try {
             historyDayFormatter = new Intl.DateTimeFormat(undefined, {
@@ -5794,7 +5743,6 @@
 
             showHistoryListView();
             renderHistoryList(filteredHistory);
-            initializeHistoryDensityToggle();
 
             // Update filter chips display
             updateFilterChips();
@@ -5875,7 +5823,6 @@
             if (currentFilters.text) {
                 hasActiveFilters = true;
                 const chip = createFilterChip('text', `Text: "${currentFilters.text}"`, () => {
-                    currentFilters.text = '';
                     const filterText = document.getElementById('filter-text');
                     if (filterText) filterText.value = '';
                     applyFilters();
@@ -5888,7 +5835,6 @@
                 hasActiveFilters = true;
                 const project = loadProjects().find(p => p.id === currentFilters.project);
                 const chip = createFilterChip('project', `<span style="display:flex; align-items:center; gap:4px;"><img src="${projectIconUrl}" alt="Project" style="width: 14px; height: 14px;" />${project?.name || 'Unknown Project'}</span>`, () => {
-                    currentFilters.project = '';
                     const filterProject = document.getElementById('filter-project');
                     if (filterProject) filterProject.value = '';
                     applyFilters();
@@ -5900,7 +5846,6 @@
                 hasActiveFilters = true;
                 const option = getMarketOption(currentFilters.market);
                 const chip = createFilterChip('market', `🌍 ${option.label}`, () => {
-                    currentFilters.market = 'all';
                     const filterMarket = document.getElementById('filter-market');
                     if (filterMarket) filterMarket.value = 'all';
                     applyFilters();
@@ -5916,7 +5861,6 @@
                     const tag = tags.find(t => t.id === tagId);
                     if (tag) {
                         const chip = createFilterChip('tag', tag.name, () => {
-                            currentFilters.tags = currentFilters.tags.filter(id => id !== tagId);
                             const checkbox = document.querySelector(`#filter-tags input[value="${tagId}"]`);
                             if (checkbox) checkbox.checked = false;
                             applyFilters();
@@ -5994,7 +5938,6 @@
             // Show all history
             const history = loadSearchHistory();
             renderHistoryList(history);
-            initializeHistoryDensityToggle();
 
             // Update UI
             updateFilterSummary();
@@ -6248,7 +6191,6 @@
                 // Apply current filters (if any) or show all
                 const filteredHistory = applyAdvancedFilters(history);
                 renderHistoryList(filteredHistory);
-                initializeHistoryDensityToggle();
             }
         }
 
@@ -6259,17 +6201,9 @@
             }
 
             const listItems = Array.isArray(history) ? history.slice() : [];
-            lastRenderedHistory = listItems.slice();
-
-            const effectiveDensity = HISTORY_DENSITY_OPTIONS.has(historyDisplayDensity)
-                ? historyDisplayDensity
-                : HISTORY_DENSITY_DEFAULT;
-            historyDisplayDensity = effectiveDensity;
-            historyList.setAttribute('data-density', effectiveDensity);
 
             if (listItems.length === 0) {
                 historyList.innerHTML = '<div class="history-empty-row">No searches match the current filters.</div>';
-                updateHistoryDensityToggleUI();
                 return;
             }
 
@@ -6359,8 +6293,6 @@
                     btn.textContent = isExpanded ? `Show all (${total})` : 'Show less';
                 });
             });
-
-            updateHistoryDensityToggleUI();
 
             const historyContainer = document.getElementById('history-container');
             if (historyContainer) {
@@ -6566,64 +6498,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        function initializeHistoryDensityToggle() {
-            const toggle = document.getElementById('history-density-toggle');
-            if (!toggle) {
-                return;
-            }
-
-            if (!toggle.dataset.initialized) {
-                toggle.addEventListener('click', event => {
-                    const target = event.target.closest('button[data-density]');
-                    if (!target) {
-                        return;
-                    }
-                    const density = target.getAttribute('data-density');
-                    if (!HISTORY_DENSITY_OPTIONS.has(density)) {
-                        return;
-                    }
-                    if (density === historyDisplayDensity) {
-                        return;
-                    }
-                    setHistoryDensity(density);
-                });
-                toggle.dataset.initialized = 'true';
-            }
-
-            updateHistoryDensityToggleUI();
-        }
-
-        function setHistoryDensity(density) {
-            if (!HISTORY_DENSITY_OPTIONS.has(density)) {
-                return;
-            }
-
-            historyDisplayDensity = density;
-
-            try {
-                localStorage.setItem(HISTORY_DENSITY_STORAGE_KEY, density);
-            } catch (error) {
-                // Ignore storage errors silently
-            }
-
-            const snapshot = Array.isArray(lastRenderedHistory) ? lastRenderedHistory.slice() : [];
-            renderHistoryList(snapshot);
-        }
-
-        function updateHistoryDensityToggleUI() {
-            const toggle = document.getElementById('history-density-toggle');
-            if (!toggle) {
-                return;
-            }
-
-            toggle.querySelectorAll('button[data-density]').forEach(btn => {
-                const targetDensity = btn.getAttribute('data-density');
-                const isActive = targetDensity === historyDisplayDensity;
-                btn.classList.toggle('is-active', isActive);
-                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-            });
         }
 
         function toggleMultiProductSearch() {
@@ -8766,7 +8640,6 @@
                 const filtered = applyAdvancedFilters(history);
                 if (typeof renderHistoryList === 'function') {
                     renderHistoryList(filtered);
-                    initializeHistoryDensityToggle();
                 }
             }
         }
