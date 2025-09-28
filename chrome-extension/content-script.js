@@ -1135,6 +1135,73 @@
                                 </div>
                                 <div id="history-list"></div>
                             </div>
+                            <div id="history-detail-container" style="
+                                display: none;
+                                height: 100%;
+                                flex-direction: column;
+                                gap: 16px;
+                            ">
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    gap: 12px;
+                                    flex-wrap: wrap;
+                                    margin-bottom: 16px;
+                                ">
+                                    <div style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 12px;
+                                        flex-wrap: wrap;
+                                    ">
+                                        <button id="history-detail-back" style="
+                                            background: none;
+                                            border: 1px solid #e9ecef;
+                                            color: #495057;
+                                            padding: 6px 12px;
+                                            border-radius: 6px;
+                                            font-size: 13px;
+                                            font-weight: 500;
+                                            display: inline-flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                            cursor: pointer;
+                                        ">← Back to history</button>
+                                        <div id="history-detail-title" style="
+                                            display: flex;
+                                            flex-wrap: wrap;
+                                            gap: 8px;
+                                            align-items: center;
+                                        "></div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <span id="history-detail-meta" style="
+                                            font-size: 13px;
+                                            color: #6c757d;
+                                        "></span>
+                                        <button id="history-detail-open-search" style="
+                                            background: #007bff;
+                                            color: white;
+                                            border: none;
+                                            padding: 6px 12px;
+                                            border-radius: 6px;
+                                            font-size: 12px;
+                                            cursor: not-allowed;
+                                            opacity: 0.6;
+                                        " disabled>Open in Search</button>
+                                    </div>
+                                </div>
+                                <div id="history-detail-results" style="
+                                    flex: 1;
+                                    overflow-y: auto;
+                                    border: 1px solid #e9ecef;
+                                    border-radius: 10px;
+                                    padding: 16px;
+                                    background: white;
+                                    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+                                "></div>
+                            </div>
                         </div>
                         
                         <!-- Reports Container -->
@@ -1793,6 +1860,8 @@
             const collapseToggle = document.getElementById('collapse-toggle');
             const collapseText = document.getElementById('collapse-text');
             const searchControls = document.getElementById('search-controls');
+            const historyDetailBack = document.getElementById('history-detail-back');
+            const historyDetailOpenSearch = document.getElementById('history-detail-open-search');
 
             if (marketSelect) {
                 marketSelect.innerHTML = '';
@@ -1902,6 +1971,21 @@
                 }
                 collapseToggle.style.transform = 'scale(1)';
             });
+
+            if (historyDetailBack) {
+                historyDetailBack.addEventListener('click', () => {
+                    showHistoryListView();
+                });
+            }
+
+            if (historyDetailOpenSearch) {
+                historyDetailOpenSearch.addEventListener('click', () => {
+                    const historyId = historyDetailOpenSearch.dataset?.historyId;
+                    if (historyId) {
+                        openHistoryItemInSearchById(historyId);
+                    }
+                });
+            }
 
             // Search functionality
             searchBtn.addEventListener('click', performSearch);
@@ -2102,6 +2186,8 @@
                 historyTab.style.color = '#495057';
                 historyTab.style.borderBottom = '2px solid #007bff';
                 historyTab.classList.add('active-tab');
+
+                showHistoryListView();
                 
                 // CRITICAL: Completely hide and clear analysis content when switching to history
                 if (reportsContainer) {
@@ -4561,7 +4647,7 @@
         
         // ===== EDIT EXISTING SEARCH ORGANIZATION - Phase 4.6 =====
         
-        function showEditOrganizationInterface(historyItem) {
+        function showEditOrganizationInterface(historyItem, mountTarget) {
             // Remove any existing edit interface or post-search tagging
             const existingInterface = document.getElementById('edit-organization-interface');
             const existingToggle = document.getElementById('edit-organization-toggle');
@@ -4582,10 +4668,10 @@
             }
             
             // Add toggle button for edit organization
-            addEditOrganizationToggle(historyItem);
+            addEditOrganizationToggle(historyItem, mountTarget);
         }
-        
-        function addEditOrganizationToggle(historyItem) {
+
+        function addEditOrganizationToggle(historyItem, mountTarget) {
             const toggleHTML = `
                 <div id="edit-organization-toggle" style="
                     background: #fff3cd;
@@ -4626,15 +4712,28 @@
             `;
             
             // Insert the toggle at the top of results container
-            const resultsContainer = document.getElementById('results-container');
-            if (resultsContainer) {
-                resultsContainer.insertAdjacentHTML('afterbegin', toggleHTML);
-                
+            let targetContainer = null;
+            if (mountTarget instanceof HTMLElement) {
+                targetContainer = mountTarget;
+            } else if (typeof mountTarget === 'string') {
+                targetContainer = document.getElementById(mountTarget);
+            }
+            if (!targetContainer) {
+                targetContainer = document.getElementById('results-container');
+            }
+
+            if (targetContainer) {
+                targetContainer.insertAdjacentHTML('afterbegin', toggleHTML);
+
                 // Add click handler for toggle
-                const toggle = document.getElementById('edit-organization-toggle');
-                const content = document.getElementById('edit-organization-content');
-                const arrow = document.getElementById('edit-organization-arrow');
-                
+                const toggle = targetContainer.querySelector('#edit-organization-toggle');
+                const content = targetContainer.querySelector('#edit-organization-content');
+                const arrow = targetContainer.querySelector('#edit-organization-arrow');
+
+                if (!toggle || !content || !arrow) {
+                    return;
+                }
+
                 toggle.addEventListener('click', () => {
                     const isHidden = content.style.display === 'none';
                     content.style.display = isHidden ? 'block' : 'none';
@@ -5333,6 +5432,8 @@
             // Apply filters to history
             const history = loadSearchHistory();
             const filteredHistory = applyAdvancedFilters(history);
+
+            showHistoryListView();
             renderHistoryList(filteredHistory);
             
             // Update filter chips display
@@ -5719,6 +5820,8 @@
             if (resultsContainer) resultsContainer.style.display = 'none';
             if (reportsContainer) reportsContainer.style.display = 'none';
             if (historyContainer) historyContainer.style.display = 'block';
+
+            showHistoryListView();
             
             const history = loadSearchHistory();
             const historyWelcome = document.getElementById('history-welcome-state');
@@ -5966,25 +6069,188 @@
             moveMarketSelector(isMultiMode);
         }
 
-        function reopenSearch(itemId) {
-            const history = loadSearchHistory();
-            const item = history.find(h => h.id === itemId);
-            if (!item) return;
+        function showHistoryListView() {
+            const historyContent = document.getElementById('history-content');
+            const historyDetailContainer = document.getElementById('history-detail-container');
+            const historyDetailResults = document.getElementById('history-detail-results');
+            const historyDetailTitle = document.getElementById('history-detail-title');
+            const historyDetailMeta = document.getElementById('history-detail-meta');
+            const historyDetailOpenSearch = document.getElementById('history-detail-open-search');
 
-            // Switch to search tab
+            if (historyContent) {
+                historyContent.style.display = 'block';
+            }
+            if (historyDetailContainer) {
+                historyDetailContainer.style.display = 'none';
+                delete historyDetailContainer.dataset.historyId;
+            }
+            if (historyDetailResults) {
+                historyDetailResults.innerHTML = '';
+            }
+            if (historyDetailTitle) {
+                historyDetailTitle.innerHTML = '';
+            }
+            if (historyDetailMeta) {
+                historyDetailMeta.textContent = '';
+            }
+            if (historyDetailOpenSearch) {
+                historyDetailOpenSearch.disabled = true;
+                historyDetailOpenSearch.style.cursor = 'not-allowed';
+                historyDetailOpenSearch.style.opacity = '0.6';
+                delete historyDetailOpenSearch.dataset.historyId;
+            }
+        }
+
+        function showHistoryDetailView(item) {
+            const historyContent = document.getElementById('history-content');
+            const historyDetailContainer = document.getElementById('history-detail-container');
+            const historyDetailResults = document.getElementById('history-detail-results');
+            const historyDetailTitle = document.getElementById('history-detail-title');
+            const historyDetailMeta = document.getElementById('history-detail-meta');
+            const historyDetailOpenSearch = document.getElementById('history-detail-open-search');
+
+            if (!historyDetailContainer || !historyDetailResults) {
+                openHistoryItemInSearch(item);
+                return;
+            }
+
+            if (historyContent) {
+                historyContent.style.display = 'none';
+            }
+
+            historyDetailContainer.style.display = 'flex';
+            historyDetailContainer.dataset.historyId = String(item.id);
+
+            if (historyDetailTitle) {
+                historyDetailTitle.innerHTML = '';
+
+                const chipsWrapper = document.createElement('div');
+                chipsWrapper.style.display = 'flex';
+                chipsWrapper.style.flexWrap = 'wrap';
+                chipsWrapper.style.gap = '8px';
+                chipsWrapper.dataset.expanded = 'false';
+
+                const applyChipStyles = (chipEl) => {
+                    chipEl.style.display = 'inline-flex';
+                    chipEl.style.alignItems = 'center';
+                    chipEl.style.background = '#e3f2fd';
+                    chipEl.style.color = '#1565c0';
+                    chipEl.style.padding = '4px 8px';
+                    chipEl.style.borderRadius = '12px';
+                    chipEl.style.fontSize = '13px';
+                    chipEl.style.border = '1px solid #bbdefb';
+                };
+
+                const queries = (() => {
+                    if (item.searchType === 'multi' && typeof item.query === 'string') {
+                        const parts = item.query.split('\n').map(q => q.trim()).filter(Boolean);
+                        if (parts.length === 0 && item.query) {
+                            return [item.query];
+                        }
+                        return parts;
+                    }
+                    if (item.query) {
+                        return [item.query];
+                    }
+                    return [];
+                })();
+
+                if (queries.length === 0) {
+                    const chip = document.createElement('span');
+                    chip.textContent = 'Untitled search';
+                    applyChipStyles(chip);
+                    chipsWrapper.appendChild(chip);
+                } else {
+                    queries.forEach((text, index) => {
+                        const chip = document.createElement('span');
+                        chip.textContent = text;
+                        applyChipStyles(chip);
+                        if (index > 0) {
+                            chip.dataset.extra = 'true';
+                            chip.style.display = 'none';
+                        }
+                        chipsWrapper.appendChild(chip);
+                    });
+                }
+
+                historyDetailTitle.appendChild(chipsWrapper);
+
+                if (queries.length > 1) {
+                    const toggleButton = document.createElement('button');
+                    toggleButton.id = 'history-detail-toggle';
+                    toggleButton.style.background = 'none';
+                    toggleButton.style.border = 'none';
+                    toggleButton.style.color = '#007bff';
+                    toggleButton.style.fontSize = '13px';
+                    toggleButton.style.cursor = 'pointer';
+                    toggleButton.textContent = `Show all (${queries.length})`;
+
+                    toggleButton.addEventListener('click', () => {
+                        const isExpanded = chipsWrapper.dataset.expanded === 'true';
+                        const nextState = !isExpanded;
+                        chipsWrapper.dataset.expanded = nextState ? 'true' : 'false';
+                        chipsWrapper.querySelectorAll('span[data-extra="true"]').forEach(chip => {
+                            chip.style.display = nextState ? 'inline-flex' : 'none';
+                        });
+                        toggleButton.textContent = nextState ? 'Hide queries' : `Show all (${queries.length})`;
+                    });
+
+                    historyDetailTitle.appendChild(toggleButton);
+                } else {
+                    chipsWrapper.dataset.expanded = 'true';
+                }
+            }
+
+            if (historyDetailMeta) {
+                const metaParts = [];
+                if (item.date) metaParts.push(item.date);
+                metaParts.push(item.searchType === 'multi' ? 'Multi-product search' : 'Single search');
+                if (item.marketLabel) {
+                    metaParts.push(item.marketLabel);
+                } else if (item.marketCode) {
+                    metaParts.push(item.marketCode);
+                }
+                historyDetailMeta.textContent = metaParts.filter(Boolean).join(' • ');
+            }
+
+            if (historyDetailOpenSearch) {
+                historyDetailOpenSearch.dataset.historyId = String(item.id);
+                historyDetailOpenSearch.disabled = false;
+                historyDetailOpenSearch.style.cursor = 'pointer';
+                historyDetailOpenSearch.style.opacity = '';
+            }
+
+            historyDetailResults.innerHTML = '';
+            if (item.searchType === 'multi' && item.results?.multiResults) {
+                displayMultiResults(item.results.multiResults, historyDetailResults, { suppressHeader: true });
+            } else {
+                displayResults(item.results, item.query, historyDetailResults);
+            }
+
+            showEditOrganizationInterface(item, historyDetailResults);
+
+            historyDetailContainer.scrollTop = 0;
+            historyDetailResults.scrollTop = 0;
+        }
+
+        function openHistoryItemInSearch(item) {
+            if (!item) {
+                return;
+            }
+
+            showHistoryListView();
+
             switchTab('search');
 
             if (item.market) {
                 setMarketSelection(item.market);
             }
 
-            // Fill search query
             const searchQuery = document.getElementById('search-query');
             const multiSearchQuery = document.getElementById('multi-search-query');
             const multiProductToggle = document.getElementById('multi-product-toggle');
 
             if (item.searchType === 'multi') {
-                // Multi-product search
                 if (multiProductToggle) {
                     multiProductToggle.checked = true;
                     toggleMultiProductSearch();
@@ -5992,8 +6258,10 @@
                 if (multiSearchQuery) {
                     multiSearchQuery.value = item.query;
                 }
+                if (searchQuery) {
+                    searchQuery.value = '';
+                }
             } else {
-                // Single search
                 if (multiProductToggle) {
                     multiProductToggle.checked = false;
                     toggleMultiProductSearch();
@@ -6001,18 +6269,37 @@
                 if (searchQuery) {
                     searchQuery.value = item.query;
                 }
+                if (multiSearchQuery) {
+                    multiSearchQuery.value = '';
+                }
             }
 
-            // Display the results
-            if (item.searchType === 'multi' && item.results.multiResults) {
+            if (item.searchType === 'multi' && item.results?.multiResults) {
                 displayMultiResults(item.results.multiResults);
             } else {
                 displayResults(item.results, item.query);
             }
             showCollapseToggle();
-            
-            // Add edit organization interface for reopened searches
             showEditOrganizationInterface(item);
+        }
+
+        function openHistoryItemInSearchById(historyId) {
+            const history = loadSearchHistory();
+            const item = history.find(h => h.id === historyId);
+            if (!item) {
+                return;
+            }
+            openHistoryItemInSearch(item);
+        }
+
+        function reopenSearch(itemId) {
+            const history = loadSearchHistory();
+            const item = history.find(h => h.id === itemId);
+            if (!item) {
+                return;
+            }
+
+            showHistoryDetailView(item);
         }
 
         function filterHistory() {
@@ -6940,14 +7227,28 @@
             return { background: '#fff3cd', color: '#856404' };
         }
 
-        function displayResults(data, query) {
-            const resultsContainer = document.getElementById('results-container');
+        function displayResults(data, query, targetContainer, options = {}) {
+            const defaultContainer = document.getElementById('results-container');
+            let resultsContainer = null;
+
+            if (targetContainer instanceof HTMLElement) {
+                resultsContainer = targetContainer;
+            } else if (typeof targetContainer === 'string') {
+                resultsContainer = document.getElementById(targetContainer);
+            }
+
+            if (!resultsContainer) {
+                resultsContainer = defaultContainer;
+            }
+
             if (!resultsContainer) {
                 return;
             }
 
-            resultsContainer.style.display = 'block';
-            
+            if (resultsContainer === defaultContainer) {
+                resultsContainer.style.display = 'block';
+            }
+
             if (!data || (!data.reviews.length && !data.products.length && !data.productLinks.length)) {
                 resultsContainer.innerHTML = `
                     <div style="
@@ -6964,27 +7265,36 @@
                 `;
                 return;
             }
-            
-            let html = `
-                <div style="
-                    padding: 6px 12px;
-                    margin-bottom: 16px;
-                    border-bottom: 1px solid #e9ecef;
-                ">
+
+            const suppressHeader = Boolean(options.suppressHeader);
+
+            let html = '';
+
+            if (!suppressHeader) {
+                html += `
                     <div style="
-                        font-size: 16px;
-                        font-weight: 600;
-                        color: #495057;
-                        margin-bottom: 8px;
-                    ">Results for "${query}"</div>
-                    <div style="display: flex; gap: 16px; font-size: 14px; color: #6c757d;">
-                        <span>${data.summary.total_reviews} reviews</span>
-                        <span>${data.summary.total_products} products</span>
-                        <span>${data.summary.total_product_links} citation links</span>
-                        <span>${data.summary.review_themes.length} themes</span>
+                        background: #f8f9fa;
+                        padding: 10px 14px;
+                        margin-bottom: 16px;
+                        border-left: 4px solid #007bff;
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 12px;
+                    ">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <h3 style="margin: 0; color: #495057;">Results for "${query}"</h3>
+                            <div style="font-size: 12px; color: #6c757d;">
+                                ${data.summary.total_reviews} reviews •
+                                ${data.summary.total_products} products •
+                                ${data.summary.total_product_links} citation links •
+                                ${data.summary.review_themes.length} themes
+                            </div>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
 
             if (data.rationale && data.rationale.trim()) {
                 html += `
@@ -7243,13 +7553,27 @@
             resultsContainer.innerHTML = html;
         }
 
-        function displayMultiResults(results) {
-            const resultsContainer = document.getElementById('results-container');
+        function displayMultiResults(results, targetContainer, options = {}) {
+            const defaultContainer = document.getElementById('results-container');
+            let resultsContainer = null;
+
+            if (targetContainer instanceof HTMLElement) {
+                resultsContainer = targetContainer;
+            } else if (typeof targetContainer === 'string') {
+                resultsContainer = document.getElementById(targetContainer);
+            }
+
+            if (!resultsContainer) {
+                resultsContainer = defaultContainer;
+            }
+
             if (!resultsContainer) {
                 return;
             }
 
-            resultsContainer.style.display = 'block';
+            if (resultsContainer === defaultContainer) {
+                resultsContainer.style.display = 'block';
+            }
             
             const successfulResults = results.filter(r => r.success);
             const failedResults = results.filter(r => !r.success);
@@ -7545,13 +7869,6 @@
             // Add detailed results section (initially hidden)
             html += `
                 <div id="detailed-results" style="display: none;">
-                    <div style="
-                        font-size: 14px;
-                        font-weight: 600;
-                        color: #495057;
-                        margin-bottom: 12px;
-                        padding: 0 12px;
-                    ">Detailed Product Information</div>
                     <div id="detailed-content"></div>
                 </div>
             `;
@@ -7614,7 +7931,7 @@
                 return originalGetElementById.call(document, id);
             };
             
-            displayResults(result.data, result.query);
+            displayResults(result.data, result.query, null, { suppressHeader: true });
             
             // Restore original function
             document.getElementById = originalGetElementById;
@@ -7623,27 +7940,33 @@
             detailedContent.innerHTML = `
                 <div style="
                     background: #f8f9fa;
-                    padding: 6px 12px;
+                    padding: 10px 14px;
                     margin-bottom: 16px;
-                    border-radius: 6px;
                     border-left: 4px solid #007bff;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 12px;
+                    flex-wrap: wrap;
                 ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    ">
-                        <h3 style="margin: 0; color: #495057;">Detailed view: ${productName}</h3>
-                        <button class="close-details-btn" style="
-                            background: #6c757d;
-                            color: white;
-                            border: none;
-                            padding: 4px 8px;
-                            border-radius: 3px;
-                            font-size: 12px;
-                            cursor: pointer;
-                        ">Close</button>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <h3 style="margin: 0; color: #495057;">Results for "${productName}"</h3>
+                        <div style="font-size: 12px; color: #6c757d;">
+                            ${result.data?.reviews?.length || 0} reviews •
+                            ${result.data?.products?.length || 0} products •
+                            ${(result.data?.productLinks?.length || 0)} citation links
+                            • ${result.data?.summary?.review_themes?.length || 0} themes
+                        </div>
                     </div>
+                    <button class="close-details-btn" style="
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        padding: 4px 10px;
+                        border-radius: 3px;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">Close</button>
                 </div>
                 ${tempContainer.innerHTML}
             `;
