@@ -226,6 +226,293 @@
                         -webkit-mask-image: url('${errorIconUrl}');
                         mask-image: url('${errorIconUrl}');
                     }
+                    .history-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 18px;
+                    }
+                    .history-day-group {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                    }
+                    .history-day-header {
+                        position: sticky;
+                        top: 0;
+                        z-index: 2;
+                        align-self: flex-start;
+                        padding: 6px 10px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        letter-spacing: 0.08em;
+                        text-transform: uppercase;
+                        color: #4b5b87;
+                        background: rgba(245, 247, 255, 0.92);
+                        border-radius: 8px;
+                        box-shadow: 0 1px 2px rgba(79, 130, 223, 0.08);
+                    }
+                    .history-day-body {
+                        border: 1px solid #e4e9f6;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(2px);
+                    }
+                    .history-row {
+                        display: grid;
+                        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto;
+                        gap: 14px;
+                        align-items: center;
+                        cursor: pointer;
+                        transition: background 0.18s ease, box-shadow 0.18s ease;
+                    }
+                    #history-list[data-density="comfortable"] .history-row {
+                        padding: 14px 18px;
+                    }
+                    #history-list[data-density="compact"] .history-row {
+                        padding: 10px 14px;
+                    }
+                    .history-row + .history-row {
+                        border-top: 1px solid #e4e8f6;
+                    }
+                    .history-row:hover {
+                        background: rgba(91, 141, 239, 0.04);
+                    }
+                    .history-row:focus-visible {
+                        outline: 2px solid rgba(91, 141, 239, 0.4);
+                        outline-offset: -2px;
+                        background: rgba(91, 141, 239, 0.08);
+                    }
+                    .history-row-left {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        min-width: 0;
+                    }
+                    .history-row-title {
+                        display: none;
+                    }
+                    .history-query-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 6px;
+                        margin-top: 0;
+                    }
+                    .history-query-chip {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        padding: 5px 12px;
+                        border-radius: 999px;
+                        background: #eef2ff;
+                        border: 1px solid #d5ddf5;
+                        color: #30426d;
+                        font-size: 13px;
+                        line-height: 1.25;
+                        white-space: nowrap;
+                    }
+                    .history-query-chip[data-extra="true"] {
+                        display: none;
+                    }
+                    .history-query-group[data-expanded="true"] .history-query-chip[data-extra="true"] {
+                        display: inline-flex;
+                    }
+                    .history-query-toggle {
+                        border: 1px dashed #c2cef3;
+                        background: #f7f9ff;
+                        color: #2f4db5;
+                        padding: 5px 12px;
+                        border-radius: 999px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    .history-query-toggle:hover {
+                        background: #e8edff;
+                    }
+                    .history-row-info {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        align-items: flex-start;
+                    }
+                    .history-row-actions {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                    .history-chip {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        padding: 3px 10px;
+                        border-radius: 999px;
+                        font-size: 12px;
+                        line-height: 1.2;
+                        white-space: nowrap;
+                    }
+                    .history-chip img {
+                        width: 12px;
+                        height: 12px;
+                    }
+                    .history-chip--project {
+                        background: #f6f7fb;
+                        border: 1px solid #e3e7f3;
+                        color: #46536d;
+                        font-size: 11px;
+                    }
+                    .history-chip--tag {
+                        font-size: 11px;
+                        border: 1px solid #e1e6f5;
+                        background: #f7f9fd;
+                        color: var(--chip-tag-color, #4c63a6);
+                    }
+                    .history-chip-dot {
+                        display: inline-block;
+                        width: 6px;
+                        height: 6px;
+                        border-radius: 50%;
+                        background: var(--chip-dot-color, currentColor);
+                    }
+                    .history-chip--tag .history-chip-dot {
+                        background: var(--chip-tag-color, #5b8def);
+                    }
+                    .history-row-labels {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 6px;
+                        margin-top: 6px;
+                    }
+                    .history-meta-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        align-items: center;
+                        font-size: 12px;
+                        color: #4a5874;
+                    }
+                    .history-meta {
+                        font-weight: 600;
+                        color: #243356;
+                    }
+                    .history-market {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 12px;
+                        color: #4a5874;
+                    }
+                    .history-market img {
+                        width: 16px;
+                        height: 12px;
+                        border-radius: 2px;
+                        box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+                        object-fit: cover;
+                    }
+                    .history-market-text {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2px;
+                        line-height: 1.1;
+                    }
+                    .history-market-label {
+                        font-weight: 600;
+                        color: #243356;
+                    }
+                    .history-market-language {
+                        font-size: 11px;
+                        color: #6c7893;
+                    }
+                    .history-stats {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        font-size: 12px;
+                        color: #4b5976;
+                    }
+                    .history-stats span {
+                        display: inline-flex;
+                        align-items: baseline;
+                        gap: 3px;
+                    }
+                    .history-stats span span {
+                        color: #5a6886;
+                        font-weight: 500;
+                        text-transform: lowercase;
+                    }
+                    .history-stats strong {
+                        color: #1f2d4a;
+                        font-weight: 600;
+                    }
+                    .history-empty-row {
+                        padding: 32px 16px;
+                        text-align: center;
+                        color: #6c7a9b;
+                        border: 1px dashed #d4dcf6;
+                        border-radius: 12px;
+                        background: rgba(255, 255, 255, 0.6);
+                    }
+                    .history-density-toggle {
+                        display: inline-flex;
+                        align-items: center;
+                        padding: 2px;
+                        border-radius: 999px;
+                        border: 1px solid #e0e4f2;
+                        background: rgba(255, 255, 255, 0.85);
+                        box-shadow: 0 1px 2px rgba(43, 67, 148, 0.05);
+                        gap: 2px;
+                    }
+                    .history-density-btn {
+                        border: none;
+                        background: transparent;
+                        border-radius: 999px;
+                        padding: 4px 10px;
+                        font-size: 12px;
+                        font-weight: 500;
+                        color: #4a5b8f;
+                        cursor: pointer;
+                        transition: background 0.18s ease, color 0.18s ease;
+                    }
+                    .history-density-btn.is-active {
+                        background: #5b8def;
+                        color: white;
+                        box-shadow: 0 4px 10px rgba(91, 141, 239, 0.2);
+                    }
+                    .history-density-btn:focus-visible {
+                        outline: none;
+                        box-shadow: 0 0 0 2px rgba(91, 141, 239, 0.4);
+                    }
+                    .history-icon-btn {
+                        border: 1px solid transparent;
+                        border-radius: 999px;
+                        padding: 4px 12px;
+                        font-size: 12px;
+                        font-weight: 500;
+                        background: transparent;
+                        color: #4b5972;
+                        cursor: pointer;
+                        transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+                    }
+                    .history-icon-btn:hover {
+                        background: rgba(91, 141, 239, 0.1);
+                        color: #2f4db5;
+                    }
+                    .history-icon-btn--primary {
+                        color: #2f4db5;
+                    }
+                    .history-icon-btn--danger {
+                        color: #c94b59;
+                    }
+                    .history-icon-btn--danger:hover {
+                        background: rgba(201, 75, 89, 0.12);
+                    }
+                    .history-icon-btn:focus-visible {
+                        outline: none;
+                        box-shadow: 0 0 0 2px rgba(91, 141, 239, 0.35);
+                    }
                     .search-input-group {
                         display: flex;
                         align-items: center;
@@ -992,6 +1279,10 @@
                                                 </svg>
                                                 <span id="filter-toggle-text">Filters</span>
                                             </button>
+                                            <div id="history-density-toggle" class="history-density-toggle" role="group" aria-label="History density">
+                                                <button type="button" class="history-density-btn" data-density="comfortable" aria-pressed="false">Comfortable</button>
+                                                <button type="button" class="history-density-btn" data-density="compact" aria-pressed="false">Compact</button>
+                                            </div>
                                         <button id="clear-history-btn-header" style="
                                             background: #dc3545;
                                             color: white;
@@ -1164,7 +1455,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div id="history-list"></div>
+                                <div id="history-list" class="history-list"></div>
                             </div>
                             <div id="history-detail-container" style="
                                 display: none;
@@ -3494,6 +3785,17 @@
                 .replace(/"/g, '&quot;');
         }
 
+        function escapeHTML(value) {
+            if (typeof value !== 'string') {
+                return '';
+            }
+
+            return value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
         function populateProjectsList() {
             const projectsList = document.getElementById('projects-list');
             if (!projectsList) return;
@@ -5183,80 +5485,90 @@
         function generateHistoryTagsAndProject(item) {
             const tags = loadTags();
             const projects = loadProjects();
-            const itemTags = item.tags || [];
+            const itemTags = Array.isArray(item.tags) ? item.tags : [];
             const itemProject = item.projectId;
-            
-            // Skip if no tags or project
-            if (!itemTags.length && !itemProject) {
-                return '';
-            }
-            
-            let html = `
-                <div style="
-                    margin-bottom: 8px;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                ">
-            `;
-            
-            // Add project if present
+
+            const chips = [];
+
             if (itemProject) {
                 const project = projects.find(p => p.id === itemProject);
                 if (project) {
-                    html += `
-                        <div style="
-                            display: flex;
-                            align-items: center;
-                            gap: 4px;
-                            background: #f8f9fa;
-                            border: 1px solid #e9ecef;
-                            padding: 2px 6px;
-                            border-radius: 12px;
-                            font-size: 11px;
-                            color: #495057;
-                        ">
-                            <img src="${projectIconUrl}" alt="Project" style="width: 14px; height: 14px;" />
-                            <span>${project.name}</span>
-                        </div>
-                    `;
+                    chips.push(`
+                        <span class="history-chip history-chip--project" ${project.description ? `title="${escapeAttributeValue(project.description)}"` : ''}>
+                            <img src="${projectIconUrl}" alt="" aria-hidden="true" />
+                            <span>${escapeHTML(project.name)}</span>
+                        </span>
+                    `);
                 }
             }
-            
-            // Add tags if present
+
             if (itemTags.length > 0) {
                 itemTags.forEach(tagId => {
                     const tag = tags.find(t => t.id === tagId);
                     if (tag) {
-                        html += `
-                            <div style="
-                                background: ${tag.color}15;
-                                color: ${tag.color};
-                                border: 1px solid ${tag.color}30;
-                                padding: 2px 6px;
-                                border-radius: 12px;
-                                font-size: 11px;
-                                display: flex;
-                                align-items: center;
-                                gap: 4px;
-                            ">
-                                <img src="${tagIconUrl}" alt="Tag" style="width: 14px; height: 14px;" />
-                                <span>${tag.name}</span>
-                            </div>
-                        `;
+                        const safeName = escapeHTML(tag.name);
+                        const dotColor = tag.color || '#5b8def';
+                        chips.push(`
+                            <span class="history-chip history-chip--tag" style="--chip-tag-color: ${dotColor};">
+                                <span class="history-chip-dot"></span>
+                                <span>${safeName}</span>
+                            </span>
+                        `);
                     }
                 });
             }
-            
-            html += `</div>`;
-            return html;
+
+            if (chips.length === 0) {
+                return '';
+            }
+
+            return `<div class="history-row-labels">${chips.join('')}</div>`;
         }
         
         // ===== END HISTORY ENHANCEMENT FUNCTIONS =====
         
         // ===== ADVANCED FILTERING SYSTEM - Phase 5 =====
         
+        const HISTORY_DENSITY_STORAGE_KEY = 'chatgpt-product-search-history-density';
+        const HISTORY_DENSITY_DEFAULT = 'comfortable';
+        const HISTORY_DENSITY_OPTIONS = new Set(['comfortable', 'compact']);
+        let historyDisplayDensity = HISTORY_DENSITY_DEFAULT;
+        let lastRenderedHistory = [];
+        let historyDayFormatter;
+        let historyTimeFormatter;
+
+        try {
+            const storedDensity = localStorage.getItem(HISTORY_DENSITY_STORAGE_KEY);
+            if (storedDensity && HISTORY_DENSITY_OPTIONS.has(storedDensity)) {
+                historyDisplayDensity = storedDensity;
+            }
+        } catch (error) {
+            historyDisplayDensity = HISTORY_DENSITY_DEFAULT;
+        }
+
+        try {
+            historyDayFormatter = new Intl.DateTimeFormat(undefined, {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        } catch (error) {
+            historyDayFormatter = {
+                format: date => date.toLocaleDateString()
+            };
+        }
+
+        try {
+            historyTimeFormatter = new Intl.DateTimeFormat(undefined, {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            historyTimeFormatter = {
+                format: date => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+        }
+
         // Global filter state
         let currentFilters = {
             text: '',
@@ -5472,7 +5784,8 @@
 
             showHistoryListView();
             renderHistoryList(filteredHistory);
-            
+            initializeHistoryDensityToggle();
+
             // Update filter chips display
             updateFilterChips();
             updateFilterSummary();
@@ -5671,11 +5984,12 @@
             // Show all history
             const history = loadSearchHistory();
             renderHistoryList(history);
-            
+            initializeHistoryDensityToggle();
+
             // Update UI
             updateFilterSummary();
             updateFilterChips();
-            
+
         }
         
         // ===== SIDEBAR-TO-FILTER INTEGRATION =====
@@ -5924,145 +6238,127 @@
                 // Apply current filters (if any) or show all
                 const filteredHistory = applyAdvancedFilters(history);
                 renderHistoryList(filteredHistory);
+                initializeHistoryDensityToggle();
             }
         }
 
         function renderHistoryList(history) {
             const historyList = document.getElementById('history-list');
-            if (!historyList) return;
+            if (!historyList) {
+                return;
+            }
 
-            historyList.innerHTML = history.map(item => `
-                <div class="history-item" data-id="${item.id}" style="
-                    background: white;
-                    border: 1px solid #e9ecef;
-                    border-radius: 8px;
-                    padding: 16px;
-                    margin-bottom: 12px;
-                    transition: all 0.2s ease;
-                    cursor: pointer;
-                ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        margin-bottom: 8px;
-                    ">
-                        <div style="
-                            font-size: 16px;
-                            font-weight: 600;
-                            color: #495057;
-                            margin-bottom: 4px;
-                        ">${item.searchType === 'multi' ? 
-                            item.query.split('\n').map(q => 
-                                `<span style="
-                                    display: inline-block;
-                                    background: #e3f2fd;
-                                    color: #1565c0;
-                                    padding: 4px 8px;
-                                    border-radius: 12px;
-                                    font-size: 13px;
-                                    margin: 2px 4px 2px 0;
-                                    border: 1px solid #bbdefb;
-                                ">${q.trim()}</span>`
-                            ).join('') 
-                            : `<span style="
-                                display: inline-block;
-                                background: #e3f2fd;
-                                color: #1565c0;
-                                padding: 4px 8px;
-                                border-radius: 12px;
-                                font-size: 13px;
-                                margin: 2px 4px 2px 0;
-                                border: 1px solid #bbdefb;
-                            ">${item.query}</span>`
-                        }</div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="reopen-search-btn" data-id="${item.id}" style="
-                                background: #5b8def;
-                                color: white;
-                                border: none;
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 12px;
-                                cursor: pointer;
-                                white-space: nowrap;
-                            ">Open</button>
-                            <button class="delete-history-btn" data-id="${item.id}" style="
-                                background: #dc3545;
-                                color: white;
-                                border: none;
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 12px;
-                                cursor: pointer;
-                            ">Delete</button>
-                        </div>
+            const listItems = Array.isArray(history) ? history.slice() : [];
+            lastRenderedHistory = listItems.slice();
+
+            const effectiveDensity = HISTORY_DENSITY_OPTIONS.has(historyDisplayDensity)
+                ? historyDisplayDensity
+                : HISTORY_DENSITY_DEFAULT;
+            historyDisplayDensity = effectiveDensity;
+            historyList.setAttribute('data-density', effectiveDensity);
+
+            if (listItems.length === 0) {
+                historyList.innerHTML = '<div class="history-empty-row">No searches match the current filters.</div>';
+                updateHistoryDensityToggleUI();
+                return;
+            }
+
+            const groups = [];
+            const groupCache = new Map();
+
+            listItems.forEach(item => {
+                const itemDate = resolveHistoryDate(item);
+                const groupKey = buildHistoryGroupKey(itemDate);
+                let group = groupCache.get(groupKey);
+                if (!group) {
+                    group = {
+                        label: buildHistoryGroupLabel(itemDate),
+                        items: []
+                    };
+                    groupCache.set(groupKey, group);
+                    groups.push(group);
+                }
+                group.items.push({ item, itemDate });
+            });
+
+            historyList.innerHTML = groups.map(group => `
+                <section class="history-day-group">
+                    <header class="history-day-header">${group.label}</header>
+                    <div class="history-day-body">
+                        ${group.items.map(({ item, itemDate }) => renderHistoryRowMarkup(item, itemDate)).join('')}
                     </div>
-                    <div style="
-                        font-size: 12px;
-                        color: #6c757d;
-                        margin-bottom: 8px;
-                    " ${item.marketLabel ? `title="${item.marketLabel}"` : ''}>
-                        ${item.date} • ${item.searchType === 'multi' ? 'Multi-product search' : 'Single search'}${item.market ? ` • ${renderMarketBadge(item.market, item.marketCode, item.marketLabel)}` : (item.marketCode ? ` • ${item.marketCode}` : '')}
-                    </div>
-                    ${generateHistoryTagsAndProject(item)}
-                    <div style="
-                        font-size: 13px;
-                        color: #6c757d;
-                        display: flex;
-                        gap: 16px;
-                    ">
-                        <span>${item.results.summary?.total_reviews || 0} reviews</span>
-                        <span>${item.results.summary?.total_products || 0} products</span>
-                        <span>${item.results.summary?.total_product_links || 0} links</span>
-                    </div>
-                </div>
+                </section>
             `).join('');
 
-            // Add event listeners for history items
-            document.querySelectorAll('.reopen-search-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
+            historyList.querySelectorAll('.reopen-search-btn').forEach(btn => {
+                btn.addEventListener('click', event => {
+                    event.stopPropagation();
                     const itemId = btn.getAttribute('data-id');
-                    reopenSearch(itemId);
-                });
-            });
-
-            document.querySelectorAll('.delete-history-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const itemId = btn.getAttribute('data-id');
-                    deleteHistoryItem(itemId);
-                });
-            });
-
-            // Add hover effects
-            document.querySelectorAll('.history-item').forEach(item => {
-                item.addEventListener('mouseenter', () => {
-                    item.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                    item.style.transform = 'translateY(-2px)';
-                });
-                item.addEventListener('mouseleave', () => {
-                    item.style.boxShadow = 'none';
-                    item.style.transform = 'translateY(0)';
-                });
-                item.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('reopen-search-btn') && 
-                        !e.target.classList.contains('delete-history-btn')) {
-                        const itemId = item.getAttribute('data-id');
+                    if (itemId) {
                         reopenSearch(itemId);
                     }
                 });
             });
-            
-            // NUCLEAR SAFEGUARD: Ensure no analysis content has been accidentally added to history
+
+            historyList.querySelectorAll('.delete-history-btn').forEach(btn => {
+                btn.addEventListener('click', event => {
+                    event.stopPropagation();
+                    const itemId = btn.getAttribute('data-id');
+                    if (itemId) {
+                        deleteHistoryItem(itemId);
+                    }
+                });
+            });
+
+            historyList.querySelectorAll('.history-row').forEach(row => {
+                row.addEventListener('click', event => {
+                    if (event.target.closest('.history-icon-btn')) {
+                        return;
+                    }
+                    const itemId = row.getAttribute('data-id');
+                    if (itemId) {
+                        reopenSearch(itemId);
+                    }
+                });
+
+                row.addEventListener('keydown', event => {
+                    if (event.defaultPrevented) {
+                        return;
+                    }
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        const itemId = row.getAttribute('data-id');
+                        if (itemId) {
+                            reopenSearch(itemId);
+                        }
+                    }
+                });
+            });
+
+            historyList.querySelectorAll('.history-query-toggle').forEach(btn => {
+                btn.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const container = btn.closest('.history-query-group');
+                    if (!container) {
+                        return;
+                    }
+                    const isExpanded = container.dataset.expanded === 'true';
+                    const total = btn.getAttribute('data-total') || container.querySelectorAll('.history-query-chip').length;
+                    container.dataset.expanded = isExpanded ? 'false' : 'true';
+                    btn.textContent = isExpanded ? `Show all (${total})` : 'Show less';
+                });
+            });
+
+            updateHistoryDensityToggleUI();
+
             const historyContainer = document.getElementById('history-container');
             if (historyContainer) {
                 const analysisResults = historyContainer.querySelector('#analysis-results');
                 const analysisContent = historyContainer.querySelector('#analysis-content');
                 const citationTable = historyContainer.querySelector('#citation-sources-table');
                 const reviewTable = historyContainer.querySelector('#review-sources-table');
-                
+
                 if (analysisResults) {
                     analysisResults.remove();
                 }
@@ -6076,6 +6372,248 @@
                     reviewTable.remove();
                 }
             }
+        }
+
+        function resolveHistoryDate(item) {
+            if (item && typeof item.timestamp === 'number') {
+                const fromTimestamp = new Date(item.timestamp);
+                if (!Number.isNaN(fromTimestamp.getTime())) {
+                    return fromTimestamp;
+                }
+            }
+
+            if (item && typeof item.date === 'string') {
+                const parsed = new Date(item.date);
+                if (!Number.isNaN(parsed.getTime())) {
+                    return parsed;
+                }
+            }
+
+            return new Date();
+        }
+
+        function buildHistoryGroupKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function buildHistoryGroupLabel(date) {
+            if (historyDayFormatter && typeof historyDayFormatter.format === 'function') {
+                try {
+                    return historyDayFormatter.format(date);
+                } catch (error) {
+                    // Fall through to manual formatting
+                }
+            }
+            return date.toLocaleDateString();
+        }
+
+        function formatHistoryTime(date) {
+            if (!date) {
+                return '';
+            }
+            if (historyTimeFormatter && typeof historyTimeFormatter.format === 'function') {
+                try {
+                    return historyTimeFormatter.format(date);
+                } catch (error) {
+                    // Fall through to manual formatting
+                }
+            }
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function extractHistoryQueries(item) {
+            if (!item) {
+                return [];
+            }
+
+            if (item.searchType === 'multi' && typeof item.query === 'string') {
+                const parts = item.query.split('\n')
+                    .map(q => q.trim())
+                    .filter(Boolean);
+                if (parts.length) {
+                    return parts;
+                }
+            }
+
+            if (typeof item.query === 'string' && item.query.trim()) {
+                return [item.query.trim()];
+            }
+
+            return [];
+        }
+
+        function renderHistoryQueryChips(queries, searchType) {
+            const total = queries.length;
+            if (total === 0) {
+                return '<div class="history-query-group"><span class="history-query-chip">Untitled search</span></div>';
+            }
+
+            const isMulti = searchType === 'multi';
+            const maxVisible = isMulti ? Math.min(2, total) : total;
+
+            const chipsHtml = queries.map((text, index) => {
+                const extraAttr = index >= maxVisible ? ' data-extra="true"' : '';
+                return `<span class="history-query-chip"${extraAttr}>${escapeHTML(text)}</span>`;
+            }).join('');
+
+            const hasHidden = total > maxVisible;
+            const toggleHtml = hasHidden
+                ? `<button type="button" class="history-query-toggle" data-total="${total}">Show all (${total})</button>`
+                : '';
+
+            const expandedAttr = hasHidden ? 'data-expanded="false"' : 'data-expanded="true"';
+
+            return `<div class="history-query-group" ${expandedAttr}>${chipsHtml}${toggleHtml}</div>`;
+        }
+
+        function renderHistoryMarketInfo(item) {
+            if (!item) {
+                return '';
+            }
+
+            const marketValue = item.market || item.marketCode;
+            if (!marketValue) {
+                return '';
+            }
+
+            const option = getMarketOption(marketValue);
+            const fallbackLabel = escapeHTML(item.marketLabel || marketValue);
+
+            if (!option) {
+                if (!fallbackLabel) {
+                    return '';
+                }
+                return `
+                    <span class="history-market">
+                        <span class="history-market-text">
+                            <span class="history-market-label">${fallbackLabel}</span>
+                        </span>
+                    </span>
+                `;
+            }
+
+            const countryLabel = escapeHTML(option.country || option.label || item.marketLabel || marketValue);
+            const languageLabel = escapeHTML(option.language || '');
+            const flagSrc = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
+                ? chrome.runtime.getURL(option.icon)
+                : option.icon;
+            const altText = escapeAttributeValue(`${countryLabel} flag`);
+
+            return `
+                <span class="history-market">
+                    <img src="${flagSrc}" alt="${altText}" />
+                    <span class="history-market-text">
+                        <span class="history-market-label">${countryLabel}</span>
+                        ${languageLabel ? `<span class="history-market-language">${languageLabel}</span>` : ''}
+                    </span>
+                </span>
+            `;
+        }
+
+        function renderHistoryRowMarkup(item, itemDate) {
+            const queries = extractHistoryQueries(item);
+            const queryChipsMarkup = renderHistoryQueryChips(queries, item.searchType);
+
+            const tagsHtml = generateHistoryTagsAndProject(item);
+
+            const timeLabel = formatHistoryTime(itemDate);
+            const marketMarkup = renderHistoryMarketInfo(item);
+
+            const metaPieces = [];
+            if (timeLabel) {
+                metaPieces.push(`<span class="history-meta">${escapeHTML(timeLabel)}</span>`);
+            }
+            if (marketMarkup) {
+                metaPieces.push(marketMarkup);
+            }
+            const metaHtml = metaPieces.length ? `<div class="history-meta-group">${metaPieces.join('')}</div>` : '';
+
+            const summary = item?.results?.summary || {};
+            const statsBadges = [
+                { label: 'reviews', value: summary.total_reviews || 0 },
+                { label: 'products', value: summary.total_products || 0 },
+                { label: 'links', value: summary.total_product_links || 0 }
+            ].map(stat => `<span><strong>${escapeHTML(String(stat.value))}</strong><span>${escapeHTML(stat.label)}</span></span>`).join('');
+            const statsHtml = `<div class="history-stats">${statsBadges}</div>`;
+
+            const accessibleLabel = escapeAttributeValue(queries[0] || 'history item');
+
+            return `
+                <div class="history-row" data-id="${item.id}" role="button" tabindex="0" aria-label="Open history item ${accessibleLabel}">
+                    <div class="history-row-left">
+                        ${queryChipsMarkup}
+                        ${tagsHtml || ''}
+                    </div>
+                    <div class="history-row-info">
+                        ${metaHtml}${statsHtml}
+                    </div>
+                    <div class="history-row-actions">
+                        <button class="history-icon-btn history-icon-btn--primary reopen-search-btn" data-id="${item.id}" aria-label="Open search ${accessibleLabel}">Open</button>
+                        <button class="history-icon-btn history-icon-btn--danger delete-history-btn" data-id="${item.id}" aria-label="Delete search ${accessibleLabel}">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initializeHistoryDensityToggle() {
+            const toggle = document.getElementById('history-density-toggle');
+            if (!toggle) {
+                return;
+            }
+
+            if (!toggle.dataset.initialized) {
+                toggle.addEventListener('click', event => {
+                    const target = event.target.closest('button[data-density]');
+                    if (!target) {
+                        return;
+                    }
+                    const density = target.getAttribute('data-density');
+                    if (!HISTORY_DENSITY_OPTIONS.has(density)) {
+                        return;
+                    }
+                    if (density === historyDisplayDensity) {
+                        return;
+                    }
+                    setHistoryDensity(density);
+                });
+                toggle.dataset.initialized = 'true';
+            }
+
+            updateHistoryDensityToggleUI();
+        }
+
+        function setHistoryDensity(density) {
+            if (!HISTORY_DENSITY_OPTIONS.has(density)) {
+                return;
+            }
+
+            historyDisplayDensity = density;
+
+            try {
+                localStorage.setItem(HISTORY_DENSITY_STORAGE_KEY, density);
+            } catch (error) {
+                // Ignore storage errors silently
+            }
+
+            const snapshot = Array.isArray(lastRenderedHistory) ? lastRenderedHistory.slice() : [];
+            renderHistoryList(snapshot);
+        }
+
+        function updateHistoryDensityToggleUI() {
+            const toggle = document.getElementById('history-density-toggle');
+            if (!toggle) {
+                return;
+            }
+
+            toggle.querySelectorAll('button[data-density]').forEach(btn => {
+                const targetDensity = btn.getAttribute('data-density');
+                const isActive = targetDensity === historyDisplayDensity;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
         }
 
         function toggleMultiProductSearch() {
@@ -8218,6 +8756,7 @@
                 const filtered = applyAdvancedFilters(history);
                 if (typeof renderHistoryList === 'function') {
                     renderHistoryList(filtered);
+                    initializeHistoryDensityToggle();
                 }
             }
         }
