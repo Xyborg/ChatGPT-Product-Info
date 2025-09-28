@@ -1098,7 +1098,7 @@
                             </div> <!-- End search-controls -->
                             
                             <!-- Hidden token field for status display -->
-                            <input type="password" id="auth-token" placeholder="Token will be fetched automatically" readonly style="
+                            <input type="text" id="auth-token" placeholder="Token will be fetched automatically" readonly style="
                                 display: none;
                                 padding: 8px 12px;
                                 border: 1px solid #dee2e6;
