@@ -6,7 +6,8 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 
 ### Core Search Features
 - **Single Product Search**: Search for individual products and get detailed reviews
-- **Multi-Product Comparison**: Compare multiple products side-by-side in a table format  
+- **Multi-Product Comparison**: Compare multiple products side-by-side in a table format
+- **Multi-Market Support**: Supports multiple countries and languages, so you can receive the same answers as users in your target market.
 - **Sentiment Analysis**: Visual sentiment breakdown of reviews (positive/neutral/negative)
 - **Citation Links**: Direct links to source websites for more information
 - **Review Themes**: Categorized review themes for easy browsing
@@ -143,6 +144,7 @@ chrome-extension/
 ├── popup.html            # Extension popup interface
 ├── popup.js              # Popup logic and controls
 ├── styles.css            # Extension styles
+├── assets/               # Static assets and resources
 └── icons/                # Extension icons (16x16 to 128x128)
 ```
 
