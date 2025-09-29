@@ -1118,59 +1118,7 @@
                             overflow-y: auto;
                             padding: 24px;
                         ">
-                            <div id="welcome-state" style="
-                                text-align: center; 
-                                padding: 60px 40px; 
-                                color: #5e6f9b;
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                justify-content: center;
-                                height: 100%;
-                                min-height: 300px;
-                            ">
-                                <img src="${searchIconUrl}" alt="Search" style="width: 52px; height: 52px; margin-bottom: 22px; opacity: 0.9; filter: hue-rotate(18deg) saturate(1.1);" />
-                                <h3 style="
-                                    margin: 0 0 12px 0;
-                                    font-size: 20px;
-                                    font-weight: 600;
-                                    color: #27325f;
-                                ">Product Search</h3>
-                                <p style="
-                                    margin: 0 0 24px 0;
-                                    font-size: 16px;
-                                    line-height: 1.5;
-                                    max-width: 400px;
-                                    color: #465584;
-                                ">Search for product reviews, comparisons, and detailed information from across the web</p>
-                                <div style="
-                                    padding: 4px 0 4px 18px;
-                                    border-left: 4px solid #5b8def;
-                                    max-width: 520px;
-                                    text-align: left;
-                                ">
-                                    <div style="font-weight: 600; margin-bottom: 8px; color: #27325f;">Try searching for:</div>
-                                    <div style="color: #556694; font-size: 14px; line-height: 1.6;">
-                                        • "iPhone 17 Pro camera quality"<br>
-                                        • "Nike Air Max running shoes"<br>
-                                        • "MacBook Air M3 performance"<br>
-                                        • "Pets Deli Hunde Nassfutter reviews"
-                                    </div>
-                                </div>
-                                <div id="auth-status" style="
-                                    margin-top: 20px;
-                                    padding: 8px 16px;
-                                    border-radius: 20px;
-                                    font-size: 13px;
-                                    font-weight: 500;
-                                    background: #fff3cd;
-                                    color: #856404;
-                                    border: 1px solid #ffeeba;
-                                    display: inline-flex;
-                                    align-items: center;
-                                    gap: 8px;
-                                "><span class="status-icon status-icon--medium status-icon--warning" aria-hidden="true"></span><span>Checking authentication...</span></div>
-                            </div>
+                            ${createWelcomeState()}
                         </div>
                         
                         <!-- History Container -->
@@ -2478,7 +2426,7 @@
 
                 if (searchArea) searchArea.style.display = 'block';
                 if (resultsContainer) {
-                    resultsContainer.style.display = 'none';
+                    resultsContainer.style.display = 'block';
                     resultsContainer.innerHTML = '';
                 }
                 if (typeof resetToCleanSearchState === 'function') {
@@ -3723,6 +3671,68 @@
         }
         
         // ===== END ENHANCED DATA MANAGEMENT FUNCTIONS =====
+
+        // ===== WELCOME STATE HELPER =====
+        
+        function createWelcomeState() {
+            return `
+                <div id="welcome-state" style="
+                    text-align: center; 
+                    padding: 60px 40px; 
+                    color: #5e6f9b;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100%;
+                    min-height: 300px;
+                ">
+                    <img src="${searchIconUrl}" alt="Search" style="width: 52px; height: 52px; margin-bottom: 22px; opacity: 0.9; filter: hue-rotate(18deg) saturate(1.1);" />
+                    <h3 style="
+                        margin: 0 0 12px 0;
+                        font-size: 20px;
+                        font-weight: 600;
+                        color: #27325f;
+                    ">Product Search</h3>
+                    <p style="
+                        margin: 0 0 24px 0;
+                        font-size: 16px;
+                        line-height: 1.5;
+                        max-width: 400px;
+                        color: #465584;
+                    ">Search for product reviews, comparisons, and detailed information from across the web</p>
+                    <div style="
+                        padding: 4px 0 4px 18px;
+                        border-left: 4px solid #5b8def;
+                        max-width: 520px;
+                        text-align: left;
+                    ">
+                        <div style="font-weight: 600; margin-bottom: 8px; color: #27325f;">Try searching for:</div>
+                        <div style="color: #556694; font-size: 14px; line-height: 1.6;">
+                            • "iPhone 17 Pro camera quality"<br>
+                            • "Nike Air Max running shoes"<br>
+                            • "MacBook Air M3 performance"<br>
+                            • "Pets Deli Hunde Nassfutter reviews"
+                        </div>
+                    </div>
+                    <div id="auth-status" style="
+                        margin-top: 20px;
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        background: #fff3cd;
+                        color: #856404;
+                        border: 1px solid #ffeeba;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                    "><span class="status-icon status-icon--medium status-icon--warning" aria-hidden="true"></span><span>Checking authentication...</span></div>
+                </div>
+            `;
+        }
+
+        // ===== END WELCOME STATE HELPER =====
 
         // ===== EXPORT/IMPORT FUNCTIONALITY =====
         
@@ -6638,56 +6648,11 @@
             // Reset results container to welcome state
             const resultsContainer = document.getElementById('results-container');
             if (resultsContainer) {
-                resultsContainer.innerHTML = `
-                    <div id="welcome-state" style="
-                        text-align: center; 
-                        padding: 60px 40px; 
-                        color: #6c757d;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        height: 100%;
-                        min-height: 300px;
-                    ">
-                        <img src="${searchIconUrl}" alt="Search" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.7;" />
-                        <h3 style="
-                            margin: 0 0 12px 0;
-                            font-size: 20px;
-                            font-weight: 600;
-                            color: #495057;
-                        ">Product Search</h3>
-                        <p style="
-                            margin: 0 0 24px 0;
-                            font-size: 16px;
-                            line-height: 1.5;
-                            max-width: 400px;
-                        ">Search for product reviews, comparisons, and detailed information from across the web</p>
-                        <div style="
-                            padding: 16px 20px;
-                            border-left: 4px solid #5b8def;
-                            max-width: 500px;
-                            text-align: left;
-                        ">
-                            <div style="font-weight: 600; margin-bottom: 8px; color: #495057;">Try searching for:</div>
-                            <div style="color: #6c757d; font-size: 14px; line-height: 1.4;">
-                                • "iPhone 17 Pro camera quality"<br>
-                                • "Nike Air Max running shoes"<br>
-                                • "MacBook Air M3 performance"<br>
-                                • "Tesla Model 3 reviews"
-                            </div>
-                        </div>
-                        <div id="auth-status" style="
-                            margin-top: 20px;
-                            padding: 8px 16px;
-                            border-radius: 4px;
-                            font-size: 12px;
-                            font-weight: 600;
-                        ">
-                            <span style="color: #28a745;">✓ Ready to search</span>
-                        </div>
-                    </div>
-                `;
+                resultsContainer.innerHTML = createWelcomeState();
+                // Re-initialize token status after creating new welcome state
+                if (typeof initializeTokenStatus === 'function') {
+                    initializeTokenStatus();
+                }
             }
         }
 
