@@ -3740,11 +3740,16 @@
             // Update data counts
             updateDataCounts();
             
+            // Populate project selector
+            populateProjectSelector();
+            
             // Set up event listeners
             const exportBtn = document.getElementById('export-data-btn');
             const importBtn = document.getElementById('import-data-btn');
             const selectFileBtn = document.getElementById('select-import-file-btn');
             const fileInput = document.getElementById('import-file-input');
+            const exportScopeAll = document.getElementById('export-scope-all');
+            const exportScopeProject = document.getElementById('export-scope-project');
             
             if (exportBtn) {
                 exportBtn.addEventListener('click', exportData);
@@ -3758,20 +3763,125 @@
                 selectFileBtn.addEventListener('click', () => fileInput.click());
                 fileInput.addEventListener('change', handleFileSelect);
             }
+            
+            // Export scope change listeners
+            if (exportScopeAll) {
+                exportScopeAll.addEventListener('change', handleExportScopeChange);
+            }
+            if (exportScopeProject) {
+                exportScopeProject.addEventListener('change', handleExportScopeChange);
+            }
+            
+            // Project selection change listener
+            const projectSelector = document.getElementById('export-project-selector');
+            if (projectSelector) {
+                projectSelector.addEventListener('change', handleProjectSelectionChange);
+            }
         }
         
         function updateDataCounts() {
-            const tags = loadTags();
-            const projects = loadProjects();
-            const history = loadSearchHistory();
+            const exportScope = document.querySelector('input[name="export-scope"]:checked')?.value;
+            const selectedProjectId = document.getElementById('export-project-selector')?.value;
             
             const tagsCountEl = document.getElementById('tags-count');
             const projectsCountEl = document.getElementById('projects-count');
             const historyCountEl = document.getElementById('history-count');
             
-            if (tagsCountEl) tagsCountEl.textContent = tags.length;
-            if (projectsCountEl) projectsCountEl.textContent = projects.length;
-            if (historyCountEl) historyCountEl.textContent = history.length;
+            if (exportScope === 'project' && selectedProjectId) {
+                // Calculate counts for selected project only
+                const projectCounts = calculateProjectCounts(selectedProjectId);
+                
+                if (tagsCountEl) tagsCountEl.textContent = projectCounts.tags;
+                if (projectsCountEl) projectsCountEl.textContent = 1; // Always 1 for single project
+                if (historyCountEl) historyCountEl.textContent = projectCounts.history;
+            } else {
+                // Show total counts for all data
+                const tags = loadTags();
+                const projects = loadProjects();
+                const history = loadSearchHistory();
+                
+                if (tagsCountEl) tagsCountEl.textContent = tags.length;
+                if (projectsCountEl) projectsCountEl.textContent = projects.length;
+                if (historyCountEl) historyCountEl.textContent = history.length;
+            }
+        }
+        
+        function calculateProjectCounts(projectId) {
+            // Get searches for this project
+            const projectHistory = loadSearchHistory().filter(item => item.projectId === projectId);
+            
+            // Count unique tags used in this project
+            const usedTagIds = new Set();
+            projectHistory.forEach(item => {
+                if (item.tags && Array.isArray(item.tags)) {
+                    item.tags.forEach(tagId => usedTagIds.add(tagId));
+                }
+            });
+            
+            return {
+                tags: usedTagIds.size,
+                history: projectHistory.length
+            };
+        }
+        
+        function populateProjectSelector() {
+            const selector = document.getElementById('export-project-selector');
+            if (!selector) return;
+            
+            const projects = loadProjects();
+            
+            // Clear existing options except the first one
+            selector.innerHTML = '<option value="">Choose a project...</option>';
+            
+            // Add project options
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                selector.appendChild(option);
+            });
+            
+            // If no projects, disable the selector
+            if (projects.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No projects available';
+                option.disabled = true;
+                selector.appendChild(option);
+                selector.disabled = true;
+            } else {
+                selector.disabled = false;
+            }
+            
+            // Re-add event listener after repopulating
+            selector.removeEventListener('change', handleProjectSelectionChange);
+            selector.addEventListener('change', handleProjectSelectionChange);
+            
+            // Update counts when project list changes
+            updateDataCounts();
+        }
+        
+        function handleExportScopeChange() {
+            const projectScope = document.getElementById('export-scope-project');
+            const projectContainer = document.getElementById('project-selection-container');
+            
+            if (projectScope && projectContainer) {
+                if (projectScope.checked) {
+                    projectContainer.style.display = 'block';
+                    // Refresh project list in case it changed
+                    populateProjectSelector();
+                } else {
+                    projectContainer.style.display = 'none';
+                }
+            }
+            
+            // Update counts when scope changes
+            updateDataCounts();
+        }
+        
+        function handleProjectSelectionChange() {
+            // Update counts when project selection changes
+            updateDataCounts();
         }
         
         function exportData() {
@@ -3779,28 +3889,74 @@
                 const exportTagsChecked = document.getElementById('export-tags')?.checked;
                 const exportProjectsChecked = document.getElementById('export-projects')?.checked;
                 const exportHistoryChecked = document.getElementById('export-history')?.checked;
+                const exportScope = document.querySelector('input[name="export-scope"]:checked')?.value;
+                const selectedProjectId = document.getElementById('export-project-selector')?.value;
                 
                 if (!exportTagsChecked && !exportProjectsChecked && !exportHistoryChecked) {
                     showExportImportStatus('Please select at least one data type to export.', 'error');
                     return;
                 }
                 
+                // Validate project selection if single project scope is chosen
+                if (exportScope === 'project' && !selectedProjectId) {
+                    showExportImportStatus('Please select a project to export.', 'error');
+                    return;
+                }
+                
                 const exportData = {
                     version: '1.0',
                     exportDate: new Date().toISOString(),
+                    exportScope: exportScope || 'all',
                     data: {}
                 };
                 
+                // Add project info if exporting single project
+                if (exportScope === 'project' && selectedProjectId) {
+                    const allProjects = loadProjects();
+                    const selectedProject = allProjects.find(p => p.id === selectedProjectId);
+                    if (selectedProject) {
+                        exportData.projectInfo = {
+                            id: selectedProject.id,
+                            name: selectedProject.name,
+                            created: selectedProject.created
+                        };
+                    }
+                }
+                
                 if (exportTagsChecked) {
-                    exportData.data.tags = loadTags();
+                    if (exportScope === 'project' && selectedProjectId) {
+                        // Get only tags used in this project's searches
+                        const projectHistory = loadSearchHistory().filter(item => item.projectId === selectedProjectId);
+                        const usedTagIds = new Set();
+                        projectHistory.forEach(item => {
+                            if (item.tags && Array.isArray(item.tags)) {
+                                item.tags.forEach(tagId => usedTagIds.add(tagId));
+                            }
+                        });
+                        const allTags = loadTags();
+                        exportData.data.tags = allTags.filter(tag => usedTagIds.has(tag.id));
+                    } else {
+                        exportData.data.tags = loadTags();
+                    }
                 }
                 
                 if (exportProjectsChecked) {
-                    exportData.data.projects = loadProjects();
+                    if (exportScope === 'project' && selectedProjectId) {
+                        // Export only the selected project
+                        const allProjects = loadProjects();
+                        exportData.data.projects = allProjects.filter(project => project.id === selectedProjectId);
+                    } else {
+                        exportData.data.projects = loadProjects();
+                    }
                 }
                 
                 if (exportHistoryChecked) {
-                    exportData.data.history = loadSearchHistory();
+                    if (exportScope === 'project' && selectedProjectId) {
+                        // Export only searches from this project
+                        exportData.data.history = loadSearchHistory().filter(item => item.projectId === selectedProjectId);
+                    } else {
+                        exportData.data.history = loadSearchHistory();
+                    }
                 }
                 
                 // Create and download file
@@ -3809,8 +3965,11 @@
                 const url = URL.createObjectURL(dataBlob);
                 
                 const link = document.createElement('a');
+                const filenameSuffix = exportScope === 'project' && selectedProjectId ? 
+                    `-${exportData.projectInfo?.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'project'}` : 
+                    '';
                 link.href = url;
-                link.download = `chatgpt-product-search-backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.download = `chatgpt-product-search-backup${filenameSuffix}-${new Date().toISOString().split('T')[0]}.json`;
                 
                 document.body.appendChild(link);
                 link.click();
@@ -3818,7 +3977,10 @@
                 
                 URL.revokeObjectURL(url);
                 
-                showExportImportStatus('Data exported successfully!', 'success');
+                const message = exportScope === 'project' ? 
+                    `Project "${exportData.projectInfo?.name || 'Unknown'}" exported successfully!` : 
+                    'Data exported successfully!';
+                showExportImportStatus(message, 'success');
                 
             } catch (error) {
                 console.error('Export failed:', error);
@@ -4267,6 +4429,10 @@
             try {
                 const project = createProject(name.trim());
                 populateProjectsList();
+                // Refresh project selector in export section if it exists
+                if (document.getElementById('export-project-selector')) {
+                    populateProjectSelector();
+                }
                 alert(`Project "${project.name}" created successfully!`);
             } catch (error) {
                 alert(`Error: ${error.message}`);
@@ -4505,40 +4671,96 @@
                                         line-height: 1.4;
                                     ">Export your tags, projects, and search history to a JSON file for backup or transfer to another browser.</p>
                                     
-                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
-                                        <label style="
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 6px;
-                                            font-size: 14px;
-                                            color: #495057;
-                                            cursor: pointer;
+                                    <!-- Export Scope Selection -->
+                                    <div style="margin-bottom: 16px; padding: 12px; background: white; border: 1px solid #dee2e6; border-radius: 4px;">
+                                        <h5 style="margin: 0 0 8px 0; color: #495057; font-size: 14px; font-weight: 600;">Export Scope</h5>
+                                        <div style="display: flex; gap: 16px; align-items: center;">
+                                            <label style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                font-size: 14px;
+                                                color: #495057;
+                                                cursor: pointer;
+                                            ">
+                                                <input type="radio" name="export-scope" id="export-scope-all" value="all" checked style="margin: 0;">
+                                                All Data
+                                            </label>
+                                            <label style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                font-size: 14px;
+                                                color: #495057;
+                                                cursor: pointer;
+                                            ">
+                                                <input type="radio" name="export-scope" id="export-scope-project" value="project" style="margin: 0;">
+                                                Single Project
+                                            </label>
+                                        </div>
+                                        
+                                        <!-- Project Selection (hidden by default) -->
+                                        <div id="project-selection-container" style="
+                                            margin-top: 12px;
+                                            display: none;
                                         ">
-                                            <input type="checkbox" id="export-tags" checked style="margin: 0;">
-                                            Tags (<span id="tags-count">0</span>)
-                                        </label>
-                                        <label style="
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 6px;
-                                            font-size: 14px;
-                                            color: #495057;
-                                            cursor: pointer;
-                                        ">
-                                            <input type="checkbox" id="export-projects" checked style="margin: 0;">
-                                            Projects (<span id="projects-count">0</span>)
-                                        </label>
-                                        <label style="
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 6px;
-                                            font-size: 14px;
-                                            color: #495057;
-                                            cursor: pointer;
-                                        ">
-                                            <input type="checkbox" id="export-history" checked style="margin: 0;">
-                                            History (<span id="history-count">0</span>)
-                                        </label>
+                                            <label style="
+                                                display: block;
+                                                font-size: 13px;
+                                                color: #6c757d;
+                                                margin-bottom: 4px;
+                                            ">Select Project:</label>
+                                            <select id="export-project-selector" style="
+                                                width: 100%;
+                                                padding: 6px 8px;
+                                                border: 1px solid #ced4da;
+                                                border-radius: 4px;
+                                                font-size: 14px;
+                                                background: white;
+                                            ">
+                                                <option value="">Choose a project...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Data Type Selection -->
+                                    <div style="margin-bottom: 16px;">
+                                        <h5 style="margin: 0 0 8px 0; color: #495057; font-size: 14px; font-weight: 600;">Data Types</h5>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                            <label style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                font-size: 14px;
+                                                color: #495057;
+                                                cursor: pointer;
+                                            ">
+                                                <input type="checkbox" id="export-tags" checked style="margin: 0;">
+                                                Tags (<span id="tags-count">0</span>)
+                                            </label>
+                                            <label style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                font-size: 14px;
+                                                color: #495057;
+                                                cursor: pointer;
+                                            ">
+                                                <input type="checkbox" id="export-projects" checked style="margin: 0;">
+                                                Projects (<span id="projects-count">0</span>)
+                                            </label>
+                                            <label style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                font-size: 14px;
+                                                color: #495057;
+                                                cursor: pointer;
+                                            ">
+                                                <input type="checkbox" id="export-history" checked style="margin: 0;">
+                                                History (<span id="history-count">0</span>)
+                                            </label>
+                                        </div>
                                     </div>
                                     
                                     <button id="export-data-btn" style="
@@ -4997,6 +5219,10 @@
             try {
                 createProject(name.trim(), description.trim());
                 populateProjectsManagement();
+                // Refresh project selector in export section if it exists
+                if (document.getElementById('export-project-selector')) {
+                    populateProjectSelector();
+                }
                 alert(`Project "${name}" created successfully!`);
             } catch (error) {
                 alert(`Error: ${error.message}`);
