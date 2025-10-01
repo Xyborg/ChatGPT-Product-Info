@@ -16,6 +16,7 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 
 
 ### Chrome Extension Features
+- **First-Time Tutorial**: Interactive walkthrough on first use to help you get started quickly
 - **Search History**: Automatically save searches (up to 50) and reopen them instantly
 - **Filter-Aware Reports**: Review/citation source reports that respect your active filters
 - **Floating Product Bubble**: Always-visible light-yellow button with the extension logo in the bottom-right corner
@@ -47,7 +48,13 @@ A Chrome extension that adds product search functionality directly to ChatGPT, a
 2. **Access the search interface** using either:
    - Click the extension icon in your Chrome toolbar → "Open Product Search"
    - Click the floating Product Info bubble in the bottom-right corner of any ChatGPT page
-3. **Start searching** for products using natural language queries
+3. **First-time users**: An interactive tutorial will automatically appear to guide you through the key features
+4. **Start searching** for products using natural language queries
+
+### Tutorial
+- **First launch**: The tutorial automatically appears when you first open the extension
+- **Re-watch anytime**: Click the **?** (help) icon in the left sidebar next to the Settings icon
+- **Quick overview**: Learn about the Search tab, History, Analysis, and how to organize with Projects & Tags
 
 ### Search Examples
 Try searching for:

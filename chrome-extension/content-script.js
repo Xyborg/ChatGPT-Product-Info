@@ -182,6 +182,15 @@
                     .analysis-tag-label:hover {
                         background-color: rgba(91, 141, 239, 0.12) !important;
                     }
+                    #help-btn:hover {
+                        background: rgba(91, 141, 239, 0.22) !important;
+                        color: #1f2a52 !important;
+                        transform: translateY(-1px);
+                    }
+                    #help-btn:focus-visible {
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.35);
+                    }
                     #settings-btn:hover {
                         background: rgba(91, 141, 239, 0.22) !important;
                         color: #1f2a52 !important;
@@ -782,20 +791,36 @@
                                     font-weight: 600;
                                     color: #27325f;
                                 ">Organization</h3>
-                                <button id="settings-btn" style="
-                                    background: rgba(91, 141, 239, 0.12);
-                                    border: none;
-                                    color: #3c4b7c;
-                                    font-size: 16px;
-                                    width: 24px;
-                                    height: 24px;
-                                    border-radius: 6px;
-                                    cursor: pointer;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    transition: all 0.2s ease;
-                                " title="Settings"><img src="${settingsIconUrl}" alt="Settings" style="width: 18px; height: 18px;" /></button>
+                                <div style="display: flex; gap: 8px;">
+                                    <button id="help-btn" style="
+                                        background: rgba(91, 141, 239, 0.12);
+                                        border: none;
+                                        color: #3c4b7c;
+                                        font-size: 18px;
+                                        width: 24px;
+                                        height: 24px;
+                                        border-radius: 6px;
+                                        cursor: pointer;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        transition: all 0.2s ease;
+                                    " title="Help & Tutorial">?</button>
+                                    <button id="settings-btn" style="
+                                        background: rgba(91, 141, 239, 0.12);
+                                        border: none;
+                                        color: #3c4b7c;
+                                        font-size: 16px;
+                                        width: 24px;
+                                        height: 24px;
+                                        border-radius: 6px;
+                                        cursor: pointer;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        transition: all 0.2s ease;
+                                    " title="Settings"><img src="${settingsIconUrl}" alt="Settings" style="width: 18px; height: 18px;" /></button>
+                                </div>
                             </div>
                             
                             <div style="
@@ -1734,6 +1759,357 @@
             </div>
         `;
 
+        // Tutorial Overlay HTML
+        const tutorialHTML = `
+            <div id="tutorial-overlay" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.85);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(3px);
+                -webkit-backdrop-filter: blur(3px);
+            ">
+                <div style="
+                    background: white;
+                    max-width: 600px;
+                    width: 90%;
+                    border-radius: 12px;
+                    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+                    overflow: hidden;
+                ">
+                    <!-- Tutorial content screens -->
+                    <div id="tutorial-screens">
+                        <!-- Screen 1: Welcome -->
+                        <div class="tutorial-screen" data-screen="1" style="display: block;">
+                            <div style="
+                                background: linear-gradient(135deg, #5b8def 0%, #4a7de8 100%);
+                                padding: 48px 32px;
+                                text-align: center;
+                                color: white;
+                            ">
+                                <div style="
+                                    width: 80px;
+                                    height: 80px;
+                                    margin: 0 auto 20px;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 40px;
+                                "><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M40.49,205.52,93,61.14a7.79,7.79,0,0,1,12.84-2.85l91.88,91.88A7.79,7.79,0,0,1,194.86,163L50.48,215.51A7.79,7.79,0,0,1,40.49,205.52Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M168,72s0-24,24-24,24-24,24-24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="144" y1="16" x2="144" y2="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="216" y1="112" x2="232" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="216" y1="80" x2="240" y2="72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="78.09" y1="102.09" x2="153.91" y2="177.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="101.11" y1="197.11" x2="58.89" y2="154.89" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></div>
+                                <h2 style="margin: 0 0 12px 0; font-size: 28px; font-weight: 700;">Welcome!</h2>
+                                <p style="margin: 0; font-size: 16px; opacity: 0.95; line-height: 1.5;">
+                                    Let's take a quick tour of <strong>ChatGPT Product Info Research</strong>
+                                </p>
+                            </div>
+                            <div style="padding: 32px;">
+                                <p style="
+                                    font-size: 15px;
+                                    line-height: 1.6;
+                                    color: #495057;
+                                    margin: 0 0 24px 0;
+                                ">
+                                    This extension lets you search for product reviews, comparisons, and detailed information 
+                                    directly within ChatGPT. It's powerful yet simple to use!
+                                </p>
+                                <div style="
+                                    background: #f8f9fa;
+                                    padding: 16px;
+                                    border-radius: 4px;
+                                ">
+                                    <p style="margin: 0; font-size: 14px; color: #6c757d;">
+                                        This tutorial takes about 30 seconds. 
+                                        You can skip it, but I recommend going through it once.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Screen 2: The Bubble -->
+                        <div class="tutorial-screen" data-screen="2" style="display: none;">
+                            <div style="
+                                background: linear-gradient(135deg, #5b8def 0%, #4a7de8 100%);
+                                padding: 40px 32px;
+                                text-align: center;
+                                color: white;
+                            ">
+                                <h2 style="margin: 0 0 12px 0; font-size: 24px; font-weight: 700;">The Yellow Bubble</h2>
+                                <p style="margin: 0; font-size: 15px; opacity: 0.95;">Your quick access button</p>
+                            </div>
+                            <div style="padding: 32px;">
+                                <div style="
+                                    background: #fffaed;
+                                    border: 2px solid #ffd43b;
+                                    border-radius: 8px;
+                                    padding: 24px;
+                                    margin-bottom: 20px;
+                                    text-align: center;
+                                ">
+                                    <div style="
+                                        width: 56px;
+                                        height: 56px;
+                                        background: #ffd43b;
+                                        border-radius: 50%;
+                                        margin: 0 auto 12px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 28px;
+                                        box-shadow: 0 4px 12px rgba(255, 212, 59, 0.4);
+                                    "><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#000000" viewBox="0 0 256 256"><path d="M232,48V88a8,8,0,0,1-16,0V56H184a8,8,0,0,1,0-16h40A8,8,0,0,1,232,48ZM72,200H40V168a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H72a8,8,0,0,0,0-16Zm152-40a8,8,0,0,0-8,8v32H184a8,8,0,0,0,0,16h40a8,8,0,0,0,8-8V168A8,8,0,0,0,224,160ZM32,96a8,8,0,0,0,8-8V56H72a8,8,0,0,0,0-16H32a8,8,0,0,0-8,8V88A8,8,0,0,0,32,96ZM80,80a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,80,80Zm104,88V88a8,8,0,0,0-16,0v80a8,8,0,0,0,16,0ZM144,80a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,144,80Zm-32,0a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,112,80Z"></path></svg></div>
+                                    <p style="margin: 0; font-size: 14px; color: #856404; font-weight: 500;">
+                                        Look for this button in the bottom-right corner!
+                                    </p>
+                                </div>
+                                <p style="
+                                    font-size: 15px;
+                                    line-height: 1.6;
+                                    color: #495057;
+                                    margin: 0;
+                                ">
+                                    Click the <strong>yellow floating bubble</strong> anytime on ChatGPT to open this search modal. 
+                                    You can also click the extension icon in your browser toolbar.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Screen 3: Key Features -->
+                        <div class="tutorial-screen" data-screen="3" style="display: none;">
+                            <div style="
+                                background: linear-gradient(135deg, #5b8def 0%, #4a7de8 100%);
+                                padding: 40px 32px;
+                                text-align: center;
+                                color: white;
+                            ">
+                                <h2 style="margin: 0 0 12px 0; font-size: 24px; font-weight: 700;">Key Features</h2>
+                                <p style="margin: 0; font-size: 15px; opacity: 0.95;">Everything you need to know</p>
+                            </div>
+                            <div style="padding: 32px;">
+                                <div style="display: flex; flex-direction: column; gap: 16px;">
+                                    <div style="display: flex; gap: 12px; align-items: start;">
+                                        <div style="
+                                            width: 32px;
+                                            height: 32px;
+                                            background: #5b8def;
+                                            border-radius: 50%;
+                                            flex-shrink: 0;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            color: white;
+                                            font-weight: 700;
+                                        ">1</div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 4px 0; color: #495057; font-size: 15px;">Search Tab</h4>
+                                            <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                                                Search single products or compare multiple products side-by-side
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 12px; align-items: start;">
+                                        <div style="
+                                            width: 32px;
+                                            height: 32px;
+                                            background: #5b8def;
+                                            border-radius: 50%;
+                                            flex-shrink: 0;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            color: white;
+                                            font-weight: 700;
+                                        ">2</div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 4px 0; color: #495057; font-size: 15px;">History Tab</h4>
+                                            <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                                                All searches are auto-saved. Filter by projects & tags to organize your work
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 12px; align-items: start;">
+                                        <div style="
+                                            width: 32px;
+                                            height: 32px;
+                                            background: #5b8def;
+                                            border-radius: 50%;
+                                            flex-shrink: 0;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            color: white;
+                                            font-weight: 700;
+                                        ">3</div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 4px 0; color: #495057; font-size: 15px;">Analysis Tab</h4>
+                                            <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                                                See which sources provide reviews and citations across your searches
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 12px; align-items: start;">
+                                        <div style="
+                                            width: 32px;
+                                            height: 32px;
+                                            background: #5b8def;
+                                            border-radius: 50%;
+                                            flex-shrink: 0;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            color: white;
+                                            font-weight: 700;
+                                        ">4</div>
+                                        <div style="flex: 1;">
+                                            <h4 style="margin: 0 0 4px 0; color: #495057; font-size: 15px;">Left Sidebar</h4>
+                                            <p style="margin: 0; color: #6c757d; font-size: 14px; line-height: 1.4;">
+                                                Create projects & tags to organize searches. Use filters to narrow down results
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Screen 4: Ready to Start -->
+                        <div class="tutorial-screen" data-screen="4" style="display: none;">
+                            <div style="
+                                background: linear-gradient(135deg, #28a745 0%, #20914a 100%);
+                                padding: 48px 32px;
+                                text-align: center;
+                                color: white;
+                            ">
+                                <div style="
+                                    width: 80px;
+                                    height: 80px;
+                                    margin: 0 auto 20px;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 40px;
+                                "><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M191.11,112.89c24-24,25.5-52.55,24.75-65.28a8,8,0,0,0-7.47-7.47c-12.73-.75-41.26.73-65.28,24.75L80,128l48,48Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M136,72H74.35a8,8,0,0,0-5.65,2.34L34.35,108.69a8,8,0,0,0,4.53,13.57L80,128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,120v61.65a8,8,0,0,1-2.34,5.65l-34.35,34.35a8,8,0,0,1-13.57-4.53L128,176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M94.56,187.82C90.69,196.31,77.65,216,40,216c0-37.65,19.69-50.69,28.18-54.56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></div>
+                                <h2 style="margin: 0 0 12px 0; font-size: 28px; font-weight: 700;">You're All Set!</h2>
+                                <p style="margin: 0; font-size: 16px; opacity: 0.95; line-height: 1.5;">
+                                    Start searching for products right away
+                                </p>
+                            </div>
+                            <div style="padding: 32px;">
+                                <div style="
+                                    background: #f8f9fa;
+                                    border-radius: 8px;
+                                    padding: 20px;
+                                    margin-bottom: 20px;
+                                ">
+                                    <h4 style="margin: 0 0 12px 0; color: #495057; font-size: 16px;">Try searching for:</h4>
+                                    <ul style="margin: 0; padding-left: 20px; color: #6c757d; font-size: 14px; line-height: 1.8;">
+                                        <li>"iPhone 17 Pro camera quality"</li>
+                                        <li>"best wireless headphones 2025"</li>
+                                        <li>"Pets Deli Hundefutter"</li>
+                                    </ul>
+                                </div>
+                                <p style="
+                                    font-size: 13px;
+                                    color: #6c757d;
+                                    text-align: center;
+                                    margin: 0;
+                                ">
+                                    💡 You can re-watch this tutorial anytime by clicking the <strong>?</strong> icon in the sidebar
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tutorial Navigation -->
+                    <div style="
+                        border-top: 1px solid #e9ecef;
+                        padding: 20px 32px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        background: #f8f9fa;
+                    ">
+                        <button id="tutorial-skip" style="
+                            background: none;
+                            border: none;
+                            color: #6c757d;
+                            font-size: 14px;
+                            cursor: pointer;
+                            padding: 8px 12px;
+                            border-radius: 4px;
+                            transition: all 0.2s;
+                        ">Skip Tutorial</button>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <div class="tutorial-dot" data-dot="1" style="
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                background: #5b8def;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "></div>
+                            <div class="tutorial-dot" data-dot="2" style="
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                background: #dee2e6;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "></div>
+                            <div class="tutorial-dot" data-dot="3" style="
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                background: #dee2e6;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "></div>
+                            <div class="tutorial-dot" data-dot="4" style="
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                background: #dee2e6;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            "></div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button id="tutorial-prev" style="
+                                background: white;
+                                border: 1px solid #dee2e6;
+                                color: #495057;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                padding: 8px 16px;
+                                border-radius: 6px;
+                                transition: all 0.2s;
+                                display: none;
+                            ">Previous</button>
+                            <button id="tutorial-next" style="
+                                background: #5b8def;
+                                border: none;
+                                color: white;
+                                font-size: 14px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                padding: 8px 20px;
+                                border-radius: 6px;
+                                transition: all 0.2s;
+                            ">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
         const ACCEPT_LANGUAGE_FALLBACK = 'en;q=0.8, es-AR;q=0.7, es;q=0.6, it;q=0.4, zh-CN;q=0.3, zh;q=0.2, id;q=0.1, pt-BR;q=0.1, pt;q=0.1, fr;q=0.1, tr;q=0.1, pl;q=0.1, sv;q=0.1, ru;q=0.1, ar;q=0.1, el;q=0.1';
         const MARKET_OPTIONS = [
             { value: 'de-DE', label: 'Deutschland (Deutsch)', country: 'Deutschland', language: 'Deutsch', code: 'DE', acceptLanguagePrefix: 'de-DE, de;q=0.9', oaiLanguage: 'de-DE', icon: 'assets/flags/de.svg' },
@@ -2346,7 +2722,168 @@
             
             // Recalculate counts to ensure consistency
             recalculateAllCounts();
+            
+            // Check and show first-time tutorial
+            checkAndShowTutorial();
         }
+
+        // ===== TUTORIAL FUNCTIONS =====
+        
+        function checkAndShowTutorial() {
+            const tutorialCompleted = localStorage.getItem('chatgpt-product-info-tutorial-completed');
+            if (!tutorialCompleted) {
+                showTutorial();
+            }
+        }
+        
+        function showTutorial() {
+            const modal = document.getElementById('chatgpt-product-search-modal');
+            if (!modal) return;
+            
+            // Check if tutorial is already shown
+            if (document.getElementById('tutorial-overlay')) return;
+            
+            // Inject tutorial HTML into modal
+            const modalContent = modal.querySelector('div[style*="border-radius"]');
+            if (modalContent) {
+                modalContent.style.position = 'relative';
+                modalContent.insertAdjacentHTML('beforeend', tutorialHTML);
+                initializeTutorialControls();
+            }
+        }
+        
+        function initializeTutorialControls() {
+            let currentScreen = 1;
+            const totalScreens = 4;
+            
+            const overlay = document.getElementById('tutorial-overlay');
+            const prevBtn = document.getElementById('tutorial-prev');
+            const nextBtn = document.getElementById('tutorial-next');
+            const skipBtn = document.getElementById('tutorial-skip');
+            const dots = document.querySelectorAll('.tutorial-dot');
+            
+            if (!overlay || !prevBtn || !nextBtn || !skipBtn) return;
+            
+            function updateScreen(screenNum) {
+                // Hide all screens
+                document.querySelectorAll('.tutorial-screen').forEach(screen => {
+                    screen.style.display = 'none';
+                });
+                
+                // Show current screen
+                const currentScreenEl = document.querySelector(`.tutorial-screen[data-screen="${screenNum}"]`);
+                if (currentScreenEl) {
+                    currentScreenEl.style.display = 'block';
+                }
+                
+                // Update dots
+                dots.forEach(dot => {
+                    const dotNum = parseInt(dot.dataset.dot);
+                    if (dotNum === screenNum) {
+                        dot.style.background = '#5b8def';
+                        dot.style.transform = 'scale(1.2)';
+                    } else {
+                        dot.style.background = '#dee2e6';
+                        dot.style.transform = 'scale(1)';
+                    }
+                });
+                
+                // Update buttons
+                if (screenNum === 1) {
+                    prevBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = 'block';
+                }
+                
+                if (screenNum === totalScreens) {
+                    nextBtn.textContent = 'Get Started';
+                    nextBtn.style.background = '#28a745';
+                } else {
+                    nextBtn.textContent = 'Next';
+                    nextBtn.style.background = '#5b8def';
+                }
+                
+                currentScreen = screenNum;
+            }
+            
+            // Next button
+            nextBtn.addEventListener('click', () => {
+                if (currentScreen < totalScreens) {
+                    updateScreen(currentScreen + 1);
+                } else {
+                    closeTutorial();
+                }
+            });
+            
+            // Previous button
+            prevBtn.addEventListener('click', () => {
+                if (currentScreen > 1) {
+                    updateScreen(currentScreen - 1);
+                }
+            });
+            
+            // Skip button
+            skipBtn.addEventListener('click', () => {
+                closeTutorial();
+            });
+            
+            // Dot navigation
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const targetScreen = parseInt(dot.dataset.dot);
+                    updateScreen(targetScreen);
+                });
+            });
+            
+            // Add hover effects to buttons
+            skipBtn.addEventListener('mouseenter', () => {
+                skipBtn.style.background = '#e9ecef';
+            });
+            skipBtn.addEventListener('mouseleave', () => {
+                skipBtn.style.background = 'none';
+            });
+            
+            prevBtn.addEventListener('mouseenter', () => {
+                prevBtn.style.background = '#f8f9fa';
+            });
+            prevBtn.addEventListener('mouseleave', () => {
+                prevBtn.style.background = 'white';
+            });
+            
+            nextBtn.addEventListener('mouseenter', () => {
+                if (currentScreen === totalScreens) {
+                    nextBtn.style.background = '#218838';
+                } else {
+                    nextBtn.style.background = '#4a7de8';
+                }
+            });
+            nextBtn.addEventListener('mouseleave', () => {
+                if (currentScreen === totalScreens) {
+                    nextBtn.style.background = '#28a745';
+                } else {
+                    nextBtn.style.background = '#5b8def';
+                }
+            });
+            
+            // Initialize first screen
+            updateScreen(1);
+        }
+        
+        function closeTutorial() {
+            const overlay = document.getElementById('tutorial-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+            // Mark tutorial as completed
+            localStorage.setItem('chatgpt-product-info-tutorial-completed', 'true');
+        }
+        
+        function resetTutorial() {
+            localStorage.removeItem('chatgpt-product-info-tutorial-completed');
+            showTutorial();
+        }
+        
+        // ===== END TUTORIAL FUNCTIONS =====
 
         // Helper to read active tab id: 'search' | 'history' | 'reports'
         function getActiveTab() {
@@ -4279,11 +4816,16 @@
             
             // Add event listeners for sidebar buttons
             const settingsBtn = document.getElementById('settings-btn');
+            const helpBtn = document.getElementById('help-btn');
             const addProjectBtn = document.getElementById('add-project-btn');
             const addTagBtn = document.getElementById('add-tag-btn');
             
             if (settingsBtn) {
                 settingsBtn.addEventListener('click', openSettingsModal);
+            }
+            
+            if (helpBtn) {
+                helpBtn.addEventListener('click', resetTutorial);
             }
             
             if (addProjectBtn) {
