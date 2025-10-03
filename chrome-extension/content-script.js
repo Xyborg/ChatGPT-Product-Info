@@ -21,14 +21,14 @@
         const existingModal = document.getElementById('chatgpt-product-search-modal');
         const existingButton = document.getElementById('openProductSearchModalBtn');
         if (existingModal) {
-            existingModal.remove();
+            existingModal.remove(); 
         }
         if (existingButton) {
             existingButton.remove();
         }
 
         // Migrate existing search history data to new format (Phase 1)
-        migrateSearchHistoryData();
+        migrateSearchHistoryData(); 
 
         // Resolve extension assets
         const settingsIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function')
@@ -8998,6 +8998,219 @@
             return { background: '#fff3cd', color: '#856404' };
         }
 
+        function copyMultiResultsToClipboard(results) {
+            const successfulResults = results.filter(r => r.success);
+            
+            // Format as Markdown
+            let markdown = `# Multi-Product Search Results\n\n`;
+            markdown += `**${successfulResults.length}** products found\n\n`;
+            markdown += `---\n\n`;
+            
+            // Add each product's results
+            successfulResults.forEach((result, index) => {
+                const data = result.data;
+                const query = result.query;
+                
+                markdown += `# ${index + 1}. ${query}\n\n`;
+                
+                // Stats
+                markdown += `**${data.summary.total_reviews}** reviews • **${data.summary.total_products}** products • **${data.summary.total_product_links}** citation links • **${data.summary.review_themes.length}** themes\n\n`;
+                
+                // Product Overview
+                if (data.rationale && data.rationale.trim()) {
+                    markdown += `## Product Overview\n\n${data.rationale}\n\n`;
+                }
+                
+                // Review Summary
+                if (data.reviewSummary && data.reviewSummary.trim()) {
+                    markdown += `## Review Summary\n\n${data.reviewSummary}\n\n`;
+                }
+                
+                // Citation Links
+                if (data.productLinks && data.productLinks.length > 0) {
+                    markdown += `## Citation Links\n\n`;
+                    data.productLinks.forEach(link => {
+                        markdown += `### ${link.title}\n`;
+                        markdown += `🔗 ${link.url}\n`;
+                        if (link.snippet) {
+                            markdown += `${link.snippet}\n`;
+                        }
+                        markdown += `\n`;
+                    });
+                }
+                
+                // Reviews with sentiment analysis
+                if (data.reviews.length > 0) {
+                    markdown += `## Reviews\n\n`;
+                    
+                    // Calculate sentiment distribution
+                    const sentimentCounts = data.reviews.reduce((acc, review) => {
+                        acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    const totalReviews = data.reviews.length;
+                    const positivePercent = Math.round(((sentimentCounts.positive || 0) / totalReviews) * 100);
+                    const neutralPercent = Math.round(((sentimentCounts.neutral || 0) / totalReviews) * 100);
+                    const negativePercent = Math.round(((sentimentCounts.negative || 0) / totalReviews) * 100);
+                    
+                    markdown += `**Sentiment Distribution:** `;
+                    markdown += `✅ ${positivePercent}% Positive`;
+                    if (neutralPercent > 0) markdown += ` • ⚠️ ${neutralPercent}% Neutral`;
+                    if (negativePercent > 0) markdown += ` • ❌ ${negativePercent}% Negative`;
+                    markdown += `\n\n`;
+                    
+                    data.reviews.forEach(review => {
+                        const sentimentEmoji = review.sentiment === 'positive' ? '✅' : 
+                                             review.sentiment === 'negative' ? '❌' : '⚠️';
+                        markdown += `### ${sentimentEmoji} ${review.theme}\n`;
+                        markdown += `**Source:** ${review.source}`;
+                        if (review.url) {
+                            markdown += ` (${review.url})`;
+                        }
+                        markdown += `\n\n${review.summary}\n\n`;
+                    });
+                }
+                
+                // Themes
+                if (data.summary.review_themes.length > 0) {
+                    markdown += `## Key Themes\n\n`;
+                    markdown += data.summary.review_themes.map(theme => `- ${theme}`).join('\n');
+                    markdown += `\n\n`;
+                }
+                
+                // Separator between products
+                if (index < successfulResults.length - 1) {
+                    markdown += `---\n\n`;
+                }
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(markdown).then(() => {
+                const copyBtn = document.getElementById('copy-multi-results-btn');
+                if (copyBtn) {
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
+                            <path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/>
+                        </svg>
+                        Copied!
+                    `;
+                    copyBtn.style.background = '#d4edda';
+                    copyBtn.style.color = '#155724';
+                    copyBtn.style.borderColor = '#c3e6cb';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = '#fff';
+                        copyBtn.style.color = '#495057';
+                        copyBtn.style.borderColor = '#dee2e6';
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        function copyResultsToClipboard(data, query) {
+            // Format data as Markdown
+            let markdown = `# Search Results: ${query}\n\n`;
+            
+            // Summary stats
+            markdown += `**${data.summary.total_reviews}** reviews • **${data.summary.total_products}** products • **${data.summary.total_product_links}** citation links • **${data.summary.review_themes.length}** themes\n\n`;
+            
+            // Product Overview
+            if (data.rationale && data.rationale.trim()) {
+                markdown += `## Product Overview\n\n${data.rationale}\n\n`;
+            }
+            
+            // Review Summary
+            if (data.reviewSummary && data.reviewSummary.trim()) {
+                markdown += `## Review Summary\n\n${data.reviewSummary}\n\n`;
+            }
+            
+            // Citation Links
+            if (data.productLinks && data.productLinks.length > 0) {
+                markdown += `## Citation Links\n\n`;
+                data.productLinks.forEach(link => {
+                    markdown += `### ${link.title}\n`;
+                    markdown += `🔗 ${link.url}\n`;
+                    if (link.snippet) {
+                        markdown += `${link.snippet}\n`;
+                    }
+                    markdown += `\n`;
+                });
+            }
+            
+            // Reviews with sentiment analysis
+            if (data.reviews.length > 0) {
+                markdown += `## Reviews\n\n`;
+                
+                // Calculate sentiment distribution
+                const sentimentCounts = data.reviews.reduce((acc, review) => {
+                    acc[review.sentiment] = (acc[review.sentiment] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                const totalReviews = data.reviews.length;
+                const positivePercent = Math.round(((sentimentCounts.positive || 0) / totalReviews) * 100);
+                const neutralPercent = Math.round(((sentimentCounts.neutral || 0) / totalReviews) * 100);
+                const negativePercent = Math.round(((sentimentCounts.negative || 0) / totalReviews) * 100);
+                
+                markdown += `**Sentiment Distribution:** `;
+                markdown += `✅ ${positivePercent}% Positive`;
+                if (neutralPercent > 0) markdown += ` • ⚠️ ${neutralPercent}% Neutral`;
+                if (negativePercent > 0) markdown += ` • ❌ ${negativePercent}% Negative`;
+                markdown += `\n\n`;
+                
+                data.reviews.forEach(review => {
+                    const sentimentEmoji = review.sentiment === 'positive' ? '✅' : 
+                                         review.sentiment === 'negative' ? '❌' : '⚠️';
+                    markdown += `### ${sentimentEmoji} ${review.theme}\n`;
+                    markdown += `**Source:** ${review.source}`;
+                    if (review.url) {
+                        markdown += ` (${review.url})`;
+                    }
+                    markdown += `\n\n${review.summary}\n\n`;
+                });
+            }
+            
+            // Themes
+            if (data.summary.review_themes.length > 0) {
+                markdown += `## Key Themes\n\n`;
+                markdown += data.summary.review_themes.map(theme => `- ${theme}`).join('\n');
+                markdown += `\n`;
+            }
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(markdown).then(() => {
+                const copyBtn = document.getElementById('copy-results-btn');
+                if (copyBtn) {
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
+                            <path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/>
+                        </svg>
+                        Copied!
+                    `;
+                    copyBtn.style.background = '#d4edda';
+                    copyBtn.style.color = '#155724';
+                    copyBtn.style.borderColor = '#c3e6cb';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = '#fff';
+                        copyBtn.style.color = '#495057';
+                        copyBtn.style.borderColor = '#dee2e6';
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
         function displayResults(data, query, targetContainer, options = {}) {
             const defaultContainer = document.getElementById('results-container');
             let resultsContainer = null;
@@ -9063,6 +9276,27 @@
                                 ${data.summary.review_themes.length} themes
                             </div>
                         </div>
+                        <button id="copy-results-btn" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 14px;
+                            background: #fff;
+                            border: 1px solid #dee2e6;
+                            border-radius: 6px;
+                            color: #495057;
+                            font-size: 13px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
+                                <rect width="256" height="256" fill="none"/>
+                                <polyline points="168 168 216 168 216 40 88 40 88 88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+                                <rect x="40" y="88" width="128" height="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+                            </svg>
+                            Copy Results
+                        </button>
                     </div>
                 `;
             }
@@ -9322,6 +9556,23 @@
             }
             
             resultsContainer.innerHTML = html;
+            
+            // Attach copy button event listener
+            if (!suppressHeader) {
+                const copyBtn = document.getElementById('copy-results-btn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', () => copyResultsToClipboard(data, query));
+                    // Add hover effects
+                    copyBtn.addEventListener('mouseenter', () => {
+                        copyBtn.style.background = '#f8f9fa';
+                        copyBtn.style.borderColor = '#5b8def';
+                    });
+                    copyBtn.addEventListener('mouseleave', () => {
+                        copyBtn.style.background = '#fff';
+                        copyBtn.style.borderColor = '#dee2e6';
+                    });
+                }
+            }
         }
 
         function displayMultiResults(results, targetContainer, options = {}) {
@@ -9354,17 +9605,47 @@
                     padding: 6px 12px;
                     margin-bottom: 16px;
                     border-bottom: 1px solid #e9ecef;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 12px;
+                    flex-wrap: wrap;
                 ">
-                    <div style="
-                        font-size: 16px;
-                        font-weight: 600;
-                        color: #495057;
-                        margin-bottom: 8px;
-                    ">Multi-Product Search Results</div>
-                    <div style="display: flex; gap: 16px; font-size: 14px; color: #6c757d;">
-                        <span>${successfulResults.length}/${results.length} products found</span>
-                        ${failedResults.length > 0 ? `<span style="color: #dc3545;">${failedResults.length} failed</span>` : ''}
+                    <div>
+                        <div style="
+                            font-size: 16px;
+                            font-weight: 600;
+                            color: #495057;
+                            margin-bottom: 8px;
+                        ">Multi-Product Search Results</div>
+                        <div style="display: flex; gap: 16px; font-size: 14px; color: #6c757d;">
+                            <span>${successfulResults.length}/${results.length} products found</span>
+                            ${failedResults.length > 0 ? `<span style="color: #dc3545;">${failedResults.length} failed</span>` : ''}
+                        </div>
                     </div>
+                    ${successfulResults.length > 0 ? `
+                        <button id="copy-multi-results-btn" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                            padding: 8px 14px;
+                            background: #fff;
+                            border: 1px solid #dee2e6;
+                            border-radius: 6px;
+                            color: #495057;
+                            font-size: 13px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
+                                <rect width="256" height="256" fill="none"/>
+                                <polyline points="168 168 216 168 216 40 88 40 88 88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+                                <rect x="40" y="88" width="128" height="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/>
+                            </svg>
+                            Copy All Results
+                        </button>
+                    ` : ''}
                 </div>
             `;
 
@@ -9648,6 +9929,23 @@
 
             // Store results for detailed view
             window.multiSearchResults = successfulResults;
+
+            // Attach copy button event listener for multi-results
+            if (successfulResults.length > 0) {
+                const copyMultiBtn = document.getElementById('copy-multi-results-btn');
+                if (copyMultiBtn) {
+                    copyMultiBtn.addEventListener('click', () => copyMultiResultsToClipboard(results));
+                    // Add hover effects
+                    copyMultiBtn.addEventListener('mouseenter', () => {
+                        copyMultiBtn.style.background = '#f8f9fa';
+                        copyMultiBtn.style.borderColor = '#5b8def';
+                    });
+                    copyMultiBtn.addEventListener('mouseleave', () => {
+                        copyMultiBtn.style.background = '#fff';
+                        copyMultiBtn.style.borderColor = '#dee2e6';
+                    });
+                }
+            }
 
             // Add event listeners for product details links
             const productNameLinks = document.querySelectorAll('.product-name-link');
