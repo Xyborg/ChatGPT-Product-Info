@@ -9276,7 +9276,7 @@
                                 ${data.summary.review_themes.length} themes
                             </div>
                         </div>
-                        <button id="copy-results-btn" style="
+                        <button id="copy-results-btn" title="Copy results to clipboard in Markdown format" style="
                             display: flex;
                             align-items: center;
                             gap: 6px;
@@ -9624,7 +9624,7 @@
                         </div>
                     </div>
                     ${successfulResults.length > 0 ? `
-                        <button id="copy-multi-results-btn" style="
+                        <button id="copy-multi-results-btn" title="Copy all product results to clipboard in Markdown format" style="
                             display: flex;
                             align-items: center;
                             gap: 6px;
