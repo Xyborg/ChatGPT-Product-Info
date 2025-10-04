@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT E-commerce Product Research",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "description": "Research e-commerce product reviews, comparisons, and detailed information directly within ChatGPT",
   "permissions": [
     "activeTab"

@@ -6,11 +6,15 @@
     <title>ChatGPT E-commerce Product Research</title>
     <style>
         body {
-            width: 320px;
-            padding: 20px;
+            width: 340px;
+            padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8f9fa;
+            background: linear-gradient(140deg, #f5f8ff 0%, #ffffff 60%);
             margin: 0;
+        }
+        
+        .container {
+            padding: 20px;
         }
         
         .header {
@@ -25,7 +29,7 @@
             gap: 8px;
             font-size: 18px;
             font-weight: 600;
-            color: #495057;
+            color: #27325f;
             margin: 0 0 8px 0;
         }
 
@@ -35,30 +39,33 @@
         }
         
         .header p {
-            font-size: 14px;
-            color: #6c757d;
+            font-size: 13px;
+            color: #5e6f9b;
             margin: 0;
             line-height: 1.4;
         }
         
         .status {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(2px);
+            border-radius: 12px;
+            padding: 14px;
             margin-bottom: 16px;
-            border: 1px solid #e9ecef;
+            border: 1px solid rgba(74, 105, 183, 0.22);
+            box-shadow: 0 2px 8px rgba(32, 42, 92, 0.08);
         }
 
         #status-text {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 13px;
         }
 
         .status-icon {
             width: 18px;
             height: 18px;
-            display: inline-block;
+            display: inline-flex;
             background-color: currentColor;
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
@@ -66,23 +73,24 @@
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
+            flex-shrink: 0;
         }
 
         .status-good {
-            background: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
+            background: rgba(40, 167, 69, 0.1);
+            border-color: rgba(40, 167, 69, 0.3);
+            color: #1e7e34;
         }
 
         .status-warning {
-            background: #fff3cd;
-            border-color: #ffeeba;
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.3);
             color: #856404;
         }
 
         .status-bad {
-            background: #f8d7da;
-            border-color: #f5c6cb;
+            background: rgba(220, 53, 69, 0.1);
+            border-color: rgba(220, 53, 69, 0.3);
             color: #721c24;
         }
 
@@ -103,51 +111,61 @@
         
         .action-button {
             width: 100%;
-            background: #007bff;
+            background: #5b8def;
             color: white;
             border: none;
             padding: 12px 16px;
-            border-radius: 6px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
             margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(91, 141, 239, 0.25);
         }
         
         .action-button:hover {
-            background: #0056b3;
+            background: #4a7de8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(91, 141, 239, 0.35);
         }
         
         .action-button:disabled {
-            background: #6c757d;
+            background: #9ca3af;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
         }
         
         .secondary-button {
-            background: #6c757d;
-            color: white;
+            background: rgba(91, 141, 239, 0.12);
+            color: #2f4db5;
+            box-shadow: 0 2px 8px rgba(91, 141, 239, 0.12);
         }
         
         .secondary-button:hover {
-            background: #545b62;
+            background: rgba(91, 141, 239, 0.18);
+            color: #27325f;
         }
         
         .instructions {
-            background: white;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(2px);
+            border-radius: 12px;
             padding: 16px;
-            border: 1px solid #e9ecef;
+            border: 1px solid rgba(74, 105, 183, 0.22);
             font-size: 13px;
-            line-height: 1.4;
-            color: #495057;
+            line-height: 1.5;
+            color: #35426b;
+            box-shadow: 0 2px 8px rgba(32, 42, 92, 0.08);
         }
         
         .instructions h3 {
             margin: 0 0 12px 0;
             font-size: 14px;
             font-weight: 600;
-            color: #495057;
+            color: #27325f;
         }
         
         .instructions ul {
@@ -156,57 +174,66 @@
         }
         
         .instructions li {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            color: #4b5976;
         }
         
         .footer {
             text-align: center;
             margin-top: 16px;
             padding-top: 16px;
-            border-top: 1px solid #e9ecef;
+            border-top: 1px solid rgba(74, 105, 183, 0.18);
             font-size: 12px;
-            color: #6c757d;
+            color: #5e6f9b;
         }
         
         .footer a {
-            color: #007bff;
+            color: #5b8def;
             text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .footer a:hover {
+            color: #4a7de8;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>
-            <img src="assets/icons-ui/search.svg" alt="Search icon" class="header-icon">
-            E-commerce Product Research
-        </h1>
-        <p>Search for product reviews and information directly in ChatGPT</p>
-    </div>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <img src="assets/icons-ui/search.svg" alt="Search icon" class="header-icon">
+                E-commerce Product Research
+            </h1>
+            <p>Search for product reviews and information directly in ChatGPT</p>
+        </div>
 
-    <div id="status" class="status">
-        <div id="status-text">Checking ChatGPT status...</div>
-    </div>
+        <div id="status" class="status">
+            <div id="status-text">Checking ChatGPT status...</div>
+        </div>
 
-    <button id="open-search" class="action-button" disabled>
-        Open E-commerce Product Research
-    </button>
+        <button id="open-search" class="action-button" disabled>
+            Open E-commerce Product Research
+        </button>
 
-    <button id="go-to-chatgpt" class="action-button secondary-button">
-        Go to ChatGPT
-    </button>
+        <button id="go-to-chatgpt" class="action-button secondary-button">
+            Go to ChatGPT
+        </button>
 
-    <div class="instructions">
-        <h3>How to use:</h3>
-        <ul>
-            <li>Make sure you're logged in to ChatGPT</li>
-            <li>Click "Open E-commerce Product Research" to show the search interface</li>
-            <li>Search for any product to get reviews and information</li>
-            <li>Use multi-product search to compare multiple items</li>
-        </ul>
-    </div>
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ul>
+                <li>Make sure you're logged in to ChatGPT</li>
+                <li>Click "Open E-commerce Product Research" to show the search interface</li>
+                <li>Search for any product to get reviews and information</li>
+                <li>Use multi-product search to compare multiple items</li>
+            </ul>
+        </div>
 
-    <div class="footer">
-        Created by <a href="https://www.martinaberastegue.com/" target="_blank" rel="noopener noreferrer">Martin Aberastegue</a>
+        <div class="footer">
+            Created by <a href="https://www.martinaberastegue.com/?utm_source=chrome&utm_medium=extension&utm_campaign=ChatGPT_Ecom_Product_Research&utm_content=popup" target="_blank" rel="noopener noreferrer">Martin Aberastegue</a>
+        </div>
     </div>
 
     <script src="popup.js"></script>
