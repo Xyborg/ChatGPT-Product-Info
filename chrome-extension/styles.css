@@ -1,17 +1,20 @@
-/* ChatGPT Product Info Research Extension Styles */
+/* ChatGPT GEO/AEO Product Research Extension Styles */
 
-#openProductSearchModalBtn {
+#openGeoResearchBtn {
     position: fixed;
-    right: 30px;
-    bottom: 100px;
+    right: 0;
+    bottom: 88px;
     transform: none;
-    background-color: #fef3c7;
-    color: #b45309;
-    border: none;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    font-size: 0;
+    background-color: #17191f;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px 0 0 10px;
+    min-width: 154px;
+    height: 44px;
+    padding: 0 14px 0 12px;
+    gap: 8px;
+    font: 600 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.02em;
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     cursor: pointer;
     z-index: 9990;
@@ -21,19 +24,26 @@
     transition: all 0.3s ease;
 }
 
-#openProductSearchModalBtn img {
-    width: 32px;
-    height: 32px;
+#openGeoResearchBtn img {
+    width: 22px;
+    height: 22px;
     pointer-events: none;
+    filter: brightness(0) invert(1);
+    opacity: 0.92;
 }
 
-#openProductSearchModalBtn.icon-fallback {
-    font-size: 24px;
+#openGeoResearchBtn[data-ready="false"] {
+    opacity: 0.62;
 }
 
-#openProductSearchModalBtn:hover {
-    background-color: #fde68a;
+#openGeoResearchBtn:hover {
+    transform: translateX(-2px);
+    background-color: #242831;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+#openGeoResearchBtn .geo-research-label {
+    pointer-events: none;
 }
 
 /* Spinning animation for loading states */

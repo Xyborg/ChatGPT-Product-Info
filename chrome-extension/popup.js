@@ -1,4 +1,4 @@
-// ChatGPT Product Info Research Extension - Popup Script
+// ChatGPT GEO/AEO Product Research Extension - Popup Script
 
 document.addEventListener('DOMContentLoaded', async () => {
     const statusEl = document.getElementById('status');
@@ -36,9 +36,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Check if content script is ready by sending a message
             try {
-                await chrome.tabs.sendMessage(activeTab.id, { action: 'ping' });
+                const response = await chrome.tabs.sendMessage(activeTab.id, { action: 'ping' });
+                const pageStatus = response && response.pageStatus;
+                if (pageStatus && pageStatus.ready === false) {
+                    statusEl.className = 'status status-warning';
+                    setStatus('warning', pageStatus.message || 'Open a ChatGPT conversation to scan');
+                    openSearchBtn.disabled = true;
+                    return false;
+                }
                 statusEl.className = 'status status-good';
-                setStatus('success', 'Ready to search products');
+                setStatus('success', 'Ready to scan this conversation');
                 openSearchBtn.disabled = false;
                 return true;
             } catch (error) {
@@ -55,16 +62,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Open the product search modal
+    // Open the GEO/AEO Product Research modal
     openSearchBtn.addEventListener('click', async () => {
         try {
             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            await chrome.tabs.sendMessage(activeTab.id, { action: 'openSearch' });
+            await chrome.tabs.sendMessage(activeTab.id, { action: 'openResearch' });
             window.close(); // Close the popup
         } catch (error) {
-            console.error('Failed to open search:', error);
+            console.error('Failed to open GEO/AEO Product Research:', error);
             statusEl.className = 'status status-bad';
-            setStatus('error', 'Failed to open search. Please refresh the page.');
+            setStatus('error', 'Failed to open GEO/AEO Product Research. Please refresh the page.');
         }
     });
 

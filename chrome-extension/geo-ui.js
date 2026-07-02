@@ -1,0 +1,1258 @@
+// ChatGPT GEO/AEO Product Research - Shadow DOM UI.
+(function () {
+    'use strict';
+
+    const CORE = () => window.CgptGeoResearchCore;
+    const TABS = [
+        ['overview', 'Overview'],
+        ['flow', 'Request flow'],
+        ['queries', 'Fan-out queries'],
+        ['sources', 'Sources'],
+        ['citations', 'Citations'],
+        ['products', 'Products'],
+        ['browse', 'Browsing'],
+        ['reasoning', 'Reasoning'],
+        ['saved', 'Saved'],
+    ];
+
+    const state = {
+        host: null,
+        shadow: null,
+        overlay: null,
+        body: null,
+        status: null,
+        activeTab: 'overview',
+        intel: null,
+        raw: null,
+        token: null,
+        loadingOffers: false,
+        offersStarted: false,
+        offerProgress: '',
+        lastConversationId: '',
+    };
+
+    const CSS = `
+        :host{--bg:#f6f7f9;--paper:#fff;--ink:#17191f;--mut:#69717d;--line:#e4e7ec;--accent:#2563eb;--green:#0f9f6e;--red:#b42318;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif}
+        *{box-sizing:border-box}
+        button,input,textarea{font:inherit}
+        .overlay{position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(17,24,39,.48);pointer-events:auto}
+        .overlay.open{display:flex}
+        .modal{width:min(1560px,96vw);height:94vh;background:var(--bg);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden;color:var(--ink);font-family:var(--sans)}
+        .head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;background:var(--paper);border-bottom:1px solid var(--line)}
+        .brand{display:flex;align-items:center;gap:10px;min-width:0}.brandicon{width:21px;height:21px;flex:none;filter:brightness(0);opacity:.88}.brandcopy{min-width:0}.title{font-weight:650;letter-spacing:.01em;white-space:nowrap}.sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--mut);min-width:0;max-width:60vw}.metaitem{display:inline-flex;align-items:center;gap:4px;min-width:0}.metalabel{color:#98a2b3}.metavalue{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28vw}.metasep{color:#c0c6cf}
+        .acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.status{font-family:var(--mono);font-size:11px;color:var(--mut);min-height:18px}
+        .btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:7px 10px;cursor:pointer;font-family:var(--mono);font-size:12px}.btn:hover{background:#eef1f5}.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.btn.danger{color:var(--red)}.btn:disabled{opacity:.55;cursor:not-allowed}.x{width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center}.x svg{width:18px;height:18px}
+        .body{flex:1;overflow:auto;padding:16px 20px 20px}.foot{height:30px;flex:0 0 30px;border-top:1px solid var(--line);background:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--mut)}.foot a{color:var(--ink);text-decoration:none;font-weight:600}.foot a:hover{text-decoration:underline}.loading,.empty{padding:38px;text-align:center;color:var(--mut);font-family:var(--mono);font-size:13px}.spinner{width:28px;height:28px;border:3px solid #d8dce2;border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}
+        .meta{margin-bottom:14px}.meta h2{font-size:18px;margin:0 0 4px}.meta p{margin:0;color:var(--mut);font-family:var(--mono);font-size:12px;word-break:break-word}
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:12px 0 16px}.stat{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px}.num{font-family:var(--mono);font-size:24px;font-weight:700}.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin-top:3px}
+        .panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}.panelh{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.eyebrow{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}.scanwrap{display:block}.scanhead{margin:0 0 10px}.scantitle{font-size:18px;line-height:1.2;margin:3px 0 0;font-weight:700}
+        .tabs{display:flex;gap:3px;border-bottom:1px solid var(--line);margin:0 0 14px;padding:0 2px;overflow:auto}.tab{border:0;background:transparent;color:var(--mut);padding:11px 10px;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--mono);font-size:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}.tab.active{color:var(--ink);border-bottom-color:var(--ink)}.tabicon{width:15px;height:15px;flex:none}.tabcount{color:inherit;opacity:.82}
+        .filter{width:100%;border:1px solid var(--line);border-radius:7px;padding:9px 10px;margin-bottom:12px;font-family:var(--mono);font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.bars{display:grid;gap:8px}.bar{display:grid;grid-template-columns:minmax(110px,180px) 1fr 42px;gap:9px;align-items:center}.barlab{font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.track{height:16px;background:#eef1f5;border-radius:5px;overflow:hidden}.fill{height:100%;background:var(--accent)}.val{text-align:right;color:var(--mut);font-family:var(--mono);font-size:12px}
+        .tablewrap{max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}th{position:sticky;top:0;background:var(--paper);text-align:left;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line)}td{padding:8px 10px;border-bottom:1px solid #f0f2f4;vertical-align:top}tr:hover td{background:#fafbfc}.mut{color:var(--mut)}.url{color:var(--accent);text-decoration:none;max-width:360px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.url:hover{text-decoration:underline}.datecell{display:inline-block;min-width:86px;white-space:nowrap;font-variant-numeric:tabular-nums}
+        .querylist{border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:260px;background:#fff}.queryrow{display:grid;grid-template-columns:46px minmax(150px,210px) minmax(0,1fr);gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid #f0f2f4}.queryrow:last-child{border-bottom:0}.queryrow:hover{background:#fafbfc}.qnum{font-family:var(--mono);font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums}.qvia{font-family:var(--mono);font-size:11px;color:#475467;background:#f2f4f7;border:1px solid #e4e7ec;border-radius:999px;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qvia.product{background:#f5f3ff;border-color:#ddd6fe;color:#6741d9}.qtext{font-size:13px;line-height:1.35;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .savedlist{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.savedhead,.savedrow{display:grid;grid-template-columns:minmax(220px,1fr) 170px 240px auto;gap:12px;align-items:center}.savedhead{padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);background:#fcfcfd}.savedrow{padding:9px 12px;border-bottom:1px solid #f0f2f4}.savedrow:last-child{border-bottom:0}.savedrow:hover{background:#fafbfc}.savedtitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedmeta{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap}.savedstats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:#475467}.savedstats b{color:var(--ink);font-weight:650}.savedacts{display:flex;gap:6px;justify-content:flex-end}.savedacts .btn{padding:5px 8px}
+        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}.pgrid::-webkit-scrollbar{height:8px}.pgrid::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}.pgrid .pcard{flex:0 0 238px;width:238px;scroll-snap-align:start}.pcard{border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:7px}.thumblink{display:block;text-decoration:none}.thumb{height:130px;width:100%;object-fit:contain;border:0;border-radius:4px;background:transparent}.ptitle{font-weight:650;line-height:1.3}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:700}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:#6b7280}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{display:inline-flex;align-self:flex-start;border-radius:999px;background:#ecfdf3;color:#067647;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#4b5563;line-height:1.4}.sourcelink{display:inline-block;color:#475467;text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#1d4ed8}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #eef1f5;padding-top:6px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafbfc}.offer.best{color:#067647;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:#0f9f6e;margin-right:4px}.small{font-family:var(--mono);font-size:11px;color:var(--mut)}.loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px}.dotspin{width:12px;height:12px;border:2px solid #d8dce2;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+        .flowtools,.flowacts{display:flex;gap:8px;flex-wrap:wrap}.flowbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.flowlegend{display:flex;flex-wrap:wrap;gap:7px 14px}.lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--mut)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.exportmenu{position:relative}.exportmenu summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.exportmenu summary::-webkit-details-marker{display:none}.chev{width:13px;height:13px;transition:transform .16s ease}.exportmenu[open] .chev{transform:rotate(180deg)}.exportitems{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:170px;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 12px 28px rgba(17,24,39,.16);padding:5px}.exportitem{display:block;width:100%;border:0;background:transparent;color:var(--ink);text-align:left;border-radius:6px;padding:7px 9px;cursor:pointer;font-family:var(--mono);font-size:12px}.exportitem:hover{background:#f2f4f7}.flowbox,.flowwrap{overflow-y:auto;overflow-x:hidden;border:1px solid var(--line);border-radius:8px;background:#fcfcfd;padding:6px}.flowbox svg,.flowwrap svg{display:block;width:100%;height:auto}
+        .reason{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}.reason b{font-size:13px}.reason pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:#374151;line-height:1.5;margin:8px 0 0}
+        @media(max-width:760px){.grid2{grid-template-columns:1fr}.modal{width:100vw;height:100vh;border-radius:0}.head{align-items:flex-start}.sub{display:none}.bar{grid-template-columns:110px 1fr 38px}.queryrow{grid-template-columns:36px 1fr}.qtext{grid-column:1 / -1;white-space:normal}.qvia{min-width:0}.savedhead{display:none}.savedrow{grid-template-columns:1fr}.savedacts{justify-content:flex-start}}
+        @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+    `;
+
+    function h(tag, props, ...children) {
+        const el = document.createElement(tag);
+        if (props) {
+            Object.keys(props).forEach((key) => {
+                const value = props[key];
+                if (value == null) return;
+                if (key === 'class') el.className = value;
+                else if (key === 'text') el.textContent = value;
+                else if (key === 'style') Object.assign(el.style, value);
+                else if (key.startsWith('on') && typeof value === 'function') el.addEventListener(key.slice(2).toLowerCase(), value);
+                else el.setAttribute(key, value);
+            });
+        }
+        children.flat(Infinity).forEach((child) => {
+            if (child == null || child === false) return;
+            el.appendChild(child.nodeType ? child : document.createTextNode(String(child)));
+        });
+        return el;
+    }
+
+    function extensionUrl(path) {
+        if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function') {
+            return chrome.runtime.getURL(path);
+        }
+        return path;
+    }
+
+    function setStatus(text, isError) {
+        if (!state.status) return;
+        state.status.textContent = text || '';
+        state.status.style.color = isError ? 'var(--red)' : 'var(--mut)';
+    }
+
+    function ensureHost() {
+        if (state.host) return;
+        document.getElementById('cgpt-geo-research-host')?.remove();
+        state.host = h('div', { id: 'cgpt-geo-research-host' });
+        state.host.style.position = 'fixed';
+        state.host.style.inset = '0';
+        state.host.style.zIndex = '2147483647';
+        state.host.style.pointerEvents = 'none';
+        state.shadow = state.host.attachShadow({ mode: 'open' });
+        const style = h('style', { text: CSS });
+        state.shadow.appendChild(style);
+
+        state.status = h('span', { class: 'status' });
+        state.body = h('div', { class: 'body' });
+        const header = h('div', { class: 'head' },
+            h('div', { class: 'brand' }, h('img', { class: 'brandicon', src: extensionUrl('icons/logobubble.svg'), alt: '', 'aria-hidden': 'true' }), h('div', { class: 'brandcopy' }, h('div', { class: 'title' }, 'ChatGPT GEO/AEO Research'), h('div', { class: 'sub', id: 'geo-research-subtitle' }, 'Open a ChatGPT conversation to scan'))),
+            h('div', { class: 'acts' },
+                state.status,
+                h('button', { class: 'btn', onClick: rescan }, 'Rescan'),
+                h('button', { class: 'btn', onClick: saveCurrent }, 'Save'),
+                h('details', { class: 'exportmenu' },
+                    h('summary', { class: 'btn' }, 'Export', chevronIcon()),
+                    h('div', { class: 'exportitems' },
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); copyJson(); } }, 'Copy JSON'),
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); copySourcesCsv(); } }, 'Copy Sources CSV'),
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); exportJson(); } }, 'Save JSON'),
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); exportSourcesCsv(); } }, 'Save Sources CSV'))),
+                h('button', { class: 'btn x', 'aria-label': 'Close', onClick: close }, closeIcon())));
+        const footer = h('div', { class: 'foot' },
+            h('a', { href: 'https://www.martinaberastegue.com', target: '_blank', rel: 'noopener noreferrer', text: 'Martin Aberastegue' }));
+        const modal = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true' }, header, state.body, footer);
+        state.overlay = h('div', { class: 'overlay' }, modal);
+        state.overlay.addEventListener('click', (event) => {
+            if (event.target === state.overlay) close();
+        });
+        state.shadow.addEventListener('click', (event) => {
+            const menu = exportMenuFromEvent(event);
+            if (menu) setTimeout(() => closeExportMenus(menu), 0);
+            else closeExportMenus();
+        });
+        document.addEventListener('pointerdown', (event) => {
+            if (!state.overlay || !state.overlay.classList.contains('open')) return;
+            if (!exportMenuFromEvent(event)) closeExportMenus();
+        }, true);
+        document.addEventListener('focusin', (event) => {
+            if (!state.overlay || !state.overlay.classList.contains('open')) return;
+            if (!exportMenuFromEvent(event)) closeExportMenus();
+        }, true);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeExportMenus();
+        });
+        state.shadow.appendChild(state.overlay);
+        document.body.appendChild(state.host);
+    }
+
+    async function open() {
+        ensureHost();
+        state.overlay.classList.add('open');
+        const status = CORE().getPageStatus();
+        const sameConversation = status.conversationId && status.conversationId === state.lastConversationId;
+        if (!state.intel || !sameConversation) await rescan();
+        else {
+            render();
+            startOfferHydration();
+        }
+    }
+
+    function close() {
+        if (state.overlay) state.overlay.classList.remove('open');
+    }
+
+    async function rescan() {
+        ensureHost();
+        state.body.replaceChildren(h('div', { class: 'loading' }, h('div', { class: 'spinner' }), 'Scanning current ChatGPT conversation...'));
+        setStatus('scanning...');
+        try {
+            const result = await CORE().scanCurrentConversation();
+            state.intel = result.intel;
+            state.raw = result.raw;
+            state.token = result.token;
+            state.lastConversationId = result.intel.id;
+            state.offersStarted = false;
+            state.offerProgress = '';
+            state.activeTab = 'overview';
+            setStatus('scan complete');
+            render();
+            startOfferHydration();
+        } catch (error) {
+            state.body.replaceChildren(h('div', { class: 'empty' }, error.message));
+            setStatus('scan failed', true);
+        }
+    }
+
+    function render() {
+        if (!state.intel) return;
+        if (state.activeTab === 'browse' && !state.intel.browseActions.length) state.activeTab = 'overview';
+        const subtitle = state.shadow.getElementById('geo-research-subtitle');
+        if (subtitle) {
+            subtitle.replaceChildren(
+                h('span', { class: 'metaitem' }, h('span', { class: 'metalabel' }, 'Conversation'), h('span', { class: 'metavalue', title: state.intel.id, text: state.intel.id })),
+                state.intel.prompt ? h('span', { class: 'metasep' }, '·') : null,
+                state.intel.prompt ? h('span', { class: 'metaitem' }, h('span', { class: 'metalabel' }, 'Prompt'), h('span', { class: 'metavalue', title: state.intel.prompt, text: state.intel.prompt })) : null);
+        }
+
+        state.body.replaceChildren(
+            h('div', { class: 'scanwrap' },
+                h('div', { class: 'scanhead' }, h('span', { class: 'eyebrow' }, 'Current scan'), h('h2', { class: 'scantitle', text: state.intel.title })),
+                renderTabs(),
+                renderFilter(),
+                renderActiveTab()));
+    }
+
+    function renderOfferState() {
+        if (state.activeTab === 'products' || state.activeTab === 'flow') render();
+    }
+
+    function renderTabs() {
+        return h('div', { class: 'tabs' }, TABS.filter(([id]) => id !== 'browse' || (state.intel && state.intel.browseActions.length)).map(([id, label]) => {
+            const count = countForTab(id);
+            return h('button', {
+                class: `tab${state.activeTab === id ? ' active' : ''}`,
+                onClick: () => {
+                    state.activeTab = id;
+                    render();
+                    if (id === 'flow') requestAnimationFrame(render);
+                },
+            }, tabIcon(id), h('span', { text: label }), count == null ? null : h('span', { class: 'tabcount', text: count }));
+        }));
+    }
+
+    function tabIcon(id) {
+        const icon = svgNode('svg', { class: 'tabicon', viewBox: '0 0 24 24', width: 15, height: 15, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'aria-hidden': 'true' });
+        const path = (d, attrs = {}) => icon.appendChild(svgNode('path', Object.assign({ d }, attrs)));
+        const circle = (attrs) => icon.appendChild(svgNode('circle', attrs));
+        const round = { 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+        if (id === 'overview') {
+            Object.assign(icon.dataset, { cap: 'square' });
+            icon.setAttribute('stroke-linecap', 'square');
+            icon.setAttribute('stroke-linejoin', 'round');
+            ['M13.6903 19.4567C13.5 18.9973 13.5 18.4149 13.5 17.25C13.5 16.0851 13.5 15.5027 13.6903 15.0433C13.944 14.4307 14.4307 13.944 15.0433 13.6903C15.5027 13.5 16.0851 13.5 17.25 13.5C18.4149 13.5 18.9973 13.5 19.4567 13.6903C20.0693 13.944 20.556 14.4307 20.8097 15.0433C21 15.5027 21 16.0851 21 17.25C21 18.4149 21 18.9973 20.8097 19.4567C20.556 20.0693 20.0693 20.556 19.4567 20.8097C18.9973 21 18.4149 21 17.25 21C16.0851 21 15.5027 21 15.0433 20.8097C14.4307 20.556 13.944 20.0693 13.6903 19.4567Z', 'M13.6903 8.95671C13.5 8.49728 13.5 7.91485 13.5 6.75C13.5 5.58515 13.5 5.00272 13.6903 4.54329C13.944 3.93072 14.4307 3.44404 15.0433 3.1903C15.5027 3 16.0851 3 17.25 3C18.4149 3 18.9973 3 19.4567 3.1903C20.0693 3.44404 20.556 3.93072 20.8097 4.54329C21 5.00272 21 5.58515 21 6.75C21 7.91485 21 8.49728 20.8097 8.95671C20.556 9.56928 20.0693 10.056 19.4567 10.3097C18.9973 10.5 18.4149 10.5 17.25 10.5C16.0851 10.5 15.5027 10.5 15.0433 10.3097C14.4307 10.056 13.944 9.56928 13.6903 8.95671Z', 'M3.1903 19.4567C3 18.9973 3 18.4149 3 17.25C3 16.0851 3 15.5027 3.1903 15.0433C3.44404 14.4307 3.93072 13.944 4.54329 13.6903C5.00272 13.5 5.58515 13.5 6.75 13.5C7.91485 13.5 8.49728 13.5 8.95671 13.6903C9.56928 13.944 10.056 14.4307 10.3097 15.0433C10.5 15.5027 10.5 16.0851 10.5 17.25C10.5 18.4149 10.5 18.9973 10.3097 19.4567C10.056 20.0693 9.56928 20.556 8.95671 20.8097C8.49728 21 7.91485 21 6.75 21C5.58515 21 5.00272 21 4.54329 20.8097C3.93072 20.556 3.44404 20.0693 3.1903 19.4567Z', 'M3.1903 8.95671C3 8.49728 3 7.91485 3 6.75C3 5.58515 3 5.00272 3.1903 4.54329C3.44404 3.93072 3.93072 3.44404 4.54329 3.1903C5.00272 3 5.58515 3 6.75 3C7.91485 3 8.49728 3 8.95671 3.1903C9.56928 3.44404 10.056 3.93072 10.3097 4.54329C10.5 5.00272 10.5 5.58515 10.5 6.75C10.5 7.91485 10.5 8.49728 10.3097 8.95671C10.056 9.56928 9.56928 10.056 8.95671 10.3097C8.49728 10.5 7.91485 10.5 6.75 10.5C5.58515 10.5 5.00272 10.5 4.54329 10.3097C3.93072 10.056 3.44404 9.56928 3.1903 8.95671Z'].forEach((d) => path(d));
+        } else if (id === 'flow') {
+            circle({ cx: 18.5, cy: 19.5, r: 2.5 }); circle({ cx: 18.5, cy: 9.5, r: 2.5 }); circle({ cx: 5.5, cy: 14.5, r: 2.5 }); circle({ cx: 5.5, cy: 4.5, r: 2.5 }); path('M8 4.5L15.5 9.5L8.5 14.5L16 19.5', round);
+        } else if (id === 'queries') {
+            path('M11 5L18 5', round); path('M10 10L14.5 14.5', round); path('M5 11L5 18', round); circle({ cx: 6.44444, cy: 6.44444, r: 4.44444 }); circle({ cx: 5, cy: 20, r: 2 }); circle({ cx: 16, cy: 16, r: 2 }); circle({ cx: 20, cy: 5, r: 2 });
+        } else if (id === 'sources') {
+            icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M10.5 8H18.5M10.5 12H13M18.5 12H16M10.5 16H13M18.5 16H16'); path('M7 7.5H6C4.11438 7.5 3.17157 7.5 2.58579 8.08579C2 8.67157 2 9.61438 2 11.5V18C2 19.3807 3.11929 20.5 4.5 20.5C5.88071 20.5 7 19.3807 7 18V7.5Z'); path('M16 3.5H11C10.07 3.5 9.60504 3.5 9.22354 3.60222C8.18827 3.87962 7.37962 4.68827 7.10222 5.72354C7 6.10504 7 6.57003 7 7.5V18C7 19.3807 5.88071 20.5 4.5 20.5H16C18.8284 20.5 20.2426 20.5 21.1213 19.6213C22 18.7426 22 17.3284 22 14.5V9.5C22 6.67157 22 5.25736 21.1213 4.37868C20.2426 3.5 18.8284 3.5 16 3.5Z');
+        } else if (id === 'citations') {
+            icon.setAttribute('stroke-linecap', 'round'); path('M15.2141 5.98239L16.6158 4.58063C17.39 3.80646 18.6452 3.80646 19.4194 4.58063C20.1935 5.3548 20.1935 6.60998 19.4194 7.38415L18.0176 8.78591M15.2141 5.98239L6.98023 14.2163C5.93493 15.2616 5.41226 15.7842 5.05637 16.4211C4.70047 17.058 4.3424 18.5619 4 20C5.43809 19.6576 6.94199 19.2995 7.57889 18.9436C8.21579 18.5877 8.73844 18.0651 9.78375 17.0198L18.0176 8.78591M15.2141 5.98239L18.0176 8.78591', { 'stroke-linejoin': 'round' }); path('M11 20H17');
+        } else if (id === 'products') {
+            icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M10.5 20.25C10.5 20.6642 10.1642 21 9.75 21C9.33579 21 9 20.6642 9 20.25C9 19.8358 9.33579 19.5 9.75 19.5C10.1642 19.5 10.5 19.8358 10.5 20.25Z'); path('M19 20.25C19 20.6642 18.6642 21 18.25 21C17.8358 21 17.5 20.6642 17.5 20.25C17.5 19.8358 17.8358 19.5 18.25 19.5C18.6642 19.5 19 19.8358 19 20.25Z'); path('M2 3H2.20664C3.53124 3 4.19354 3 4.6255 3.40221C5.05746 3.80441 5.10464 4.46503 5.19902 5.78626L5.45035 9.30496C5.5924 11.2936 5.66342 12.2879 5.96476 13.0961C6.62531 14.8677 8.08229 16.2244 9.89648 16.757C10.7241 17 11.7267 17 13.7317 17C15.8373 17 16.89 17 17.7417 16.7416C19.6593 16.1599 21.1599 14.6593 21.7416 12.7417C22 11.89 22 10.8433 22 8.75C22 8.05222 22 7.70333 21.9139 7.41943C21.72 6.78023 21.2198 6.28002 20.5806 6.08612C20.2967 6 19.9478 6 19.25 6H5.5'); path('M16 10V13M11 10V13');
+        } else if (id === 'browse') {
+            icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M18.4737 15.5215C18.4795 15.4928 18.5205 15.4928 18.5263 15.5215C18.8302 17.0081 19.9919 18.1698 21.4785 18.4737C21.5072 18.4795 21.5072 18.5205 21.4785 18.5263C19.9919 18.8302 18.8302 19.9919 18.5263 21.4785C18.5205 21.5072 18.4795 21.5072 18.4737 21.4785C18.1698 19.9919 17.0081 18.8302 15.5215 18.5263C15.4928 18.5205 15.4928 18.4795 15.5215 18.4737C17.0081 18.1698 18.1698 17.0081 18.4737 15.5215Z'); path('M3 7.5H20'); path('M12.5 20.5H10.5C6.72876 20.5 4.84315 20.5 3.67157 19.3284C2.5 18.1569 2.5 16.2712 2.5 12.5V10.5C2.5 6.72876 2.5 4.84315 3.67157 3.67157C4.84315 2.5 6.72876 2.5 10.5 2.5H12.5C16.2712 2.5 18.1569 2.5 19.3284 3.67157C20.5 4.84315 20.5 6.72876 20.5 10.5V12.5');
+        } else if (id === 'reasoning') {
+            icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M7 4.5C5.34315 4.5 4 5.84315 4 7.5C4 8.06866 4.15822 8.60037 4.43304 9.0535C3.04727 9.31855 2 10.537 2 12C2 13.463 3.04727 14.6814 4.43304 14.9465M7 4.5C7 3.11929 8.11929 2 9.5 2C10.8807 2 12 3.11929 12 4.5V19.5C12 20.8807 10.8807 22 9.5 22C8.11929 22 7 20.8807 7 19.5C5.34315 19.5 4 18.1569 4 16.5C4 15.9313 4.15822 15.3996 4.43304 14.9465M7 4.5C7 5.31791 7.39278 6.04408 8 6.50018M4.43304 14.9465C4.78948 14.3588 5.34207 13.9032 6 13.6707'); path('M19.25 4.74976L17 6.99976H15M18.5 4.74976C18.5 5.16397 18.8358 5.49976 19.25 5.49976C19.6642 5.49976 20 5.16397 20 4.74976C20 4.33554 19.6642 3.99976 19.25 3.99976C18.8358 3.99976 18.5 4.33554 18.5 4.74976Z'); path('M19.25 19.2498L17 16.9998H15M18.5 19.2498C18.5 18.8355 18.8358 18.4998 19.25 18.4998C19.6642 18.4998 20 18.8355 20 19.2498C20 19.664 19.6642 19.9998 19.25 19.9998C18.8358 19.9998 18.5 19.664 18.5 19.2498Z'); path('M19.25 11.9998H15M18.5 11.9998C18.5 12.414 18.8358 12.7498 19.25 12.7498C19.6642 12.7498 20 12.414 20 11.9998C20 11.5855 19.6642 11.2498 19.25 11.2498C18.8358 11.2498 18.5 11.5855 18.5 11.9998Z');
+        } else if (id === 'saved') {
+            icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M17.4776 9.01106C17.485 9.01102 17.4925 9.01101 17.5 9.01101C19.9853 9.01101 22 11.0294 22 13.5193C22 15.8398 20.25 17.7508 18 18M17.4776 9.01106C17.4924 8.84606 17.5 8.67896 17.5 8.51009C17.5 5.46695 15.0376 3 12 3C9.12324 3 6.76233 5.21267 6.52042 8.03192M17.4776 9.01106C17.3753 10.1476 16.9286 11.1846 16.2428 12.0165M6.52042 8.03192C3.98398 8.27373 2 10.4139 2 13.0183C2 15.4417 3.71776 17.4632 6 17.9273M6.52042 8.03192C6.67826 8.01687 6.83823 8.00917 7 8.00917C8.12582 8.00917 9.16474 8.38194 10.0005 9.01101'); path('M12 21L12 13M12 21C11.2998 21 9.99153 19.0057 9.5 18.5M12 21C12.7002 21 14.0085 19.0057 14.5 18.5');
+        }
+        return icon;
+    }
+
+    function renderFilter() {
+        if (!['queries', 'sources', 'citations', 'products', 'browse', 'reasoning', 'saved'].includes(state.activeTab)) return null;
+        return h('input', {
+            class: 'filter',
+            placeholder: 'filter this view...',
+            onInput: (event) => {
+                const query = event.target.value.toLowerCase();
+                state.body.querySelectorAll('[data-filter-row]').forEach((row) => {
+                    row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+                });
+            },
+        });
+    }
+
+    function renderActiveTab() {
+        switch (state.activeTab) {
+            case 'flow': return renderFlow();
+            case 'queries': return renderQueries();
+            case 'sources': return renderSources();
+            case 'citations': return renderCitations();
+            case 'products': return renderProducts();
+            case 'browse': return renderBrowse();
+            case 'reasoning': return renderReasoning();
+            case 'saved': return renderSaved();
+            default: return renderOverview();
+        }
+    }
+
+    function countForTab(id) {
+        const intel = state.intel;
+        if (!intel) return null;
+        if (id === 'queries') return intel.queries.length;
+        if (id === 'sources') return intel.sources.length;
+        if (id === 'citations') return intel.citations.length;
+        if (id === 'products') return intel.products.length;
+        if (id === 'browse') return intel.browseActions.length;
+        if (id === 'reasoning') return intel.reasoning.length + (intel.memory.length ? intel.memory.length : 0);
+        if (id === 'saved') return null;
+        return null;
+    }
+
+    function stat(value, label) {
+        return h('div', { class: 'stat' }, h('div', { class: 'num', text: value }), h('div', { class: 'lbl', text: label }));
+    }
+
+    function renderOverview() {
+        const stats = state.intel.stats;
+        const statItems = [
+            stat(stats.queries, 'fan-out queries'),
+            stat(stats.sources, 'sources'),
+            stat(stats.domains, 'domains'),
+            stat(stats.citations, 'citations'),
+            stat(stats.products, 'products'),
+            stats.browseActions ? stat(stats.browseActions, 'browse actions') : null,
+            stat(state.intel.reasoning.length, 'reasoning steps'),
+            stat(stats.memoryItems, 'memory'),
+        ].filter(Boolean);
+        return h('div', null,
+            h('div', { class: 'stats' }, statItems),
+            h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'source pipelines')), renderBars(pipelineCounts(state.intel.sources))),
+            h('div', { class: 'grid2' },
+                h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'top fetched domains')), renderBars(domainCounts(state.intel.sources))),
+                h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'top cited domains')), renderBars(domainCounts(state.intel.citations)))));
+    }
+
+    function pipelineCounts(items) {
+        const counts = {};
+        items.forEach((item) => {
+            const pipeline = item.pipeline || '?';
+            counts[pipeline] = (counts[pipeline] || 0) + 1;
+        });
+        return Object.keys(counts).map((label) => ({ label, value: counts[label], color: pipelineColor(label) })).sort((a, b) => b.value - a.value);
+    }
+
+    function domainCounts(items) {
+        const counts = {};
+        items.forEach((item) => {
+            const domain = item.domain || CORE().cleanDomain(item.url) || '?';
+            counts[domain] = counts[domain] || { value: 0, pipelines: {} };
+            counts[domain].value += 1;
+            if (item.pipeline) counts[domain].pipelines[item.pipeline] = (counts[domain].pipelines[item.pipeline] || 0) + 1;
+        });
+        return Object.keys(counts).map((domain) => {
+            const pipelines = counts[domain].pipelines;
+            const topPipeline = Object.keys(pipelines).sort((a, b) => pipelines[b] - pipelines[a])[0];
+            return { label: domain, value: counts[domain].value, color: topPipeline ? pipelineColor(topPipeline) : '#868e96' };
+        }).sort((a, b) => b.value - a.value).slice(0, 12);
+    }
+
+    function renderBars(items) {
+        if (!items.length) return h('div', { class: 'empty' }, 'nothing captured');
+        const max = Math.max(...items.map((item) => item.value));
+        return h('div', { class: 'bars' }, items.map((item) => h('div', { class: 'bar' },
+            h('div', { class: 'barlab', title: item.label, text: item.label }),
+            h('div', { class: 'track' }, h('div', { class: 'fill', style: { width: `${Math.max(4, item.value / max * 100)}%`, background: item.color || 'var(--accent)' } })),
+            h('div', { class: 'val', text: item.value }))));
+    }
+
+    function renderQueryChips() {
+        if (!state.intel.queries.length) return h('div', { class: 'empty' }, 'no fan-out queries captured');
+        return h('div', { class: 'querylist' }, state.intel.queries.map((query, index) => {
+            const isProduct = /product/i.test(query.via || '');
+            return h('div', { class: 'queryrow' },
+                h('div', { class: 'qnum', text: `#${index + 1}` }),
+                h('div', { class: `qvia${isProduct ? ' product' : ''}`, title: query.via, text: compactVia(query.via) }),
+                h('div', { class: 'qtext', title: query.query, text: query.query }));
+        }));
+    }
+
+    function compactVia(value) {
+        const text = String(value || 'unknown');
+        return text
+            .replace(/^metadata\./, '')
+            .replace(/^web\./, '')
+            .replace(/^product_query\./, 'product.');
+    }
+
+    function renderQueries() {
+        return table(['#', 'fan-out query', 'found via'], state.intel.queries.map((query, index) => [
+            index + 1,
+            query.query,
+            query.via,
+        ]));
+    }
+
+    function renderFlow() {
+        const available = Math.max(920, Math.floor((state.body && state.body.clientWidth ? state.body.clientWidth : window.innerWidth * 0.88) - 72));
+        const flow = drawFlowSvg(available);
+        const box = h('div', { class: 'flowbox' }, flow);
+        const pipeKeys = orderedPipelineKeys();
+        const hasProducts = state.intel.products.length > 0;
+        return h('div', null,
+            h('div', { class: 'flowbar' },
+                h('div', { class: 'flowlegend' },
+                    pipeKeys.map((key) => h('span', { class: 'lg' }, h('i', { style: { background: pipelineColor(key) } }), key)),
+                    hasProducts ? h('span', { class: 'lg' }, h('i', { style: { background: '#6741D9' } }), 'product query') : null,
+                    h('span', { class: 'lg' }, h('i', { style: { background: 'transparent', border: '2px solid #17191f', width: '10px', height: '10px' } }), 'cited'),
+                    hasProducts ? h('span', { class: 'lg' }, h('i', { style: { background: '#0CA678' } }), 'best price') : null),
+                h('div', { class: 'flowtools' },
+                    state.intel.products.some((product) => product.lookupKey) ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : 'Reload offers') : null,
+                    h('details', { class: 'exportmenu' },
+                        h('summary', { class: 'btn' }, 'Export', chevronIcon()),
+                        h('div', { class: 'exportitems' },
+                            h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); copyFlowSvg(flow); } }, 'Copy SVG'),
+                            h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); copyFlowPng(flow); } }, 'Copy PNG'),
+                            h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); download(`${state.intel.id}-flow.svg`, serializeSvg(flow), 'image/svg+xml'); } }, 'Save SVG'),
+                            h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); saveFlowPng(flow); } }, 'Save PNG'))))),
+            state.loadingOffers ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.offerProgress || 'loading live offers...') : null,
+            box);
+    }
+
+    function drawFlowSvg(availW) {
+        const intel = state.intel;
+        const sources = intel.sources || [];
+        const citations = intel.citations || [];
+        const products = intel.products || [];
+        const hasProducts = products.length > 0;
+        const queries = intel.queries || [];
+        const width = Math.max(900, Math.floor(availW || 1120));
+        const NHMIN = 27;
+        const NHMINW = 52;
+        const LINE = 14.5;
+        const PADY = 6;
+        const PADX = 10;
+        const CHARW = 6.55;
+        const GAP = 9;
+        const GGAP = 18;
+        const TOP = 50;
+        const BANDGAP = 62;
+        const M = 6;
+        const GAPC = Math.max(16, Math.round(width * 0.018));
+        const hubW = 82;
+        const usable = width - 2 * M - 4 * GAPC - hubW;
+        let promptW = Math.max(96, Math.round(usable * 0.15));
+        let queryW = Math.max(118, Math.round(usable * 0.19));
+        let midW = Math.max(118, Math.round(usable * 0.17));
+        let endW = Math.max(220, usable - promptW - queryW - midW);
+        const used0 = 2 * M + hubW + 4 * GAPC + promptW + queryW + midW + endW;
+        if (used0 > width) {
+            const total = promptW + queryW + midW + endW;
+            const factor = Math.max(0.6, (total - (used0 - width)) / total);
+            promptW = Math.floor(promptW * factor);
+            queryW = Math.floor(queryW * factor);
+            midW = Math.floor(midW * factor);
+            endW = Math.floor(endW * factor);
+        }
+        const xPrompt = M;
+        const xQuery = xPrompt + promptW + GAPC;
+        const xHub = xQuery + queryW + GAPC;
+        const xMid = xHub + hubW + GAPC;
+        const xEnd = xMid + midW + GAPC;
+        const rightEdge = xEnd + endW;
+        const innerL = (rightEdge - xMid) - 2 * GAPC;
+        const lqW = Math.max(110, Math.round(innerL * 0.28));
+        const lpW = Math.max(150, Math.round(innerL * 0.29));
+        const loW = Math.max(190, innerL - lqW - lpW);
+        const xLQ = xMid;
+        const xLP = xLQ + lqW + GAPC;
+        const xLO = xLP + lpW + GAPC;
+        const pipeKeys = orderedPipelineKeys();
+
+        const wrapLines = (text, maxW) => {
+            const value = String(text == null ? '' : text).trim();
+            const max = Math.max(4, Math.floor(maxW / CHARW));
+            if (!value) return [''];
+            const words = value.split(/\s+/);
+            const lines = [];
+            let cur = '';
+            words.forEach((word) => {
+                if (word.length > max) {
+                    if (cur) {
+                        lines.push(cur);
+                        cur = '';
+                    }
+                    let rest = word;
+                    while (rest.length > max) {
+                        lines.push(rest.slice(0, max));
+                        rest = rest.slice(max);
+                    }
+                    cur = rest;
+                } else if (!cur) cur = word;
+                else if ((cur + ' ' + word).length <= max) cur += ' ' + word;
+                else {
+                    lines.push(cur);
+                    cur = word;
+                }
+            });
+            if (cur) lines.push(cur);
+            return lines.length ? lines : [''];
+        };
+        const midTrunc = (text, maxChars) => {
+            const value = String(text == null ? '' : text);
+            if (value.length <= maxChars) return value;
+            if (maxChars <= 3) return value.slice(0, Math.max(0, maxChars));
+            const head = Math.ceil((maxChars - 1) * 0.62);
+            const tail = maxChars - 1 - head;
+            return `${value.slice(0, head)}...${value.slice(value.length - tail)}`;
+        };
+        const fit = (label, right, dot, colW, cap) => {
+            const rightW = right ? String(right).length * CHARW + 12 : 0;
+            const dotW = dot ? 13 : 0;
+            const contentW = PADX * 2 + dotW + String(label == null ? '' : label).length * CHARW + rightW;
+            const w = Math.round(Math.min(colW, Math.max(NHMINW, contentW)));
+            let lines = wrapLines(label, w - PADX * 2 - dotW - rightW);
+            if (cap && lines.length > cap) {
+                lines = lines.slice(0, cap);
+                lines[cap - 1] = `${lines[cap - 1].slice(0, Math.max(1, lines[cap - 1].length - 3))}...`;
+            }
+            return { w, lines, h: Math.max(NHMIN, lines.length * LINE + PADY * 2) };
+        };
+        const fitStack = (label, meta, dot, colW, cap) => {
+            const dotW = dot ? 13 : 0;
+            const labelText = String(label == null ? '' : label);
+            const metaText = String(meta == null ? '' : meta).trim();
+            const w = Math.round(Math.max(NHMINW, colW));
+            let lines = wrapLines(labelText, w - PADX * 2 - dotW);
+            if (cap && lines.length > cap) {
+                lines = lines.slice(0, cap);
+                lines[cap - 1] = `${lines[cap - 1].slice(0, Math.max(1, lines[cap - 1].length - 3))}...`;
+            }
+            const metaH = metaText ? LINE + 2 : 0;
+            return { w, lines, meta: metaText, h: Math.max(NHMIN + metaH, lines.length * LINE + PADY * 2 + metaH) };
+        };
+        const fitLine = (label, right, dot, colW) => {
+            const rightW = right ? String(right).length * CHARW + 12 : 0;
+            const dotW = dot ? 13 : 0;
+            const maxChars = Math.max(4, Math.floor((colW - PADX * 2 - dotW - rightW) / CHARW));
+            const line = midTrunc(label, maxChars);
+            const w = Math.round(Math.min(colW, Math.max(NHMINW, PADX * 2 + dotW + line.length * CHARW + rightW)));
+            return { w, lines: [line], h: NHMIN };
+        };
+
+        const citedSet = new Set(citations.map((citation) => citation.domain).filter(Boolean));
+        const sourceMap = {};
+        sources.forEach((source) => {
+            const domain = source.domain || '?';
+            sourceMap[domain] = sourceMap[domain] || { n: 0, p: {} };
+            sourceMap[domain].n += 1;
+            sourceMap[domain].p[source.pipeline] = (sourceMap[domain].p[source.pipeline] || 0) + 1;
+        });
+        let domains = Object.keys(sourceMap).map((domain) => {
+            const pipelines = sourceMap[domain].p;
+            const top = Object.keys(pipelines).sort((a, b) => pipelines[b] - pipelines[a])[0] || '?';
+            return { domain, pipeline: top, n: sourceMap[domain].n, cited: citedSet.has(domain) };
+        });
+        domains.sort((a, b) => (pipeKeys.indexOf(a.pipeline) - pipeKeys.indexOf(b.pipeline)) || (Number(b.cited) - Number(a.cited)) || (b.n - a.n));
+        domains = domains.slice(0, 26);
+        const pipesPresent = pipeKeys.filter((key) => domains.some((domain) => domain.pipeline === key));
+
+        const productQSet = new Set();
+        products.forEach((product) => {
+            if (product.query) productQSet.add(product.query.trim().toLowerCase());
+            if (product.title) productQSet.add(product.title.trim().toLowerCase());
+        });
+        const webQueries = queries.filter((query) => !/product/i.test(query.via || '') && !productQSet.has((query.query || '').trim().toLowerCase()));
+        const shownQueries = webQueries.slice(0, 18);
+        const moreQueries = webQueries.length - shownQueries.length;
+
+        let yu = 0;
+        const domL = [];
+        const pipeL = [];
+        pipesPresent.forEach((pipeline, groupIndex) => {
+            if (groupIndex > 0) yu += GGAP;
+            const groupDomains = domains.filter((domain) => domain.pipeline === pipeline);
+            const measured = groupDomains.map((domain) => ({ domain, f: fitLine(domain.domain, domain.cited ? 'cited' : (domain.n > 1 ? `x${domain.n}` : ''), true, endW) }));
+            let blockH = 0;
+            measured.forEach((item, index) => {
+                blockH += item.f.h;
+                if (index < measured.length - 1) blockH += GAP;
+            });
+            const pf = fit(`${pipeline} (${groupDomains.length})`, null, false, midW);
+            const groupH = Math.max(blockH, pf.h);
+            let y = yu + (groupH - blockH) / 2;
+            measured.forEach((item) => {
+                domL.push({ d: item.domain, y, h: item.f.h, w: item.f.w, lines: item.f.lines });
+                y += item.f.h + GAP;
+            });
+            pipeL.push({ key: pipeline, n: groupDomains.length, yMid: yu + groupH / 2, h: pf.h, w: pf.w, lines: pf.lines });
+            yu += groupH;
+        });
+        const upperH = Math.max(yu, NHMIN);
+
+        const qOrder = [];
+        const qGroups = {};
+        products.forEach((product) => {
+            const key = (product.query || '').trim() || '\u0000none';
+            if (!qGroups[key]) {
+                qGroups[key] = [];
+                qOrder.push(key);
+            }
+            qGroups[key].push(product);
+        });
+        let yo = 0;
+        const offL = [];
+        const prodL = [];
+        const pqL = [];
+        qOrder.forEach((qkey, groupIndex) => {
+            if (groupIndex > 0) yo += GGAP;
+            const label = qkey === '\u0000none' ? '(no product query)' : qkey;
+            const qf = fit(label, null, false, lqW, 4);
+            const items = qGroups[qkey].map((product) => {
+                const offers = product.offers || [];
+                const pf = fitStack(product.title, product.price || '', false, lpW, 4);
+                const measuredOffers = offers.map((offer) => {
+                    const best = Boolean(offer.tag && /best/i.test(offer.tag));
+                    return { offer, best, f: fitStack(offer.merchant || '-', offer.total || offer.price || '', best, loW, 3) };
+                });
+                let blockH = measuredOffers.length ? 0 : pf.h;
+                measuredOffers.forEach((item, index) => {
+                    blockH += item.f.h;
+                    if (index < measuredOffers.length - 1) blockH += GAP;
+                });
+                return { product, pf, measuredOffers, groupH: Math.max(blockH, pf.h), blockH, offers: offers.length };
+            });
+            let clusterH = 0;
+            items.forEach((item, index) => {
+                clusterH += item.groupH;
+                if (index < items.length - 1) clusterH += GAP;
+            });
+            const groupH = Math.max(clusterH, qf.h);
+            const start = yo;
+            let cy = yo + (groupH - clusterH) / 2;
+            items.forEach((item) => {
+                const pmid = cy + item.groupH / 2;
+                let oy = cy + (item.groupH - item.blockH) / 2;
+                item.measuredOffers.forEach((offer) => {
+                    offL.push({ o: offer.offer, y: oy, h: offer.f.h, w: offer.f.w, lines: offer.f.lines, pmid, pw: item.pf.w, best: offer.best });
+                    oy += offer.f.h + GAP;
+                });
+                prodL.push({ p: item.product, yMid: pmid, h: item.pf.h, w: item.pf.w, lines: item.pf.lines, offers: item.offers, err: item.product.offerError, qmid: start + groupH / 2, qRight: xLQ + qf.w });
+                cy += item.groupH + GAP;
+            });
+            pqL.push({ label, qf, yMid: start + groupH / 2, n: items.length });
+            yo = start + groupH + GAP;
+        });
+        yo = Math.max(yo - GAP, NHMIN);
+
+        const upTop = TOP;
+        const loTop = TOP + upperH + BANDGAP;
+        const lowerH = hasProducts ? yo : 0;
+        const height = hasProducts ? loTop + lowerH + 22 : upTop + upperH + 28;
+        const centerY = hasProducts ? (upTop + loTop + lowerH) / 2 : upTop + upperH / 2;
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.setAttribute('width', width);
+        svg.setAttribute('height', height);
+        svg.setAttribute('font-family', 'ui-monospace,Menlo,Consolas,monospace');
+        svg.appendChild(svgNode('rect', { x: 0, y: 0, width, height, fill: '#ffffff' }));
+
+        const edgeGroup = svgNode('g', { fill: 'none' });
+        const nodeGroup = svgNode('g', {});
+        svg.appendChild(edgeGroup);
+        svg.appendChild(nodeGroup);
+        const edge = (x1, y1, x2, y2, color, w, op) => {
+            const dx = (x2 - x1) * 0.45;
+            edgeGroup.appendChild(svgNode('path', { d: `M${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`, stroke: color, 'stroke-width': w || 1.1, 'stroke-opacity': op == null ? 0.5 : op }));
+        };
+        const hdr = (x, y, text) => nodeGroup.appendChild(svgText(x, y, text.toUpperCase(), 10, '#9aa0a6', 700));
+        const refreshGlyph = (x, y, product, text) => {
+            const color = product.lookupKey ? '#2563eb' : '#98a2b3';
+            const group = svgNode('g', { transform: `translate(${x} ${y - 10}) scale(.72)`, cursor: product.lookupKey ? 'pointer' : 'default' });
+            group.appendChild(svgNode('title', {}));
+            group.lastChild.textContent = product.lookupKey ? `Reload offers for ${product.title || 'product'}` : 'No lookup key available';
+            group.appendChild(svgNode('rect', { x: 0, y: 0, width: 24, height: 24, rx: 4, fill: 'transparent' }));
+            group.appendChild(svgNode('path', { d: 'M20.5 5.5H9.5C5.78672 5.5 3 8.18503 3 12', fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+            group.appendChild(svgNode('path', { d: 'M3.5 18.5H14.5C18.2133 18.5 21 15.815 21 12', fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+            group.appendChild(svgNode('path', { d: 'M18.5 3C18.5 3 21 4.84122 21 5.50002C21 6.15882 18.5 8 18.5 8', fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+            group.appendChild(svgNode('path', { d: 'M5.49998 16C5.49998 16 3.00001 17.8412 3 18.5C2.99999 19.1588 5.5 21 5.5 21', fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+            if (product.lookupKey) {
+                group.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    refreshProductOffers(product);
+                });
+            }
+            nodeGroup.appendChild(group);
+            nodeGroup.appendChild(svgText(x + 22, y + 4, text, 10, product.offerLoading ? '#2563eb' : '#c2c7cd', 400));
+        };
+        const node = (x, y, w, hgt, lines, options) => {
+            const opts = options || {};
+            const group = svgNode('g', {});
+            group.appendChild(svgNode('rect', { x, y, width: w, height: hgt, rx: 7, fill: opts.fill || '#fff', stroke: opts.stroke || '#E7E9ED', 'stroke-width': opts.sw || 1 }));
+            if (opts.dot) group.appendChild(svgNode('circle', { cx: x + 10, cy: y + hgt / 2, r: 3.3, fill: opts.dot }));
+            const tx = svgNode('text', { 'font-size': 11, fill: opts.tc || '#17191f', 'font-weight': opts.bold ? 600 : 400 });
+            const x0 = x + PADX + (opts.dot ? 13 : 0);
+            lines.forEach((line, index) => tx.appendChild(svgTspan(x0, y + PADY + 10.5 + index * LINE, line)));
+            group.appendChild(tx);
+            if (opts.right) group.appendChild(svgText(x + w - 8, y + PADY + 10.5, opts.right, 10.5, opts.rc || '#9aa0a6', opts.bold ? 600 : 400, 'end'));
+            if (opts.meta) group.appendChild(svgText(x + w - 8, y + hgt - PADY - 2, opts.meta, 10.5, opts.rc || '#69717d', opts.bold ? 600 : 400, 'end'));
+            if (opts.title) {
+                const title = svgNode('title', {});
+                title.textContent = opts.title;
+                group.appendChild(title);
+            }
+            if (opts.href) {
+                const anchor = svgNode('a', { href: opts.href, target: '_blank', rel: 'noopener' });
+                anchor.appendChild(group);
+                nodeGroup.appendChild(anchor);
+            } else {
+                nodeGroup.appendChild(group);
+            }
+            return group;
+        };
+
+        hdr(xPrompt, upTop - 14, 'prompt');
+        hdr(xQuery, upTop - 14, 'fan-out queries');
+        hdr(xHub, upTop - 14, 'search / shop');
+        hdr(xMid, upTop - 14, 'pipelines');
+        hdr(xEnd, upTop - 14, 'sources  (cited = black)');
+        if (hasProducts) {
+            hdr(xLQ, loTop - 14, 'product fan-out');
+            hdr(xLP, loTop - 14, 'products');
+            hdr(xLO, loTop - 14, 'offers  (dot = best price)');
+        }
+
+        const spineY = centerY;
+        const promptFit = fit(intel.prompt || '(prompt)', null, false, promptW, 4);
+        node(xPrompt, spineY - promptFit.h / 2, promptFit.w, promptFit.h, promptFit.lines, { fill: '#17191f', tc: '#fff', bold: true, title: intel.prompt });
+        const hubFit = fit('web.run', null, false, hubW);
+        node(xHub, spineY - hubFit.h / 2, hubFit.w, hubFit.h, hubFit.lines, { fill: '#2b2f36', tc: '#fff', title: 'ChatGPT web/product tool calls' });
+        const promptR = xPrompt + promptFit.w;
+        const hubR = xHub + hubFit.w;
+
+        const qMs = shownQueries.map((query) => ({ query, f: fit(query.query, null, false, queryW, 6) }));
+        if (moreQueries > 0) qMs.push({ more: true, f: fit(`+${moreQueries} more fan-out queries`, null, false, queryW) });
+        let qTot = 0;
+        qMs.forEach((item, index) => {
+            qTot += item.f.h;
+            if (index < qMs.length - 1) qTot += GAP;
+        });
+        let qy = spineY - qTot / 2;
+        qMs.forEach((item) => {
+            const cy = qy + item.f.h / 2;
+            edge(promptR, spineY, xQuery, cy, '#CED4DA', 1, 0.5);
+            if (!item.more) edge(xQuery + item.f.w, cy, xHub, spineY, '#CED4DA', 1, 0.36);
+            node(xQuery, qy, item.f.w, item.f.h, item.f.lines, item.more ? { fill: '#fff', tc: '#9aa0a6' } : { fill: '#F7F8FA', tc: '#42464d', title: `${item.query.query} · via ${item.query.via}` });
+            qy += item.f.h + GAP;
+        });
+
+        pipeL.forEach((pipeline) => {
+            const pcy = upTop + pipeline.yMid;
+            edge(hubR, spineY, xMid, pcy, pipelineColor(pipeline.key), Math.min(1 + pipeline.n * 0.22, 4), 0.5);
+            node(xMid, pcy - pipeline.h / 2, pipeline.w, pipeline.h, pipeline.lines, { fill: 'rgba(0,0,0,0.03)', stroke: pipelineColor(pipeline.key), tc: pipelineDark(pipeline.key), bold: true });
+        });
+        domL.forEach((item) => {
+            const dcy = upTop + item.y + item.h / 2;
+            const pipeline = pipeL.find((candidate) => candidate.key === item.d.pipeline);
+            if (pipeline) edge(xMid + pipeline.w, upTop + pipeline.yMid, xEnd, dcy, pipelineColor(item.d.pipeline), 1, 0.38);
+            node(xEnd, upTop + item.y, item.w, item.h, item.lines, { dot: pipelineColor(item.d.pipeline), stroke: item.d.cited ? '#17191f' : '#E7E9ED', sw: item.d.cited ? 1.7 : 1, tc: item.d.cited ? '#17191f' : '#69717d', bold: item.d.cited, right: item.d.cited ? 'cited' : (item.d.n > 1 ? `x${item.d.n}` : ''), rc: item.d.cited ? '#17191f' : '#c2c7cd', title: `${item.d.domain} · ${item.d.pipeline} · ${item.d.n} result${item.d.n > 1 ? 's' : ''}${item.d.cited ? ' · cited' : ''}` });
+        });
+
+        if (hasProducts) {
+            pqL.forEach((query) => {
+                const y = loTop + query.yMid;
+                edge(hubR, spineY, xLQ, y, '#B8BEC6', Math.min(1 + query.n * 0.35, 3.4), 0.5);
+                node(xLQ, y - query.qf.h / 2, query.qf.w, query.qf.h, query.qf.lines, { fill: '#F5F3FF', stroke: '#D9CFFB', tc: '#6741D9', title: `product query · ${query.n} product${query.n > 1 ? 's' : ''}\n${query.label}` });
+            });
+            prodL.forEach((product) => {
+                const y = loTop + product.yMid;
+                edge(product.qRight, loTop + product.qmid, xLP, y, '#CBD2D9', 1.2, 0.5);
+                node(xLP, y - product.h / 2, product.w, product.h, product.lines, { fill: '#fff', stroke: '#E7E9ED', tc: '#17191f', meta: product.p.price || '', rc: '#17191f', href: product.p.providerUrl || '', title: `${product.p.title}${product.p.price ? ` · ${product.p.price}` : ''}${product.p.merchants ? ` · ${product.p.merchants}` : ''}` });
+                if (!product.offers) refreshGlyph(xLO, y, product.p, product.p.offerLoading ? 'loading offers...' : (product.err ? 'offers unavailable' : '- no offers -'));
+            });
+            offL.forEach((offer) => {
+                const y = loTop + offer.y + offer.h / 2;
+                const best = offer.best;
+                edge(xLP + offer.pw, loTop + offer.pmid, xLO, y, best ? '#0CA678' : '#CBD2D9', best ? 1.6 : 1, 0.5);
+                const offerHref = offer.o.url || offer.o.shoppingUrl || '';
+                node(xLO, loTop + offer.y, offer.w, offer.h, offer.lines, { dot: best ? '#0CA678' : null, stroke: best ? '#0CA678' : '#E7E9ED', sw: best ? 1.6 : 1, tc: best ? '#0CA678' : '#42464d', bold: best, meta: offer.o.total || offer.o.price || '', rc: best ? '#0CA678' : '#69717d', href: offerHref, title: `${offer.o.merchant || ''} · ${offer.o.total || offer.o.price || ''}${offer.o.details ? ` · ${offer.o.details}` : ''}${offerHref ? ` · ${offer.o.url ? offerHref : `Google Shopping fallback: ${offerHref}`}` : ''}` });
+            });
+        }
+
+        if (!sources.length && !queries.length && !products.length) {
+            node(30, 70, 260, 36, ['nothing captured for this conversation'], { fill: '#fff', tc: '#9aa0a6' });
+        }
+        return svg;
+    }
+
+    function svgNode(tag, attrs) {
+        const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        Object.keys(attrs).forEach((key) => node.setAttribute(key, attrs[key]));
+        return node;
+    }
+
+    function svgText(x, y, text, size, fill, weight, anchor) {
+        const attrs = { x, y, 'font-size': size, fill, 'font-weight': weight || 400 };
+        if (anchor) attrs['text-anchor'] = anchor;
+        const node = svgNode('text', attrs);
+        node.textContent = text;
+        return node;
+    }
+
+    function svgTspan(x, y, text) {
+        const node = svgNode('tspan', { x, y });
+        node.textContent = text;
+        return node;
+    }
+
+    function orderedPipelineKeys() {
+        const counts = {};
+        (state.intel.sources || []).forEach((source) => {
+            counts[source.pipeline || '?'] = (counts[source.pipeline || '?'] || 0) + 1;
+        });
+        const preferred = ['serp', 'labrador', 'bright', 'oxylabs'];
+        return preferred.filter((key) => counts[key]).concat(Object.keys(counts).filter((key) => !preferred.includes(key)));
+    }
+
+    function pipelineColor(pipeline) {
+        return { serp: '#8A8F98', labrador: '#4C6EF5', bright: '#12B886', oxylabs: '#F59F00' }[pipeline] || '#CBD2D9';
+    }
+
+    function pipelineDark(pipeline) {
+        return { serp: '#495057', labrador: '#3b5bdb', bright: '#099268', oxylabs: '#E8590C' }[pipeline] || '#495057';
+    }
+
+    function isBestOffer(offer) {
+        return Boolean(offer && offer.tag && /best/i.test(offer.tag));
+    }
+
+    function compactCount(value) {
+        if (value == null || value === '') return '';
+        const numeric = Number(String(value).replace(/[^\d.]/g, ''));
+        if (!Number.isFinite(numeric)) return String(value);
+        if (numeric >= 1000) return `${(numeric / 1000).toFixed(1).replace('.0', '')}k`;
+        return String(Math.round(numeric));
+    }
+
+    function productRatingText(product) {
+        const rating = product && product.rating != null && product.rating !== '' ? String(product.rating) : '';
+        const reviews = compactCount(product && product.reviews);
+        if (!rating && !reviews) return '';
+        if (rating && reviews) return `${rating} · ${reviews} reviews`;
+        if (rating) return rating;
+        return `${reviews} reviews`;
+    }
+
+    function starIcon() {
+        const icon = svgNode('svg', { class: 'ratingstar', viewBox: '0 0 24 24', width: '14', height: '14', 'aria-hidden': 'true' });
+        icon.appendChild(svgNode('path', { d: 'M13.7276 3.44418L15.4874 6.99288C15.7274 7.48687 16.3673 7.9607 16.9073 8.05143L20.0969 8.58575C22.1367 8.92853 22.6167 10.4206 21.1468 11.8925L18.6671 14.3927C18.2471 14.8161 18.0172 15.6327 18.1471 16.2175L18.8571 19.3125C19.417 21.7623 18.1271 22.71 15.9774 21.4296L12.9877 19.6452C12.4478 19.3226 11.5579 19.3226 11.0079 19.6452L8.01827 21.4296C5.8785 22.71 4.57865 21.7522 5.13859 19.3125L5.84851 16.2175C5.97849 15.6327 5.74852 14.8161 5.32856 14.3927L2.84884 11.8925C1.389 10.4206 1.85895 8.92853 3.89872 8.58575L7.08837 8.05143C7.61831 7.9607 8.25824 7.48687 8.49821 6.99288L10.258 3.44418C11.2179 1.51861 12.7777 1.51861 13.7276 3.44418Z', fill: '#efc823', stroke: '#efc823', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+        return icon;
+    }
+
+    function chevronIcon() {
+        const icon = svgNode('svg', { class: 'chev', viewBox: '0 0 24 24', width: '13', height: '13', 'aria-hidden': 'true' });
+        icon.appendChild(svgNode('path', { d: 'M6 9l6 6 6-6', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+        return icon;
+    }
+
+    function closeIcon() {
+        const icon = svgNode('svg', { viewBox: '0 0 24 24', width: '18', height: '18', 'aria-hidden': 'true', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+        icon.appendChild(svgNode('path', { d: 'M18 6L6.00081 17.9992M17.9992 18L6 6.00085' }));
+        return icon;
+    }
+
+    function primaryMerchantLabel(value) {
+        return String(value || '').replace(/\s*\+\s*others\b/i, '').trim();
+    }
+
+    function compactUrlLabel(url) {
+        if (!url) return '';
+        const domain = CORE().cleanDomain(url);
+        return domain || String(url).replace(/^https?:\/\//, '').split(/[/?#]/)[0];
+    }
+
+    function isChatGptUrl(url) {
+        const domain = compactUrlLabel(url).toLowerCase();
+        return domain === 'chatgpt.com' || domain.endsWith('.chatgpt.com');
+    }
+
+    function usableProductUrl(url) {
+        return url && !isChatGptUrl(url) ? url : '';
+    }
+
+    function formatDate(value) {
+        if (value == null || value === '') return '';
+        const text = String(value).trim();
+        if (/^\d{4}$/.test(text)) return text;
+        let date;
+        if (/^\d{9,13}(?:\.\d+)?$/.test(text)) {
+            let numeric = Number(text);
+            if (numeric < 1e12) numeric *= 1000;
+            date = new Date(numeric);
+        } else {
+            date = new Date(text);
+        }
+        if (Number.isNaN(date.getTime())) return text;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${date.getUTCDate()} ${months[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+    }
+
+    function renderSources() {
+        return table(['domain', 'pipeline', 'title', 'url', 'date'], state.intel.sources.map((source) => [
+            source.domain,
+            source.pipeline,
+            source.title,
+            link(source.url),
+            h('span', { class: 'datecell', text: formatDate(source.pubDate) }),
+        ]));
+    }
+
+    function renderCitations() {
+        return table(['domain', 'title', 'url', 'type'], state.intel.citations.map((citation) => [
+            citation.domain,
+            citation.title,
+            link(citation.url),
+            citation.refType || '',
+        ]));
+    }
+
+    function renderBrowse() {
+        return table(['action', 'argument'], state.intel.browseActions.map((action) => [
+            action.action,
+            action.arg,
+        ]));
+    }
+
+    function renderProducts() {
+        if (!state.intel.products.length) return h('div', { class: 'empty' }, 'No product carousel was captured in this conversation.');
+        const canHydrate = state.intel.products.some((product) => product.lookupKey);
+        const ordered = state.intel.products
+            .map((product, index) => ({ product, index }))
+            .sort((a, b) => ((a.product.position ?? a.index) - (b.product.position ?? b.index)));
+        return h('div', null,
+            h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, `${state.intel.products.length} products`),
+                h('div', { class: 'flowtools' },
+                    canHydrate ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : 'Reload offers') : null,
+                    h('button', { class: 'btn', onClick: exportProductsCsv }, 'Products CSV'))),
+            state.loadingOffers ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.offerProgress || 'loading live offers...') : null,
+            h('div', { class: 'pgrid' }, ordered.map((item) => renderProductCard(item.product))));
+    }
+
+    function renderProductCard(product) {
+        const offers = (product.offers || []).slice().sort((a, b) => Number(isBestOffer(b)) - Number(isBestOffer(a)));
+        const rating = productRatingText(product);
+        const firstOfferLink = offers.find((offer) => usableProductUrl(offer.url) || offer.shoppingUrl) || {};
+        const chosenUrl = usableProductUrl(product.providerUrl) || usableProductUrl(firstOfferLink.url) || '';
+        const fallbackUrl = !chosenUrl && product.shoppingUrl ? product.shoppingUrl : '';
+        const productUrl = chosenUrl || fallbackUrl || firstOfferLink.shoppingUrl || '';
+        const sourceLabel = primaryMerchantLabel(product.merchants) || compactUrlLabel(chosenUrl) || (fallbackUrl ? 'Google Shopping' : '');
+        const image = product.image ? h('img', { class: 'thumb', src: product.image, loading: 'lazy', onError: function () { this.style.display = 'none'; } }) : null;
+        const title = productUrl
+            ? h('a', { class: 'ptitle plink', href: productUrl, target: '_blank', rel: 'noopener', title: productUrl, text: product.title || '(untitled)' })
+            : h('div', { class: 'ptitle', text: product.title || '(untitled)' });
+        return h('div', { class: 'pcard', 'data-filter-row': '1' },
+            image && productUrl ? h('a', { class: 'thumblink', href: productUrl, target: '_blank', rel: 'noopener', title: productUrl }, image) : image,
+            product.tag ? h('span', { class: 'pill', text: product.tag }) : null,
+            title,
+            product.price ? h('div', { class: 'price', text: product.price }) : null,
+            rating ? h('div', { class: 'ratingline' }, starIcon(), h('span', { text: rating })) : null,
+            product.description ? h('div', { class: 'desc', text: product.description }) : null,
+            sourceLabel ? (productUrl
+                ? h('a', { class: 'small sourcelink', href: productUrl, target: '_blank', rel: 'noopener', title: productUrl, text: sourceLabel })
+                : h('div', { class: 'small', text: sourceLabel })) : null,
+            ...offers.map((offer) => {
+                const best = isBestOffer(offer);
+                const offerUrl = usableProductUrl(offer.url) || offer.shoppingUrl || '';
+                const row = h('div', { class: `offer${best ? ' best' : ''}`, title: [offer.details, offer.tag, offer.url || (offer.shoppingUrl ? `Google Shopping fallback: ${offer.shoppingUrl}` : '')].filter(Boolean).join(' · ') },
+                    h('span', null, best ? h('span', { class: 'bestmark', text: '●' }) : null, offer.merchant || 'merchant'),
+                    h('strong', { text: offer.total || offer.price || offer.base || '' }));
+                return offerUrl ? h('a', { class: 'offerlink', href: offerUrl, target: '_blank', rel: 'noopener', title: offer.url || `Google Shopping fallback: ${offerUrl}` }, row) : row;
+            }),
+            !offers.length && (state.loadingOffers || product.offerLoading) && product.lookupKey ? h('div', { class: 'loadingline', style: { margin: '4px 0 0' } }, h('span', { class: 'dotspin' }), 'loading live offers...') : null,
+            !offers.length && product.offerError ? h('div', { class: 'small', text: 'live offers unavailable' }) : null,
+            !offers.length && !state.loadingOffers && product.lookupKey && !product.offerError ? h('div', { class: 'small', text: 'offers loading starts on open' }) : null);
+    }
+
+    function startOfferHydration() {
+        if (state.offersStarted || state.loadingOffers) return;
+        const hasTargets = state.intel && state.intel.products.some((product) => product.lookupKey && !(product.offers && product.offers.length));
+        if (!hasTargets) return;
+        state.offersStarted = true;
+        hydrateOffers({ force: false });
+    }
+
+    async function refreshProductOffers(product) {
+        if (!state.intel || !product || !product.lookupKey || product.offerLoading) return;
+        product.offerLoading = true;
+        product.offerError = '';
+        product.offers = [];
+        setStatus(`loading offers: ${product.title || 'product'}...`);
+        renderOfferState();
+        try {
+            const live = await CORE().loadProductOffers(product, state.token);
+            if (live && live.offers && live.offers.length) {
+                product.offers = live.offers;
+                if (live.providerUrl) product.providerUrl = live.providerUrl;
+                if (live.shoppingUrl) product.shoppingUrl = live.shoppingUrl;
+                if (live.rating != null && live.rating !== '') product.rating = live.rating;
+                if (live.reviews != null && live.reviews !== '') product.reviews = live.reviews;
+            } else {
+                product.offers = [];
+                product.offerError = 'No live offers found.';
+            }
+            setStatus('offers updated');
+        } catch (error) {
+            product.offers = [];
+            product.offerError = error.message;
+            setStatus('offer reload failed', true);
+        } finally {
+            product.offerLoading = false;
+            renderOfferState();
+        }
+    }
+
+    async function hydrateOffers(options = {}) {
+        if (!state.intel || state.loadingOffers) return;
+        if (options.force) {
+            state.intel.products.forEach((product) => {
+                if (product.lookupKey) {
+                    product.offers = [];
+                    product.offerError = '';
+                    product.offerLoading = false;
+                }
+            });
+        }
+        state.loadingOffers = true;
+        state.offerProgress = 'starting live offer load...';
+        renderOfferState();
+        setStatus('loading live offers...');
+        const targets = state.intel.products.filter((product) => product.lookupKey && !(product.offers && product.offers.length));
+        for (let i = 0; i < targets.length; i++) {
+            state.offerProgress = `loading offers ${i + 1}/${targets.length}: ${targets[i].title || 'product'}`;
+            setStatus(`loading offers ${i + 1}/${targets.length}...`);
+            targets[i].offerLoading = true;
+            renderOfferState();
+            try {
+                const live = await CORE().loadProductOffers(targets[i], state.token);
+                if (live && live.offers && live.offers.length) {
+                    targets[i].offers = live.offers;
+                    if (live.providerUrl) targets[i].providerUrl = live.providerUrl;
+                    if (live.shoppingUrl) targets[i].shoppingUrl = live.shoppingUrl;
+                    if (live.rating != null && live.rating !== '') targets[i].rating = live.rating;
+                    if (live.reviews != null && live.reviews !== '') targets[i].reviews = live.reviews;
+                }
+            } catch (error) {
+                targets[i].offerError = error.message;
+            } finally {
+                targets[i].offerLoading = false;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 350));
+        }
+        state.loadingOffers = false;
+        state.offerProgress = '';
+        setStatus('offers updated');
+        renderOfferState();
+    }
+
+    function renderReasoning() {
+        const blocks = [];
+        if (state.intel.reasoningRecap) blocks.push(h('div', { class: 'reason', 'data-filter-row': '1' }, h('b', { text: 'Reasoning recap' }), h('pre', { text: state.intel.reasoningRecap })));
+        state.intel.reasoning.forEach((item, index) => blocks.push(h('div', { class: 'reason', 'data-filter-row': '1' }, h('b', { text: item.summary || `Reasoning step ${index + 1}` }), h('pre', { text: item.content || '' }))));
+        state.intel.memory.forEach((item) => blocks.push(h('div', { class: 'reason', 'data-filter-row': '1' }, h('b', { text: `${item.attribution}: ${item.title || 'memory'}` }), h('pre', { text: item.snippet || '' }))));
+        return blocks.length ? h('div', null, blocks) : h('div', { class: 'empty' }, 'No reasoning or memory metadata was exposed for this conversation.');
+    }
+
+    function renderSaved() {
+        const mount = h('div', { class: 'empty' }, 'Loading saved scans...');
+        CORE().loadSnapshots().then((snapshots) => {
+            if (!snapshots.length) {
+                mount.replaceChildren(h('div', { class: 'empty' }, 'No saved scans yet.'));
+                return;
+            }
+            mount.className = 'savedlist';
+            mount.replaceChildren(
+                h('div', { class: 'savedhead' },
+                    h('span', { text: 'chat' }),
+                    h('span', { text: 'saved' }),
+                    h('span', { text: 'captured' }),
+                    h('span', { text: 'actions' })),
+                ...snapshots.map((snapshot) => h('div', { class: 'savedrow', 'data-filter-row': '1' },
+                h('div', { class: 'savedtitle', title: snapshot.title || '(untitled)', text: snapshot.title || '(untitled)' }),
+                h('div', { class: 'savedmeta', text: new Date(snapshot.scannedAt).toLocaleString() }),
+                h('div', { class: 'savedstats' },
+                    h('span', null, h('b', { text: snapshot.stats.sources || 0 }), ' sources'),
+                    h('span', null, h('b', { text: snapshot.stats.citations || 0 }), ' citations'),
+                    h('span', null, h('b', { text: snapshot.stats.products || 0 }), ' products')),
+                h('div', { class: 'savedacts' },
+                    h('button', { class: 'btn', onClick: () => { state.intel = snapshot.intel; state.activeTab = 'overview'; render(); } }, 'Open'),
+                    h('button', { class: 'btn danger', onClick: async () => { await CORE().deleteSnapshot(snapshot.id); state.activeTab = 'saved'; render(); } }, 'Delete')))));
+        }).catch((error) => mount.replaceChildren(h('div', { class: 'empty' }, error.message)));
+        return mount;
+    }
+
+    function table(headers, rows) {
+        if (!rows.length) return h('div', { class: 'empty' }, 'nothing captured');
+        return h('div', { class: 'tablewrap' },
+            h('table', null,
+                h('thead', null, h('tr', null, headers.map((header) => h('th', { text: header })))),
+                h('tbody', null, rows.map((row) => h('tr', { 'data-filter-row': '1' }, row.map((cell) => h('td', null, cell)))))));
+    }
+
+    function link(url) {
+        if (!url) return '';
+        return h('a', { class: 'url', href: url, target: '_blank', rel: 'noopener', title: url, text: url.replace(/^https?:\/\//, '') });
+    }
+
+    async function saveCurrent() {
+        if (!state.intel) return;
+        try {
+            await CORE().saveSnapshot(state.intel);
+            setStatus('saved locally');
+        } catch (error) {
+            setStatus(error.message, true);
+        }
+    }
+
+    function jsonText() {
+        return state.intel ? JSON.stringify(state.intel, null, 2) : '';
+    }
+
+    function sourcesCsvText() {
+        return state.intel ? CORE().toCsv(state.intel.sources) : '';
+    }
+
+    async function copyText(text, success) {
+        try {
+            await navigator.clipboard.writeText(text);
+            setStatus(success);
+        } catch (error) {
+            setStatus('copy failed', true);
+        }
+    }
+
+    function copyJson() {
+        if (!state.intel) return;
+        copyText(jsonText(), 'JSON copied');
+    }
+
+    function copySourcesCsv() {
+        if (!state.intel) return;
+        copyText(sourcesCsvText(), 'Sources CSV copied');
+    }
+
+    function exportJson() {
+        if (!state.intel) return;
+        download(`${state.intel.id}.json`, jsonText(), 'application/json');
+    }
+
+    function exportSourcesCsv() {
+        if (!state.intel) return;
+        download(`${state.intel.id}-sources.csv`, sourcesCsvText(), 'text/csv');
+    }
+
+    function exportProductsCsv() {
+        if (!state.intel) return;
+        const rows = state.intel.products.map((product) => ({
+            title: product.title,
+            price: product.price,
+            tag: product.tag,
+            merchants: product.merchants,
+            rating: product.rating,
+            reviews: product.reviews,
+            query: product.query,
+            providerUrl: product.providerUrl,
+            shoppingUrl: product.shoppingUrl,
+            offers: (product.offers || []).length,
+        }));
+        download(`${state.intel.id}-products.csv`, CORE().toCsv(rows), 'text/csv');
+    }
+
+    function serializeSvg(svg) {
+        const clone = svg.cloneNode(true);
+        clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        return new XMLSerializer().serializeToString(clone);
+    }
+
+    function closeExportMenu(event) {
+        const menu = event && event.currentTarget && event.currentTarget.closest('details');
+        if (menu) menu.open = false;
+    }
+
+    function exportMenuFromEvent(event) {
+        const path = event && typeof event.composedPath === 'function' ? event.composedPath() : [];
+        return path.find((node) => node && node.classList && node.classList.contains('exportmenu')) || null;
+    }
+
+    function closeExportMenus(except) {
+        if (!state.shadow) return;
+        state.shadow.querySelectorAll('details.exportmenu[open]').forEach((menu) => {
+            if (menu !== except) menu.open = false;
+        });
+    }
+
+    async function copyFlowSvg(svg) {
+        try {
+            await navigator.clipboard.writeText(serializeSvg(svg));
+            setStatus('SVG copied');
+        } catch (error) {
+            setStatus('SVG copy failed', true);
+        }
+    }
+
+    function flowPngBlob(svg) {
+        return new Promise((resolve, reject) => {
+            const svgText = serializeSvg(svg);
+            const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Number(svg.getAttribute('width')) * 2;
+                    canvas.height = Number(svg.getAttribute('height')) * 2;
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(2, 2);
+                    ctx.drawImage(img, 0, 0);
+                    URL.revokeObjectURL(url);
+                    canvas.toBlob((png) => {
+                        if (png) resolve(png);
+                        else reject(new Error('PNG render failed'));
+                    }, 'image/png');
+                } catch (error) {
+                    URL.revokeObjectURL(url);
+                    reject(error);
+                }
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('PNG render failed'));
+            };
+            img.src = url;
+        });
+    }
+
+    async function copyFlowPng(svg) {
+        try {
+            if (!navigator.clipboard || typeof ClipboardItem === 'undefined') throw new Error('PNG clipboard is unavailable');
+            const png = await flowPngBlob(svg);
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+            setStatus('PNG copied');
+        } catch (error) {
+            setStatus('PNG copy unavailable, saved instead');
+            saveFlowPng(svg);
+        }
+    }
+
+    async function saveFlowPng(svg) {
+        const svgText = serializeSvg(svg);
+        try {
+            const png = await flowPngBlob(svg);
+            downloadBlob(`${state.intel.id}-flow.png`, png);
+        } catch (error) {
+            download(`${state.intel.id}-flow.svg`, svgText, 'image/svg+xml');
+        }
+    }
+
+    function download(name, text, type) {
+        downloadBlob(name, new Blob([text], { type }));
+    }
+
+    function downloadBlob(name, blob) {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = name;
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && state.overlay && state.overlay.classList.contains('open')) close();
+    });
+
+    window.CgptGeoResearchUI = { open, close, rescan };
+})();

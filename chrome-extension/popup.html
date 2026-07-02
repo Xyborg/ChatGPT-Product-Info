@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT E-commerce Product Research</title>
+    <title>ChatGPT GEO/AEO Product Research</title>
     <style>
         body {
             width: 340px;
@@ -122,6 +122,10 @@
             transition: all 0.2s ease;
             margin-bottom: 12px;
             box-shadow: 0 4px 12px rgba(91, 141, 239, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
         
         .action-button:hover {
@@ -204,9 +208,9 @@
         <div class="header">
             <h1>
                 <img src="assets/icons-ui/search.svg" alt="Search icon" class="header-icon">
-                E-commerce Product Research
+                GEO/AEO Product Research
             </h1>
-            <p>Search for product reviews and information directly in ChatGPT</p>
+            <p>Scan ChatGPT conversations for sources, citations, products, and offer research</p>
         </div>
 
         <div id="status" class="status">
@@ -214,20 +218,21 @@
         </div>
 
         <button id="open-search" class="action-button" disabled>
-            Open E-commerce Product Research
+            Open GEO/AEO Product Research
         </button>
 
         <button id="go-to-chatgpt" class="action-button secondary-button">
             Go to ChatGPT
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="16" height="16" fill="none"/><path d="M104,141.86V77.19L148.5,51.5a48,48,0,0,1,66.4,64.08" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M128,155.71,72,123.38V72a48,48,0,0,1,88.69-25.47" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M152,141.86,96,174.19,51.5,148.5A48,48,0,0,1,73.79,59" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M152,114.14v64.67L107.5,204.5a48,48,0,0,1-66.4-64.08" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M128,100.29l56,32.33V184a48,48,0,0,1-88.69,25.47" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M104,114.14l56-32.33,44.5,25.69a48,48,0,0,1-22.29,89.55" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
         </button>
 
         <div class="instructions">
             <h3>How to use:</h3>
             <ul>
                 <li>Make sure you're logged in to ChatGPT</li>
-                <li>Click "Open E-commerce Product Research" to show the search interface</li>
-                <li>Search for any product to get reviews and information</li>
-                <li>Use multi-product search to compare multiple items</li>
+                <li>Open a ChatGPT conversation you want to analyze</li>
+                <li>Click "Open GEO/AEO Product Research" to scan the conversation</li>
+                <li>Export sources, citations, products, flow diagrams, and saved scans</li>
             </ul>
         </div>
 
