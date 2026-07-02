@@ -33,6 +33,16 @@ The extension runs inside `chatgpt.com`, reads the active conversation from your
 5. Open `https://chatgpt.com`, log in, and open a conversation.
 6. Click the floating **GEO/AEO Research** button or the extension popup button.
 
+## Build A Release Zip
+
+Update the version in `chrome-extension/manifest.json`, then run:
+
+```bash
+./scripts/build-extension.sh
+```
+
+The script creates `dist/chatgpt-geo-aeo-research-v<version>.zip` with `manifest.json` at the archive root, plus a `.sha256` checksum file. It stages only the runtime files required by the extension and excludes docs, local files, old scripts, `.DS_Store`, PEM keys, existing zips, screenshots, and store assets.
+
 ## How To Use
 
 1. Open a ChatGPT conversation.

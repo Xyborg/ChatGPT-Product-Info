@@ -58,7 +58,10 @@ temp/
 *.crx
 *.pem
 *.zip
+dist/
+.tmp-extension-build/
 IMPLEMENTATION_PLAN.md
 store-assets/
 modal-prototype.html
 xray-prod.js
+assets/
