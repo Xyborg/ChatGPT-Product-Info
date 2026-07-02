@@ -519,6 +519,25 @@
         return project;
     }
 
+    async function updateProject(projectId, updates = {}) {
+        const projects = await loadProjects();
+        const current = projects.find((project) => project.id === projectId);
+        if (!current) throw new Error('Project not found.');
+        const nextName = Object.prototype.hasOwnProperty.call(updates, 'name') ? String(updates.name || '').trim() : current.name;
+        if (!nextName) throw new Error('Project name is required.');
+        if (projects.some((project) => project.id !== projectId && project.name.toLowerCase() === nextName.toLowerCase())) {
+            throw new Error('A project with this name already exists.');
+        }
+        const next = projects.map((project) => project.id === projectId ? normalizeProject({
+            ...project,
+            ...updates,
+            name: nextName,
+            updatedAt: new Date().toISOString(),
+        }) : project);
+        await saveProjects(next);
+        return next.find((project) => project.id === projectId);
+    }
+
     async function deleteProject(projectId) {
         const projects = await loadProjects();
         await saveProjects(projects.filter((project) => project.id !== projectId));
@@ -547,6 +566,26 @@
         const tag = normalizeTag({ name: normalizedName, color: color || '#2563eb' });
         await saveTags([...tags, tag]);
         return tag;
+    }
+
+    async function updateTag(tagId, updates = {}) {
+        const tags = await loadTags();
+        const current = tags.find((tag) => tag.id === tagId);
+        if (!current) throw new Error('Tag not found.');
+        const nextName = Object.prototype.hasOwnProperty.call(updates, 'name') ? String(updates.name || '').trim() : current.name;
+        if (!nextName) throw new Error('Tag name is required.');
+        if (tags.some((tag) => tag.id !== tagId && tag.name.toLowerCase() === nextName.toLowerCase())) {
+            throw new Error('A tag with this name already exists.');
+        }
+        const next = tags.map((tag) => tag.id === tagId ? normalizeTag({
+            ...tag,
+            ...updates,
+            name: nextName,
+            color: updates.color || tag.color,
+            updatedAt: new Date().toISOString(),
+        }) : tag);
+        await saveTags(next);
+        return next.find((tag) => tag.id === tagId);
     }
 
     async function deleteTag(tagId) {
@@ -659,9 +698,11 @@
         deleteSnapshot,
         loadProjects,
         createProject,
+        updateProject,
         deleteProject,
         loadTags,
         createTag,
+        updateTag,
         deleteTag,
         loadLibrary,
         importLibrary,

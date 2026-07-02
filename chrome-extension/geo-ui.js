@@ -54,7 +54,7 @@
         .querylist{border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:260px;background:#fff}.queryrow{display:grid;grid-template-columns:46px minmax(150px,210px) minmax(0,1fr);gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid #f0f2f4}.queryrow:last-child{border-bottom:0}.queryrow:hover{background:#fafbfc}.qnum{font-family:var(--mono);font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums}.qvia{font-family:var(--mono);font-size:11px;color:#475467;background:#f2f4f7;border:1px solid #e4e7ec;border-radius:999px;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qvia.product{background:#f5f3ff;border-color:#ddd6fe;color:#6741d9}.qtext{font-size:13px;line-height:1.35;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .savedlist{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.savedhead,.savedrow{display:grid;grid-template-columns:minmax(220px,1fr) 170px 240px auto;gap:12px;align-items:center}.savedhead{padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);background:#fcfcfd}.savedrow{padding:9px 12px;border-bottom:1px solid #f0f2f4}.savedrow:last-child{border-bottom:0}.savedrow:hover{background:#fafbfc}.savedtitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedmeta{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap}.savedstats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:#475467}.savedstats b{color:var(--ink);font-weight:650}.savedacts{display:flex;gap:6px;justify-content:flex-end}.savedacts .btn{padding:5px 8px}
         .savedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.savedfilters,.savedtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.select{border:1px solid var(--line);background-color:#fff;border-radius:7px;padding:7px 34px 7px 9px;font-family:var(--mono);font-size:12px;color:var(--ink);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317191f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:14px 14px;background-position:right 10px center}.savedhead,.savedrow{grid-template-columns:minmax(260px,1.4fr) 150px minmax(220px,.9fr) minmax(180px,.75fr) auto}.savedorg{display:flex;flex-direction:column;gap:7px;min-width:0}.savedorg .select{width:100%;max-width:280px}.tagline{display:flex;gap:5px;flex-wrap:wrap}.tagchip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:650}.notes{font-size:12px;color:#475467;line-height:1.35;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.importfile{display:none}
-        .orgshade{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.34);padding:24px}.orgmodal{width:min(600px,calc(100vw - 56px));max-height:min(720px,calc(100vh - 80px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 24px 70px rgba(17,24,39,.28);padding:18px}.orghead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.orgtitle{font-size:16px;font-weight:700;margin:0}.orgsub{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px;line-height:1.4}.orggrid{display:grid;gap:14px}.orgfield{display:grid;gap:6px}.orgfield label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}.orginput,.orgtextarea{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:8px 10px;font-family:var(--mono);font-size:12px}.orgtextarea{min-height:86px;resize:vertical;font-family:var(--sans);line-height:1.4}.orgcolor{width:48px;height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:3px;cursor:pointer}.orgrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.orgrow.tags{grid-template-columns:minmax(0,1fr) auto 48px}.orghint{font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.4}.orgstatus{min-height:16px;font-family:var(--mono);font-size:11px;color:var(--mut)}.orgchips{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}.orgchip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-family:var(--mono);font-size:11px;font-weight:650}.orgchip button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font:inherit;opacity:.75}.orgactions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+        .orgshade{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.34);padding:24px}.orgmodal{width:min(600px,calc(100vw - 56px));max-height:min(720px,calc(100vh - 80px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 24px 70px rgba(17,24,39,.28);padding:18px}.orgmodal.wide{width:min(760px,calc(100vw - 56px))}.orghead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.orgtitle{font-size:16px;font-weight:700;margin:0}.orgsub{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px;line-height:1.4}.orggrid{display:grid;gap:14px}.orgfield{display:grid;gap:6px}.orgfield label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}.orginput,.orgtextarea{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:8px 10px;font-family:var(--mono);font-size:12px}.orgtextarea{min-height:86px;resize:vertical;font-family:var(--sans);line-height:1.4}.orgcolor{width:48px;height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:3px;cursor:pointer}.orgrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.orgrow.tags{grid-template-columns:minmax(0,1fr) auto 48px}.orghint{font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.4}.orgstatus{min-height:16px;font-family:var(--mono);font-size:11px;color:var(--mut)}.orgchips{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}.orgchip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-family:var(--mono);font-size:11px;font-weight:650}.orgchip button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font:inherit;opacity:.75}.orgactions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.managebody{display:grid;gap:18px}.managesec{display:grid;gap:8px}.managerow{display:grid;grid-template-columns:minmax(0,1fr) 84px auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f4}.managerow:last-child{border-bottom:0}.managerow.tag{grid-template-columns:minmax(0,1fr) 48px 84px auto auto}.managecount{font-family:var(--mono);font-size:11px;color:var(--mut);text-align:right}
         .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}.pgrid::-webkit-scrollbar{height:8px}.pgrid::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}.pgrid .pcard{flex:0 0 238px;width:238px;scroll-snap-align:start}.pcard{border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:7px}.thumblink{display:block;text-decoration:none}.thumb{height:130px;width:100%;object-fit:contain;border:0;border-radius:4px;background:transparent}.ptitle{font-weight:650;line-height:1.3}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:700}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:#6b7280}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{display:inline-flex;align-self:flex-start;border-radius:999px;background:#ecfdf3;color:#067647;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#4b5563;line-height:1.4}.sourcelink{display:inline-block;color:#475467;text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#1d4ed8}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #eef1f5;padding-top:6px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafbfc}.offer.best{color:#067647;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:#0f9f6e;margin-right:4px}.small{font-family:var(--mono);font-size:11px;color:var(--mut)}.loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px}.dotspin{width:12px;height:12px;border:2px solid #d8dce2;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
         .flowtools,.flowacts{display:flex;gap:8px;flex-wrap:wrap}.flowbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.flowlegend{display:flex;flex-wrap:wrap;gap:7px 14px}.lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--mut)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.exportmenu{position:relative}.exportmenu summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.exportmenu summary::-webkit-details-marker{display:none}.chev{width:13px;height:13px;transition:transform .16s ease}.exportmenu[open] .chev{transform:rotate(180deg)}.exportitems{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:170px;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 12px 28px rgba(17,24,39,.16);padding:5px}.exportitem{display:block;width:100%;border:0;background:transparent;color:var(--ink);text-align:left;border-radius:6px;padding:7px 9px;cursor:pointer;font-family:var(--mono);font-size:12px}.exportitem:hover{background:#f2f4f7}.flowbox,.flowwrap{overflow-y:auto;overflow-x:hidden;border:1px solid var(--line);border-radius:8px;background:#fcfcfd;padding:6px}.flowbox svg,.flowwrap svg{display:block;width:100%;height:auto}
         .reason{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}.reason b{font-size:13px}.reason pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:#374151;line-height:1.5;margin:8px 0 0}
@@ -1045,7 +1045,7 @@
                 product.offers = [];
                 product.offerError = 'No live offers found.';
             }
-            setStatus('offers updated');
+            if (!await persistCurrentSnapshot('offers updated and saved')) setStatus('offers updated');
         } catch (error) {
             product.offers = [];
             product.offerError = error.message;
@@ -1095,8 +1095,21 @@
         }
         state.loadingOffers = false;
         state.offerProgress = '';
-        setStatus('offers updated');
+        if (!await persistCurrentSnapshot('offers updated and saved')) setStatus('offers updated');
         renderOfferState();
+    }
+
+    async function persistCurrentSnapshot(message) {
+        if (!state.intel || !state.intel.id || !state.intel.scannedAt) return false;
+        try {
+            const snapshotId = `${state.intel.id}:${state.intel.scannedAt}`;
+            const saved = await CORE().updateSnapshot(snapshotId, { intel: state.intel, stats: state.intel.stats });
+            if (!saved) return false;
+            setStatus(message || 'saved scan updated');
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     function renderReasoning() {
@@ -1137,6 +1150,7 @@
             h('div', { class: 'savedtools' },
                 h('button', { class: 'btn', onClick: createProjectFromPrompt }, 'New project'),
                 h('button', { class: 'btn', onClick: createTagFromPrompt }, 'New tag'),
+                h('button', { class: 'btn', onClick: openLibraryManagementModal }, 'Manage'),
                 h('button', { class: 'btn', onClick: () => fileInput.click() }, 'Import'),
                 h('details', { class: 'exportmenu' },
                     h('summary', { class: 'btn' }, 'Export', chevronIcon()),
@@ -1202,6 +1216,117 @@
     async function createTagFromPrompt() {
         const result = await openOrganizationModal({ title: 'Create tag', mode: 'tag' });
         if (result) render();
+    }
+
+    async function openLibraryManagementModal() {
+        ensureHost();
+        let library = await CORE().loadLibrary();
+        let pendingDelete = '';
+        const shade = h('div', { class: 'orgshade' });
+        const body = h('div', { class: 'managebody' });
+        const status = h('div', { class: 'orgstatus' });
+
+        const close = () => {
+            shade.remove();
+            if (state.activeTab === 'saved') render();
+        };
+        const refresh = async (message) => {
+            library = await CORE().loadLibrary();
+            pendingDelete = '';
+            status.textContent = message || '';
+            draw();
+        };
+        const usage = (kind, id) => {
+            const snapshots = library.snapshots || [];
+            if (kind === 'project') return snapshots.filter((snapshot) => snapshot.projectId === id).length;
+            return snapshots.filter((snapshot) => (snapshot.tags || []).includes(id)).length;
+        };
+        const deleteLabel = (kind, id) => pendingDelete === `${kind}:${id}` ? 'Confirm delete' : 'Delete';
+        const deleteItem = async (kind, item) => {
+            const key = `${kind}:${item.id}`;
+            if (pendingDelete !== key) {
+                pendingDelete = key;
+                draw();
+                return;
+            }
+            if (kind === 'project') {
+                await CORE().deleteProject(item.id);
+                if (state.savedFilters.projectId === item.id) state.savedFilters.projectId = '';
+            } else {
+                await CORE().deleteTag(item.id);
+                if (state.savedFilters.tagId === item.id) state.savedFilters.tagId = '';
+            }
+            await refresh(`${kind === 'project' ? 'Project' : 'Tag'} deleted`);
+        };
+        const draw = () => {
+            const projectRows = (library.projects || []).map((project) => {
+                const input = h('input', { class: 'orginput', value: project.name });
+                return h('div', { class: 'managerow' },
+                    input,
+                    h('div', { class: 'managecount', text: `${usage('project', project.id)} scans` }),
+                    h('button', { class: 'btn', onClick: async () => {
+                        try {
+                            await CORE().updateProject(project.id, { name: input.value });
+                            await refresh('Project updated');
+                        } catch (error) {
+                            status.textContent = error.message;
+                        }
+                    } }, 'Save'),
+                    h('button', { class: 'btn danger', onClick: async () => {
+                        try {
+                            await deleteItem('project', project);
+                        } catch (error) {
+                            status.textContent = error.message;
+                        }
+                    } }, deleteLabel('project', project.id)));
+            });
+            const tagRows = (library.tags || []).map((tag) => {
+                const input = h('input', { class: 'orginput', value: tag.name });
+                const color = h('input', { class: 'orgcolor', type: 'color', value: /^#[0-9a-f]{6}$/i.test(tag.color || '') ? tag.color : '#2563eb' });
+                return h('div', { class: 'managerow tag' },
+                    input,
+                    color,
+                    h('div', { class: 'managecount', text: `${usage('tag', tag.id)} scans` }),
+                    h('button', { class: 'btn', onClick: async () => {
+                        try {
+                            await CORE().updateTag(tag.id, { name: input.value, color: color.value });
+                            await refresh('Tag updated');
+                        } catch (error) {
+                            status.textContent = error.message;
+                        }
+                    } }, 'Save'),
+                    h('button', { class: 'btn danger', onClick: async () => {
+                        try {
+                            await deleteItem('tag', tag);
+                        } catch (error) {
+                            status.textContent = error.message;
+                        }
+                    } }, deleteLabel('tag', tag.id)));
+            });
+            body.replaceChildren(
+                h('div', { class: 'managesec' },
+                    h('div', { class: 'eyebrow', text: 'Projects' }),
+                    projectRows.length ? projectRows : h('div', { class: 'small', text: 'No projects yet.' })),
+                h('div', { class: 'managesec' },
+                    h('div', { class: 'eyebrow', text: 'Tags' }),
+                    tagRows.length ? tagRows : h('div', { class: 'small', text: 'No tags yet.' })));
+        };
+
+        const panel = h('div', { class: 'orgmodal wide', role: 'dialog', 'aria-modal': 'true' },
+            h('div', { class: 'orghead' },
+                h('div', null,
+                    h('h3', { class: 'orgtitle', text: 'Manage projects and tags' }),
+                    h('div', { class: 'orgsub', text: 'Rename or delete local organization labels. Deleted projects/tags are removed from saved scans.' })),
+                h('button', { class: 'btn x', 'aria-label': 'Close', onClick: close }, closeIcon())),
+            body,
+            status,
+            h('div', { class: 'orgactions' }, h('button', { class: 'btn primary', type: 'button', onClick: close }, 'Done')));
+        shade.appendChild(panel);
+        shade.addEventListener('click', (event) => {
+            if (event.target === shade) close();
+        });
+        state.overlay.appendChild(shade);
+        draw();
     }
 
     async function organizeSavedSnapshot(snapshot) {
