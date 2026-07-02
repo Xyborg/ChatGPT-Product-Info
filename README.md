@@ -4,6 +4,9 @@ A Chrome extension for extracting GEO/AEO, source, citation, product, and offer 
 
 The extension runs inside `chatgpt.com`, reads the active conversation from your logged-in ChatGPT session, normalizes the visible research signals, and lets you save, organize, inspect, and export the results locally.
 
+<img width="1912" height="962" alt="2" src="https://github.com/user-attachments/assets/c6eb21d6-3f76-4d1b-ae47-d005bc2bcf94" />
+
+
 ## What It Captures
 
 - Conversation prompt, title, id, and scan timestamp.
@@ -14,6 +17,8 @@ The extension runs inside `chatgpt.com`, reads the active conversation from your
 - Product carousel entities, images, prices, ratings, review counts, selected source links, and available offer data.
 - Request flow diagrams showing prompt, fan-out queries, source pipelines, product fan-out, products, and offers.
 
+<img width="1912" height="962" alt="5" src="https://github.com/user-attachments/assets/7793b3a1-fbed-4e69-8234-eeac26e8262b" />
+
 ## v2 Highlights
 
 - Cache-first saved conversations: reopening a previously saved conversation loads the saved scan instantly unless you click **Rescan**.
@@ -23,6 +28,8 @@ The extension runs inside `chatgpt.com`, reads the active conversation from your
 - Current scan export as JSON or sources CSV.
 - Saved library export as JSON, sources CSV, or products CSV.
 - No external backend. Saved scans stay in `chrome.storage.local`.
+
+<img width="1912" height="962" alt="6" src="https://github.com/user-attachments/assets/d1974258-9be3-4209-94ce-439568ae4d23" />
 
 ## Installation
 
