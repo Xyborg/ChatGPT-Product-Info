@@ -11,6 +11,7 @@
         ['citations', 'Citations'],
         ['products', 'Products'],
         ['browse', 'Browsing'],
+        ['research', 'Deep Research'],
         ['reasoning', 'Reasoning'],
         ['saved', 'Saved'],
     ];
@@ -55,7 +56,7 @@
         .savedlist{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.savedhead,.savedrow{display:grid;grid-template-columns:minmax(220px,1fr) 170px 240px auto;gap:12px;align-items:center}.savedhead{padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);background:#fcfcfd}.savedrow{padding:9px 12px;border-bottom:1px solid #f0f2f4}.savedrow:last-child{border-bottom:0}.savedrow:hover{background:#fafbfc}.savedtitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedmeta{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap}.savedstats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:#475467}.savedstats b{color:var(--ink);font-weight:650}.savedacts{display:flex;gap:6px;justify-content:flex-end}.savedacts .btn{padding:5px 8px}
         .savedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.savedfilters,.savedtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.select{border:1px solid var(--line);background-color:#fff;border-radius:7px;padding:7px 34px 7px 9px;font-family:var(--mono);font-size:12px;color:var(--ink);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317191f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:14px 14px;background-position:right 10px center}.savedhead,.savedrow{grid-template-columns:minmax(260px,1.4fr) 150px minmax(220px,.9fr) minmax(180px,.75fr) auto}.savedorg{display:flex;flex-direction:column;gap:7px;min-width:0}.savedorg .select{width:100%;max-width:280px}.tagline{display:flex;gap:5px;flex-wrap:wrap}.tagchip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:650}.notes{font-size:12px;color:#475467;line-height:1.35;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.importfile{display:none}
         .orgshade{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.34);padding:24px}.orgmodal{width:min(600px,calc(100vw - 56px));max-height:min(720px,calc(100vh - 80px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 24px 70px rgba(17,24,39,.28);padding:18px}.orgmodal.wide{width:min(760px,calc(100vw - 56px))}.orghead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.orgtitle{font-size:16px;font-weight:700;margin:0}.orgsub{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px;line-height:1.4}.orggrid{display:grid;gap:14px}.orgfield{display:grid;gap:6px}.orgfield label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}.orginput,.orgtextarea{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:8px 10px;font-family:var(--mono);font-size:12px}.orgtextarea{min-height:86px;resize:vertical;font-family:var(--sans);line-height:1.4}.orgcolor{width:48px;height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:3px;cursor:pointer}.orgrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.orgrow.tags{grid-template-columns:minmax(0,1fr) auto 48px}.orghint{font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.4}.orgstatus{min-height:16px;font-family:var(--mono);font-size:11px;color:var(--mut)}.orgchips{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}.orgchip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-family:var(--mono);font-size:11px;font-weight:650}.orgchip button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font:inherit;opacity:.75}.orgactions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.managebody{display:grid;gap:18px}.managesec{display:grid;gap:8px}.managerow{display:grid;grid-template-columns:minmax(0,1fr) 84px auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f0f2f4}.managerow:last-child{border-bottom:0}.managerow.tag{grid-template-columns:minmax(0,1fr) 48px 84px auto auto}.managecount{font-family:var(--mono);font-size:11px;color:var(--mut);text-align:right}
-        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}.pgrid::-webkit-scrollbar{height:8px}.pgrid::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}.pgrid .pcard{flex:0 0 238px;width:238px;scroll-snap-align:start}.pcard{border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:7px}.thumblink{display:block;text-decoration:none}.thumb{height:130px;width:100%;object-fit:contain;border:0;border-radius:4px;background:transparent}.ptitle{font-weight:650;line-height:1.3}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:700}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:#6b7280}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{display:inline-flex;align-self:flex-start;border-radius:999px;background:#ecfdf3;color:#067647;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#4b5563;line-height:1.4}.sourcelink{display:inline-block;color:#475467;text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#1d4ed8}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #eef1f5;padding-top:6px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafbfc}.offer.best{color:#067647;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:#0f9f6e;margin-right:4px}.small{font-family:var(--mono);font-size:11px;color:var(--mut)}.loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px}.cachenote{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff8e6;border:1px solid #f2d78f;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-family:var(--mono);font-size:11.5px;color:#7a5b0f}.dotspin{width:12px;height:12px;border:2px solid #d8dce2;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}.pgrid::-webkit-scrollbar{height:8px}.pgrid::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}.pgrid .pcard{flex:0 0 238px;width:238px;scroll-snap-align:start}.pcard{border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:7px}.thumblink{display:block;text-decoration:none}.thumb{height:130px;width:100%;object-fit:contain;border:0;border-radius:4px;background:transparent}.ptitle{font-weight:650;line-height:1.3}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:700}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:#6b7280}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{display:inline-flex;align-self:flex-start;border-radius:999px;background:#ecfdf3;color:#067647;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#4b5563;line-height:1.4}.sourcelink{display:inline-block;color:#475467;text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#1d4ed8}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #eef1f5;padding-top:6px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafbfc}.offer.best{color:#067647;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:#0f9f6e;margin-right:4px}.small{font-family:var(--mono);font-size:11px;color:var(--mut)}.loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px}.cachenote{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff8e6;border:1px solid #f2d78f;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-family:var(--mono);font-size:11.5px;color:#7a5b0f}.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.rchip{font-family:var(--mono);font-size:11px;color:var(--mut);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px 10px}.rchip b{color:var(--ink);margin-right:2px}.rnote{font-family:var(--mono);font-size:11px;color:var(--mut);background:#f0f6f7;border:1px dashed #bcd8dd;border-radius:8px;padding:8px 11px;margin-bottom:12px;line-height:1.5}.rsteps{display:grid;gap:6px}.rstep{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:8px 11px}.rstep-blocked{border-color:#f1b7b0;background:#fff6f5}.rbadge{flex:none;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:3px 8px;margin-top:1px;color:#fff}.rbadge{background:#868e96}.rbadge-search{background:#0B7285}.rbadge-open{background:#4C6EF5}.rbadge-find{background:#845EF7}.rbadge-click{background:#868e96}.rbadge-quote{background:#0f9f6e}.rbadge-other{background:#5f6b7a}.rbadge-blocked{background:#C92A2A}.rstepbody{min-width:0;flex:1}.rmain{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}a.rmain:hover{text-decoration:underline;color:#1d4ed8}.rmeta{font-family:var(--mono);font-size:10.5px;color:var(--mut);margin-top:2px;line-height:1.45}.rstep-blocked .rmeta{color:#b42318}.rcensus{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}.rcensus>summary{cursor:pointer;margin-bottom:8px}.rcensus>.rstep{margin-bottom:6px}.rquote{border-left:3px solid #cbd5e1;background:var(--paper);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#374151;line-height:1.5}.dotspin{width:12px;height:12px;border:2px solid #d8dce2;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
         .flowtools,.flowacts{display:flex;gap:8px;flex-wrap:wrap}.flowbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.flowlegend{display:flex;flex-wrap:wrap;gap:7px 14px}.lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--mut)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.exportmenu{position:relative}.exportmenu summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.exportmenu summary::-webkit-details-marker{display:none}.chev{width:13px;height:13px;transition:transform .16s ease}.exportmenu[open] .chev{transform:rotate(180deg)}.exportitems{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:170px;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 12px 28px rgba(17,24,39,.16);padding:5px}.exportitem{display:block;width:100%;border:0;background:transparent;color:var(--ink);text-align:left;border-radius:6px;padding:7px 9px;cursor:pointer;font-family:var(--mono);font-size:12px}.exportitem:hover{background:#f2f4f7}.flowbox,.flowwrap{overflow-y:auto;overflow-x:hidden;border:1px solid var(--line);border-radius:8px;background:#fcfcfd;padding:6px}.flowbox svg,.flowwrap svg{display:block;width:100%;height:auto}
         .reason{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}.reason b{font-size:13px}.reason pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:#374151;line-height:1.5;margin:8px 0 0}
         @media(max-width:760px){.grid2{grid-template-columns:1fr}.modal{width:100vw;height:100vh;border-radius:0}.head{align-items:flex-start}.sub{display:none}.bar{grid-template-columns:110px 1fr 38px}.queryrow{grid-template-columns:36px 1fr}.qtext{grid-column:1 / -1;white-space:normal}.qvia{min-width:0}.savedhead{display:none}.savedrow{grid-template-columns:1fr}.savedacts{justify-content:flex-start}}
@@ -277,7 +278,12 @@
     }
 
     function renderTabs() {
-        return h('div', { class: 'tabs' }, TABS.filter(([id]) => id !== 'browse' || (state.intel && state.intel.browseActions.length)).map(([id, label]) => {
+        const dr = state.intel && state.intel.deepResearch;
+        return h('div', { class: 'tabs' }, TABS.filter(([id]) => {
+            if (id === 'browse') return state.intel && state.intel.browseActions.length;
+            if (id === 'research') return dr && (dr.steps.length > 0 || dr.looksLikeResearch);
+            return true;
+        }).map(([id, label]) => {
             const count = countForTab(id);
             return h('button', {
                 class: `tab${state.activeTab === id ? ' active' : ''}`,
@@ -310,6 +316,16 @@
             icon.setAttribute('stroke-linecap', 'round'); path('M15.2141 5.98239L16.6158 4.58063C17.39 3.80646 18.6452 3.80646 19.4194 4.58063C20.1935 5.3548 20.1935 6.60998 19.4194 7.38415L18.0176 8.78591M15.2141 5.98239L6.98023 14.2163C5.93493 15.2616 5.41226 15.7842 5.05637 16.4211C4.70047 17.058 4.3424 18.5619 4 20C5.43809 19.6576 6.94199 19.2995 7.57889 18.9436C8.21579 18.5877 8.73844 18.0651 9.78375 17.0198L18.0176 8.78591M15.2141 5.98239L18.0176 8.78591', { 'stroke-linejoin': 'round' }); path('M11 20H17');
         } else if (id === 'products') {
             icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M10.5 20.25C10.5 20.6642 10.1642 21 9.75 21C9.33579 21 9 20.6642 9 20.25C9 19.8358 9.33579 19.5 9.75 19.5C10.1642 19.5 10.5 19.8358 10.5 20.25Z'); path('M19 20.25C19 20.6642 18.6642 21 18.25 21C17.8358 21 17.5 20.6642 17.5 20.25C17.5 19.8358 17.8358 19.5 18.25 19.5C18.6642 19.5 19 19.8358 19 20.25Z'); path('M2 3H2.20664C3.53124 3 4.19354 3 4.6255 3.40221C5.05746 3.80441 5.10464 4.46503 5.19902 5.78626L5.45035 9.30496C5.5924 11.2936 5.66342 12.2879 5.96476 13.0961C6.62531 14.8677 8.08229 16.2244 9.89648 16.757C10.7241 17 11.7267 17 13.7317 17C15.8373 17 16.89 17 17.7417 16.7416C19.6593 16.1599 21.1599 14.6593 21.7416 12.7417C22 11.89 22 10.8433 22 8.75C22 8.05222 22 7.70333 21.9139 7.41943C21.72 6.78023 21.2198 6.28002 20.5806 6.08612C20.2967 6 19.9478 6 19.25 6H5.5'); path('M16 10V13M11 10V13');
+        } else if (id === 'research') {
+            path('M16.1995 2.62118C17.0064 2.153 17.4099 1.91892 17.8053 2.02539C18.2007 2.13186 18.4336 2.53732 18.8995 3.34823L20.3819 5.92852C20.8478 6.73943 21.0807 7.14489 20.9747 7.54225C20.8688 7.93961 20.4653 8.1737 19.6584 8.64188L16.235 10.6282C15.4281 11.0964 15.0247 11.3305 14.6293 11.224C14.2339 11.1175 14.0009 10.7121 13.5351 9.90115L12.0527 7.32085C11.5868 6.50994 11.3539 6.10449 11.4598 5.70713C11.5658 5.30977 11.9692 5.07568 12.7761 4.6075L16.1995 2.62118Z');
+            path('M11.5585 6.46075L14.0292 10.7613L10.6058 12.7476C9.79886 13.2157 9.39541 13.4498 9.00001 13.3434C8.60461 13.2369 8.37167 12.8314 7.9058 12.0205L7.41168 11.1604C6.94581 10.3495 6.71288 9.94406 6.81882 9.5467C6.92477 9.14934 7.32822 8.91525 8.13513 8.44707L11.5585 6.46075Z');
+            path('M6.91755 10.3003L8.39993 12.8806L5.40444 14.6186C5.00566 14.85 4.80627 14.9657 4.61138 14.9915C4.35152 15.0259 4.08871 14.9551 3.88077 14.7948C3.72482 14.6745 3.6097 14.4741 3.37947 14.0734C3.14923 13.6726 3.03412 13.4722 3.00846 13.2764C2.97425 13.0152 3.04467 12.7511 3.20422 12.5421C3.32389 12.3854 3.52328 12.2697 3.92206 12.0384L6.91755 10.3003Z');
+            path('M7.5 22L12 12L16.5 22', round);
+        } else if (id === 'research') {
+            path('M16.1995 2.62118C17.0064 2.153 17.4099 1.91892 17.8053 2.02539C18.2007 2.13186 18.4336 2.53732 18.8995 3.34823L20.3819 5.92852C20.8478 6.73943 21.0807 7.14489 20.9747 7.54225C20.8688 7.93961 20.4653 8.1737 19.6584 8.64188L16.235 10.6282C15.4281 11.0964 15.0247 11.3305 14.6293 11.224C14.2339 11.1175 14.0009 10.7121 13.5351 9.90115L12.0527 7.32085C11.5868 6.50994 11.3539 6.10449 11.4598 5.70713C11.5658 5.30977 11.9692 5.07568 12.7761 4.6075L16.1995 2.62118Z');
+            path('M11.5585 6.46075L14.0292 10.7613L10.6058 12.7476C9.79886 13.2157 9.39541 13.4498 9.00001 13.3434C8.60461 13.2369 8.37167 12.8314 7.9058 12.0205L7.41168 11.1604C6.94581 10.3495 6.71288 9.94406 6.81882 9.5467C6.92477 9.14934 7.32822 8.91525 8.13513 8.44707L11.5585 6.46075Z');
+            path('M6.91755 10.3003L8.39993 12.8806L5.40444 14.6186C5.00566 14.85 4.80627 14.9657 4.61138 14.9915C4.35152 15.0259 4.08871 14.9551 3.88077 14.7948C3.72482 14.6745 3.6097 14.4741 3.37947 14.0734C3.14923 13.6726 3.03412 13.4722 3.00846 13.2764C2.97425 13.0152 3.04467 12.7511 3.20422 12.5421C3.32389 12.3854 3.52328 12.2697 3.92206 12.0384L6.91755 10.3003Z');
+            path('M7.5 22L12 12L16.5 22', round);
         } else if (id === 'browse') {
             icon.setAttribute('stroke-linecap', 'round'); icon.setAttribute('stroke-linejoin', 'round'); path('M18.4737 15.5215C18.4795 15.4928 18.5205 15.4928 18.5263 15.5215C18.8302 17.0081 19.9919 18.1698 21.4785 18.4737C21.5072 18.4795 21.5072 18.5205 21.4785 18.5263C19.9919 18.8302 18.8302 19.9919 18.5263 21.4785C18.5205 21.5072 18.4795 21.5072 18.4737 21.4785C18.1698 19.9919 17.0081 18.8302 15.5215 18.5263C15.4928 18.5205 15.4928 18.4795 15.5215 18.4737C17.0081 18.1698 18.1698 17.0081 18.4737 15.5215Z'); path('M3 7.5H20'); path('M12.5 20.5H10.5C6.72876 20.5 4.84315 20.5 3.67157 19.3284C2.5 18.1569 2.5 16.2712 2.5 12.5V10.5C2.5 6.72876 2.5 4.84315 3.67157 3.67157C4.84315 2.5 6.72876 2.5 10.5 2.5H12.5C16.2712 2.5 18.1569 2.5 19.3284 3.67157C20.5 4.84315 20.5 6.72876 20.5 10.5V12.5');
         } else if (id === 'reasoning') {
@@ -321,7 +337,7 @@
     }
 
     function renderFilter() {
-        if (!['queries', 'sources', 'citations', 'products', 'browse', 'reasoning', 'saved'].includes(state.activeTab)) return null;
+        if (!['queries', 'sources', 'citations', 'products', 'browse', 'research', 'reasoning', 'saved'].includes(state.activeTab)) return null;
         return h('input', {
             class: 'filter',
             placeholder: 'filter this view...',
@@ -342,6 +358,7 @@
             case 'citations': return renderCitations();
             case 'products': return renderProducts();
             case 'browse': return renderBrowse();
+            case 'research': return renderResearch();
             case 'reasoning': return renderReasoning();
             case 'saved': return renderSaved();
             default: return renderOverview();
@@ -356,6 +373,7 @@
         if (id === 'citations') return intel.citations.length;
         if (id === 'products') return intel.products.length;
         if (id === 'browse') return intel.browseActions.length;
+        if (id === 'research') return intel.deepResearch ? intel.deepResearch.steps.length : 0;
         if (id === 'reasoning') return intel.reasoning.length + (intel.memory.length ? intel.memory.length : 0);
         if (id === 'saved') return null;
         return null;
@@ -868,11 +886,11 @@
     }
 
     function pipelineColor(pipeline) {
-        return { serp: '#8A8F98', labrador: '#4C6EF5', bright: '#12B886', oxylabs: '#F59F00' }[pipeline] || '#CBD2D9';
+        return { serp: '#8A8F98', labrador: '#4C6EF5', bright: '#12B886', oxylabs: '#F59F00', bing: '#0B7285' }[pipeline] || '#CBD2D9';
     }
 
     function pipelineDark(pipeline) {
-        return { serp: '#495057', labrador: '#3b5bdb', bright: '#099268', oxylabs: '#E8590C' }[pipeline] || '#495057';
+        return { serp: '#495057', labrador: '#3b5bdb', bright: '#099268', oxylabs: '#E8590C', bing: '#095665' }[pipeline] || '#495057';
     }
 
     function tagStyle(tag) {
@@ -975,6 +993,98 @@
             link(citation.url),
             citation.refType || '',
         ]));
+    }
+
+    function renderResearch() {
+        const research = state.intel.deepResearch || { steps: [], quotes: [], stats: {}, selectedSources: [], asyncSources: {} };
+        if (!research.steps.length) {
+            const census = research.census || { authors: {}, contentTypes: {}, commands: {}, recipients: {}, hintKeys: {} };
+            const list = (bucket) => {
+                const keys = Object.keys(bucket).sort((left, right) => bucket[right] - bucket[left]);
+                if (!keys.length) return h('div', { class: 'rmeta' }, '—');
+                return h('div', { class: 'rmeta' }, keys.slice(0, 18).map((key) => `${key} ×${bucket[key]}`).join('  ·  '));
+            };
+            const selected = research.selectedSources || [];
+            const backends = Object.keys(research.asyncSources || {});
+            const blocks = [];
+            blocks.push(h('div', { class: 'rnote' },
+                'Deep Research browses server-side and streams the live step trail (search → open → find) over a WebSocket that ChatGPT does not persist into the conversation. The per-step timeline therefore can’t be rebuilt after the fact — only the artifacts the run saved are recoverable, shown below.'
+                + (research.version ? `  Deep Research version: ${research.version}.` : '')));
+            if (backends.length) {
+                const total = backends.reduce((sum, key) => sum + (research.asyncSources[key] || 0), 0);
+                blocks.push(h('div', { class: 'rchips' },
+                    h('span', { class: 'rchip' }, h('b', { text: String(total) }), ' async retrieval turns'),
+                    backends.map((key) => h('span', { class: 'rchip' }, h('b', { text: String(research.asyncSources[key]) }), ` ${key}`))));
+            }
+            if (selected.length) {
+                blocks.push(h('div', { class: 'eyebrow', style: { margin: '14px 0 8px' } }, `Sources the run selected (${selected.length})`));
+                selected.forEach((item) => blocks.push(h('div', { class: 'rstep', 'data-filter-row': '1' },
+                    h('span', { class: 'rbadge rbadge-quote' }, 'source'),
+                    h('div', { class: 'rstepbody' },
+                        item.url ? h('a', { class: 'rmain', href: item.url, target: '_blank', rel: 'noopener noreferrer', title: item.url, text: item.title || item.domain || item.url })
+                                 : h('div', { class: 'rmain', text: item.title || item.domain || '(source)' }),
+                        h('div', { class: 'rmeta', text: item.domain + (item.attribution ? ` · ${item.attribution}` : '') })))));
+            } else {
+                blocks.push(h('div', { class: 'small', style: { margin: '10px 0' } }, 'No caterpillar_selected_sources were persisted here — the Sources and Citations tabs hold the sources that made it into the final report.'));
+            }
+            blocks.push(h('details', { class: 'rcensus' },
+                h('summary', { class: 'small' }, 'Conversation shape (diagnostic)'),
+                h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'authors'), h('div', { class: 'rstepbody' }, list(census.authors))),
+                h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'types'), h('div', { class: 'rstepbody' }, list(census.contentTypes))),
+                h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'commands'), h('div', { class: 'rstepbody' }, list(census.commands))),
+                h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'recipients'), h('div', { class: 'rstepbody' }, list(census.recipients))),
+                h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'meta keys'), h('div', { class: 'rstepbody' }, list(census.hintKeys))),
+                Object.keys(census.samples || {}).map((key) => h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, key.replace(/^_/, '').slice(0, 14)), h('div', { class: 'rstepbody' }, h('div', { class: 'rmeta', style: { whiteSpace: 'pre-wrap', wordBreak: 'break-all' }, text: census.samples[key] })))),
+                census.sampleCaterpillar ? h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'cat. shape'), h('div', { class: 'rstepbody' }, h('div', { class: 'rmeta', text: census.sampleCaterpillar }))) : null,
+                census.sampleWebRun ? h('div', { class: 'rstep' }, h('span', { class: 'rbadge rbadge-other' }, 'web.run shape'), h('div', { class: 'rstepbody' }, h('div', { class: 'rmeta', text: census.sampleWebRun }))) : null));
+            return h('div', null, blocks);
+        }
+        const stats = research.stats || {};
+        const chip = (value, label) => h('span', { class: 'rchip' }, h('b', { text: String(value ?? 0) }), ` ${label}`);
+        const badge = (step) => {
+            const known = ['search', 'open', 'find', 'click', 'quote', 'blocked'];
+            const kind = step.robotsBlocked ? 'blocked' : (known.includes(step.command) ? step.command : 'other');
+            return h('span', { class: `rbadge rbadge-${kind}` }, step.robotsBlocked ? 'blocked' : (step.command || 'step'));
+        };
+        const stepRow = (step) => {
+            const meta = [];
+            if (step.command === 'search') {
+                if (step.topn != null) meta.push(`topn ${step.topn}`);
+                if (step.source) meta.push(step.source);
+                if (step.caterpillarUrls.length) meta.push(`${step.caterpillarUrls.length} SERP candidates`);
+            }
+            if (step.command === 'open') {
+                if (step.window) meta.push(`lines ${step.window.from}–${step.window.to} of ${step.window.total}`);
+                if (step.readIndex > 1) meta.push(`re-read #${step.readIndex}`);
+                if (step.fromUrl) meta.push(`followed link from “${step.fromTitle || CORE().cleanDomain(step.fromUrl)}”`);
+            }
+            if (step.command === 'find') meta.push(step.findMiss ? 'no match → likely re-query or abandon' : 'match → triggers positioned re-read');
+            if (step.robotsBlocked) meta.push('Fetch denied by robots.txt (OAI-SearchBot) — page invisible to Deep Research');
+            const main = step.command === 'search' ? (step.query || step.summaryPreview || '(query)')
+                : step.command === 'find' ? `“${step.pattern || step.query || ''}”`
+                : (step.url || step.title || step.query || step.summaryPreview || step.resultPreview || '(page)');
+            const looksEmpty = !step.url && !step.query && !step.pattern && !step.window;
+            if (looksEmpty && step.debug) meta.push(`shape: author=${step.debug.author} · type=${step.debug.contentType} · command=${step.debug.rawCommand} · meta[${step.debug.metaKeys || '—'}] · kwargs[${step.debug.kwargsKeys || '—'}]`);
+            return h('div', { class: 'rstep' + (step.robotsBlocked ? ' rstep-blocked' : ''), 'data-filter-row': '1' },
+                badge(step),
+                h('div', { class: 'rstepbody' },
+                    step.command === 'open' && step.url
+                        ? h('a', { class: 'rmain', href: step.url, target: '_blank', rel: 'noopener noreferrer', title: step.url, text: main })
+                        : h('div', { class: 'rmain', text: main }),
+                    meta.length ? h('div', { class: 'rmeta', text: meta.join('  ·  ') }) : null));
+        };
+        return h('div', null,
+            h('div', { class: 'rchips' },
+                chip(stats.searches, 'searches'), chip(stats.opens, 'opens'), chip(stats.uniquePagesRead, 'pages read'),
+                chip(stats.reReads, 're-read'), chip(stats.finds, 'finds'), chip(stats.findMisses, 'find misses'),
+                chip(stats.linkFollows, 'link follows'), chip(stats.robotsBlocked, 'robots-blocked')),
+            h('div', { class: 'rnote' }, 'Deep Research reads via Bing (source: web_with_bing) with three commands — search → open → find — in ~5–6k-char windows. Re-reads and link follows signal a page earned attention; being read ≠ being cited.'),
+            h('div', { class: 'rsteps' }, research.steps.map(stepRow)),
+            research.quotes.length ? h('div', null,
+                h('div', { class: 'eyebrow', style: { margin: '18px 0 8px' } }, 'Captured quotes'),
+                research.quotes.map((quote) => h('div', { class: 'rquote', 'data-filter-row': '1' },
+                    h('div', { class: 'rmeta' }, quote.domain + (quote.title ? ` · ${quote.title}` : '')),
+                    h('div', { text: quote.text })))) : null);
     }
 
     function renderBrowse() {

@@ -5,7 +5,8 @@ A Chrome extension that scans the current ChatGPT conversation and extracts GEO/
 ## What It Does
 
 - Reads the active ChatGPT conversation JSON from your own logged-in session.
-- Extracts fan-out queries, fetched sources, cited domains, exposed reasoning recaps, memory/personalization metadata, and product carousel data.
+- Extracts fan-out queries, fetched sources, cited domains, exposed reasoning recaps, memory/personalization metadata, Deep Research artifacts, and product carousel data.
+- Shows Deep Research selected sources, recoverable search/open/find traces, blocked-fetch signals, async retrieval hints, and diagnostics when ChatGPT exposes them.
 - Optionally hydrates live product offers when ChatGPT provided a real `product_lookup_key`.
 - Saves normalized scan snapshots locally with `chrome.storage.local`.
 - Organizes saved scans with local projects, tags, and notes.
@@ -23,7 +24,7 @@ A Chrome extension that scans the current ChatGPT conversation and extracts GEO/
 
 1. Open a ChatGPT conversation you want to analyze.
 2. Click the floating **GEO/AEO Research** pill or the extension popup button.
-3. Use the tabs to inspect Overview, Request flow, Fan-out queries, Sources, Citations, Products, Reasoning, and Saved scans.
+3. Use the tabs to inspect Overview, Request flow, Fan-out queries, Sources, Citations, Products, Deep Research, Reasoning, and Saved scans.
 4. Use **Saved** to assign scans to projects, add tags/notes, import backups, or export all saved research.
 
 ## Privacy
@@ -42,6 +43,8 @@ Runtime scripts:
 - `content-script.js`: floating button, route-change status, popup message bridge.
 
 The old direct `product_info` workflow was replaced because it depended on unstable internal request shapes. The current model analyzes real ChatGPT conversation output and only calls `product_update` when a product card already includes a valid lookup key.
+
+Deep Research activity is partly server-side and the full live step trail is not always persisted into the final conversation payload. When that happens, the extension shows the recovered selected sources, backend hints, and diagnostic metadata rather than fabricating missing steps.
 
 ## Research Inspiration
 

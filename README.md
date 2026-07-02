@@ -14,6 +14,7 @@ The extension runs inside `chatgpt.com`, reads the active conversation from your
 - Fetched sources, source pipelines, domains, titles, URLs, and dates.
 - Cited domains and citation links.
 - Exposed reasoning recap and memory/personalization metadata when present.
+- Deep Research artifacts when present, including selected sources, backend retrieval hints, recoverable search/open/find steps, blocked fetch signals, and diagnostic conversation shape.
 - Product carousel entities, images, prices, ratings, review counts, selected source links, and available offer data.
 - Request flow diagrams showing prompt, fan-out queries, source pipelines, product fan-out, products, and offers.
 
@@ -25,6 +26,7 @@ The extension runs inside `chatgpt.com`, reads the active conversation from your
 - Saved research library with projects, tags, notes, filters, and import/export.
 - Live offer hydration for product cards when ChatGPT provides a valid `product_lookup_key`.
 - Flow export as SVG or PNG, including copy-to-clipboard actions.
+- Deep Research tab for inspecting recoverable research traces and explaining what cannot be rebuilt from saved ChatGPT conversation data.
 - Current scan export as JSON or sources CSV.
 - Saved library export as JSON, sources CSV, or products CSV.
 - No external backend. Saved scans stay in `chrome.storage.local`.
@@ -60,6 +62,7 @@ The script creates `dist/chatgpt-geo-aeo-research-v<version>.zip` with `manifest
    - **Fan-out queries** for generated search/product queries.
    - **Sources** and **Citations** for fetched and cited URLs.
    - **Products** for product cards, ratings, selected links, and offers.
+   - **Deep Research** for selected sources, recoverable search/open/find traces, blocked-fetch signals, and diagnostic metadata when ChatGPT exposes them.
    - **Reasoning** for exposed reasoning recap or memory metadata.
    - **Saved** for local research organization.
 4. Click **Save** to assign a project, tags, and notes.
@@ -82,6 +85,12 @@ Saved scans are stored locally in Chrome. The Saved tab supports:
 The extension does not call the old direct `product_info` endpoint. It analyzes products already present in the ChatGPT conversation and hydrates live offers only when a product includes a valid lookup key.
 
 If a saved scan is opened from cache, offers are not auto-refetched. Click **Reload offers** when you want fresh offer data.
+
+## Deep Research
+
+The Deep Research tab is available when a conversation exposes Deep Research-related metadata. It can show selected sources, async retrieval backends, recoverable search/open/find steps, re-reads, link follows, quotes, and robots-blocked pages.
+
+Some Deep Research activity is streamed server-side and is not persisted into the final conversation payload. When the full step trail is unavailable, the extension shows the recovered artifacts and a diagnostic view of the conversation shape instead of pretending the missing browsing path can be reconstructed.
 
 ## Research Inspiration
 

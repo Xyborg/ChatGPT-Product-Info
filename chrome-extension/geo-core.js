@@ -234,6 +234,83 @@
         });
     }
 
+    const RESEARCH_COMMAND_ALIASES = {
+        search: 'search', search_query: 'search',
+        open: 'open', open_url: 'open', mclick: 'open',
+        find: 'find', find_in_page: 'find', find_on_page: 'find',
+        click: 'click', click_result: 'click',
+        quote: 'quote', quote_lines: 'quote',
+        back: 'back', scroll: 'scroll', screenshot: 'screenshot',
+    };
+
+    function parseResearchStep(message, meta, content) {
+        const authorName = (message.author && message.author.name) || '';
+        const isBrowserTool = /^browser([._]|$)/.test(authorName);
+        const isWebRun = /^web\.run$|^web$/.test(authorName);
+        // other tools (file_search, myfiles_browser, python, ...) reuse metadata.command and even
+        // tether_browsing_display, so anything not clearly the web browser/runner is rejected.
+        if (!isBrowserTool && !isWebRun && authorName) return null;
+        const isTether = content.content_type === 'tether_browsing_display';
+        if (!isBrowserTool && !isWebRun && !isTether) return null;
+        const kwargs = (meta.kwargs && typeof meta.kwargs === 'object') ? meta.kwargs : {};
+
+        const summary = String(content.summary || '');
+        const result = String(content.result || '');
+        const queryMatch = summary.match(/Search results for query\s*[`'"](.+?)[`'"]/i) || result.match(/Search results for query\s*[`'"](.+?)[`'"]/i);
+        const windowMatch = (summary + '\n' + result).match(/viewing lines? \[(\d+)\s*-\s*(\d+)\] of (\d+)/i);
+
+        // command: explicit metadata first, then the tool author suffix (browser.search -> search),
+        // then infer from the payload shape (search summary vs page window).
+        let rawCommand = meta.command || (isBrowserTool && authorName.includes('.') ? authorName.split('.').pop() : '');
+        if (!rawCommand && isWebRun) rawCommand = queryMatch ? 'search' : (windowMatch ? 'open' : 'run');
+        if (!rawCommand && isTether) rawCommand = queryMatch ? 'search' : (windowMatch ? 'open' : '');
+        const command = RESEARCH_COMMAND_ALIASES[String(rawCommand).toLowerCase()] || '';
+        // strict whitelist: reject spinner/prompt/context_stuff and any other non-browser command
+        if (!command) return null;
+        // a bare tether message with no author must show real browsing evidence
+        if (!isBrowserTool && !isWebRun && !meta.command && !queryMatch && !windowMatch && !/Fetch denied by robots\.txt/i.test(result)) return null;
+
+        // web.run search calls store the query in content parts / kwargs rather than a summary line.
+        const partsText = Array.isArray(content.parts) ? content.parts.filter((part) => typeof part === 'string').join(' ') : '';
+        const webRunQuery = kwargs.query || kwargs.q || kwargs.search_query
+            || (queryMatch ? queryMatch[1] : '')
+            || (isWebRun && command === 'search' ? (partsText.match(/(?:search|query)[:\s"']+([^"'\n]{3,120})/i) || [])[1] || '' : '');
+
+        const urlCandidate = meta.display_url || meta.url || content.url || kwargs.url || kwargs.href || kwargs.link || '';
+        const resultUrlMatch = !urlCandidate ? ((result + '\n' + partsText).match(/^\s*URL:\s*(https?:\/\/\S+)/im) || (result + '\n' + partsText).match(/https?:\/\/[^\s\)\]】]+/)) : null;
+        const url = urlCandidate || (resultUrlMatch ? (resultUrlMatch[1] || resultUrlMatch[0]) : '');
+        const robotsBlocked = /Fetch denied by robots\.txt/i.test(result) || /Fetch denied by robots\.txt/i.test(summary);
+        const findMiss = command === 'find' && (/(no match|not found|0 matches)/i.test(result) || result.length < 70);
+
+        return {
+            command,
+            query: webRunQuery,
+            pattern: kwargs.pattern || (command === 'find' ? kwargs.query || kwargs.q || '' : ''),
+            topn: kwargs.topn != null ? kwargs.topn : null,
+            source: kwargs.source || meta.source || '',
+            url,
+            domain: cleanDomain(url),
+            title: meta.display_title || content.title || '',
+            fromUrl: meta.clicked_from_url || '',
+            fromTitle: meta.clicked_from_title || '',
+            window: windowMatch ? { from: Number(windowMatch[1]), to: Number(windowMatch[2]), total: Number(windowMatch[3]) } : null,
+            caterpillarUrls: Array.isArray(meta.caterpillar_urls) ? meta.caterpillar_urls.slice(0, 20) : [],
+            robotsBlocked,
+            findMiss,
+            resultChars: result.length,
+            summaryPreview: summary.slice(0, 160),
+            resultPreview: result.slice(0, 200),
+            createTime: message.create_time || 0,
+            debug: {
+                author: authorName || '(none)',
+                contentType: content.content_type || '(none)',
+                rawCommand: rawCommand || '(none)',
+                metaKeys: Object.keys(meta).slice(0, 24).join(','),
+                kwargsKeys: Object.keys(kwargs).slice(0, 12).join(','),
+            },
+        };
+    }
+
     function extractConversationIntel(conversation, context) {
         const queries = [];
         const sources = [];
@@ -245,6 +322,13 @@
         const memory = [];
         const reasoning = [];
         const reasoningRecaps = [];
+        const researchSteps = [];
+        const researchQuotes = [];
+        const census = { authors: {}, contentTypes: {}, commands: {}, recipients: {}, hintKeys: {}, allMetaKeys: {} };
+        const bump = (bucket, key) => { if (key) bucket[key] = (bucket[key] || 0) + 1; };
+        const selectedSources = [];      // caterpillar_selected_sources — what the run actually chose
+        const asyncSources = {};          // async_source counts — server-side retrieval backends used
+        let deepResearchVersion = '';
         const assistantTexts = [];
         const userPrompts = [];
 
@@ -263,6 +347,70 @@
             if (role === 'user' && text) userPrompts.push(text.trim());
             if (role === 'assistant' && text) assistantTexts.push(text.trim());
 
+            bump(census.authors, authorName || role || '(none)');
+            Object.keys(meta).forEach((key) => bump(census.allMetaKeys, key));
+            bump(census.contentTypes, content.content_type || '(none)');
+            if (meta.command) bump(census.commands, String(meta.command));
+            if (recipient) bump(census.recipients, recipient);
+            Object.keys(meta).forEach((key) => {
+                if (!/research|async|task|agent|tether|browse|caterpillar|quote|cite|citation|reference|result_group|sources/i.test(key)) return;
+                const fieldValue = meta[key];
+                const isEmpty = (Array.isArray(fieldValue) && !fieldValue.length)
+                    || (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue) && !Object.keys(fieldValue).length);
+                bump(census.hintKeys, isEmpty ? `${key}:empty` : key);
+            });
+            // sample the first NON-EMPTY value of every citation-bearing field so shapes are visible
+            census.samples = census.samples || {};
+            ['citations', 'content_references', 'search_result_groups', 'selected_sources', 'selected_mcp_sources', '_cite_metadata', 'caterpillar_selected_sources'].forEach((key) => {
+                if (census.samples[key]) return;
+                const fieldValue = meta[key];
+                if (fieldValue == null) return;
+                if (Array.isArray(fieldValue) && !fieldValue.length) return;
+                if (typeof fieldValue === 'object' && !Array.isArray(fieldValue) && !Object.keys(fieldValue).length) return;
+                try { census.samples[key] = JSON.stringify(fieldValue).slice(0, 500); } catch (_) { /* ignore */ }
+            });
+            // one-time raw-shape samples so unknown field structures are visible in the diagnostic
+            if (!census.sampleCaterpillar && (meta.caterpillar_selected_sources || content.caterpillar_selected_sources)) {
+                try { census.sampleCaterpillar = JSON.stringify(meta.caterpillar_selected_sources || content.caterpillar_selected_sources).slice(0, 400); } catch (_) { /* ignore */ }
+            }
+            if (!census.sampleWebRun && /^web\.run$|^web$/.test(authorName)) {
+                try { census.sampleWebRun = JSON.stringify({ contentType: content.content_type, metaKeys: Object.keys(meta), contentKeys: Object.keys(content) }).slice(0, 400); } catch (_) { /* ignore */ }
+            }
+
+            // Persisted Deep Research artifacts (the live step trail is not saved; these are).
+            if (meta.deep_research_version) deepResearchVersion = String(meta.deep_research_version);
+            // async_source values are server/turn IDs like "saserver-centralus-prod...:conversation-turn-<id>:US"
+            // — aggregate by region so the chips are meaningful instead of a wall of raw IDs.
+            const asyncVal = typeof meta.async_source === 'string' ? meta.async_source
+                : (meta.async_source && typeof meta.async_source === 'object' ? (meta.async_source.source || meta.async_source.type || '') : '');
+            if (asyncVal) {
+                const regionMatch = asyncVal.match(/saserver-([a-z0-9]+)-/i);
+                bump(asyncSources, regionMatch ? regionMatch[1] : (asyncVal.length > 40 ? 'async turn' : asyncVal));
+            }
+
+            // caterpillar_selected_sources appears in several shapes across DR versions:
+            // bare string URLs, {url,title}, {source:{url}}, {ref_id,url}, or a wrapper {sources:[...]}.
+            const pullUrl = (item) => {
+                if (!item) return '';
+                if (typeof item === 'string') return /^https?:\/\//.test(item) ? item : '';
+                return item.url || item.link || item.ref_url || item.href
+                    || (item.source && (item.source.url || item.source.link))
+                    || (item.metadata && item.metadata.url) || '';
+            };
+            const collectSelected = (bucket) => {
+                if (!bucket) return;
+                const arr = Array.isArray(bucket) ? bucket : (Array.isArray(bucket.sources) ? bucket.sources : (Array.isArray(bucket.selected) ? bucket.selected : []));
+                arr.forEach((item) => {
+                    const url = pullUrl(item);
+                    if (!url) return;
+                    const obj = (item && typeof item === 'object') ? item : {};
+                    const src = obj.source || {};
+                    selectedSources.push({ url, domain: cleanDomain(url), title: obj.title || src.title || obj.snippet || '', attribution: obj.attribution || src.attribution || '' });
+                    addSource(sources, { url, attribution: obj.attribution || url, result_source: 'caterpillar', title: obj.title || src.title || '', snippet: obj.snippet || '' });
+                });
+            };
+            [meta.caterpillar_selected_sources, content.caterpillar_selected_sources, meta.selected_sources, meta.selected_mcp_sources, meta.sources].forEach(collectSelected);
+
             if (meta.turn_use_case) useCases.push({ useCase: meta.turn_use_case, role });
             (meta.search_result_groups || []).forEach((group) => (group.entries || []).forEach((entry) => addSource(sources, entry)));
             if (meta.search_queries) [].concat(meta.search_queries).forEach((query) => pushQuery(queries, query, 'metadata.search_queries'));
@@ -272,19 +420,39 @@
             if (typeof meta.command === 'string') parseWebCommand(meta.command, queries, browseActions);
 
             (meta.citations || []).forEach((citation) => {
-                const citationMeta = citation.metadata || {};
-                if (citationMeta.url) {
-                    citations.push({ domain: cleanDomain(citationMeta.url), title: citationMeta.title || '', url: citationMeta.url, refType: citationMeta.type || '' });
+                const citationMeta = citation.metadata || citation.citation || citation || {};
+                const citeUrl = citationMeta.url || (citationMeta.metadata && citationMeta.metadata.url) || '';
+                if (citeUrl) {
+                    citations.push({ domain: cleanDomain(citeUrl), title: citationMeta.title || '', url: citeUrl, refType: citationMeta.type || citation.citation_format_type || '' });
                 }
             });
+
+            // Deep Research reports cite via inline citeturnXviewY markers resolved against
+            // _cite_metadata.metadata_list — this is where DR's "N citations" actually live.
+            const citeMeta = meta._cite_metadata || content._cite_metadata || null;
+            if (citeMeta) {
+                const metadataList = [].concat(citeMeta.metadata_list || citeMeta.metadataList || citeMeta.list || []);
+                metadataList.forEach((item) => {
+                    if (!item) return;
+                    const url = item.url || (item.metadata && item.metadata.url) || '';
+                    const title = item.title || (item.metadata && item.metadata.title) || '';
+                    if (!url) return;
+                    citations.push({ domain: cleanDomain(url), title, url, refType: item.type || 'deep_research' });
+                    addSource(sources, { url, attribution: url, result_source: 'caterpillar', title, snippet: item.snippet || '', pub_date: item.pub_date || '' });
+                });
+            }
 
             (meta.content_references || []).forEach((reference) => {
                 if (reference.url) {
                     citations.push({ domain: cleanDomain(reference.url), title: reference.title || reference.alt || '', url: reference.url, refType: reference.type || '' });
                 }
-                (reference.items || reference.refs || reference.sources || []).forEach((item) => {
-                    if (item && item.url) citations.push({ domain: cleanDomain(item.url), title: item.title || '', url: item.url, refType: reference.type || '' });
+                const collectRefItems = (items, refType) => (items || []).forEach((item) => {
+                    if (!item) return;
+                    if (item.url) citations.push({ domain: cleanDomain(item.url), title: item.title || '', url: item.url, refType: refType || item.type || '' });
+                    // grouped_webpages nests further lists (sources/items/refs/fallback_items)
+                    [item.items, item.refs, item.sources, item.fallback_items].forEach((nested) => collectRefItems(nested, refType || item.type));
                 });
+                [reference.items, reference.refs, reference.sources, reference.fallback_items].forEach((bucket) => collectRefItems(bucket, reference.type));
                 if (reference.type === 'products' && Array.isArray(reference.products)) {
                     reference.products.forEach((product, index) => addProduct(products, product, index, 'conversation'));
                 }
@@ -310,6 +478,22 @@
             if (/web/i.test(recipient) || /web/i.test(authorName) || content.content_type === 'code') {
                 parseWebCommand(text, queries, browseActions);
             }
+
+            // Deep Research text-browser trail (browser.search / open / find via tether_browsing_display)
+            const step = parseResearchStep(message, meta, content);
+            if (step) {
+                researchSteps.push(step);
+                if (step.command === 'search' && step.query) pushQuery(queries, step.query, 'browser.search (bing)');
+                step.caterpillarUrls.forEach((candidateUrl) => addSource(sources, { url: candidateUrl, attribution: candidateUrl, result_source: 'bing', title: '', snippet: '' }));
+            }
+            if (content.content_type === 'tether_quote') {
+                researchQuotes.push({
+                    url: content.url || '',
+                    domain: cleanDomain(content.domain || content.url || ''),
+                    title: content.title || '',
+                    text: String(content.text || '').slice(0, 600),
+                });
+            }
         });
 
         const seenSource = new Set(sources.map((source) => `${source.url}|${source.pipeline}`));
@@ -328,9 +512,65 @@
             }
             Object.keys(value).forEach((key) => {
                 if (/quer(y|ies)$/i.test(key)) [].concat(value[key]).forEach((query) => pushQuery(queries, query, key));
+                if (key === '_cite_metadata' && value[key] && typeof value[key] === 'object') {
+                    [].concat(value[key].metadata_list || value[key].metadataList || []).forEach((item) => {
+                        const url = item && (item.url || (item.metadata && item.metadata.url)) || '';
+                        if (url && !citations.some((existing) => existing.url === url)) {
+                            const title = item.title || (item.metadata && item.metadata.title) || '';
+                            citations.push({ domain: cleanDomain(url), title, url, refType: item.type || 'deep_research' });
+                            addSource(sources, { url, attribution: url, result_source: 'caterpillar', title, snippet: item.snippet || '', pub_date: item.pub_date || '' });
+                        }
+                    });
+                }
+                if (/caterpillar_selected_sources|^selected_sources$/i.test(key) && Array.isArray(value[key])) {
+                    value[key].forEach((item) => {
+                        const url = typeof item === 'string' ? item : (item && (item.url || item.link || item.ref_url) || '');
+                        if (url && !selectedSources.some((existing) => existing.url === url)) {
+                            selectedSources.push({ url, domain: cleanDomain(url), title: (item && item.title) || '', attribution: (item && item.attribution) || '' });
+                            addSource(sources, { url, attribution: (item && item.attribution) || url, result_source: 'caterpillar', title: (item && item.title) || '', snippet: (item && item.snippet) || '' });
+                        }
+                    });
+                }
                 deepScan(value[key]);
             });
         })(conversation);
+
+        researchSteps.sort((left, right) => (left.createTime || 0) - (right.createTime || 0));
+        const openCounts = {};
+        researchSteps.forEach((step) => {
+            if (step.command !== 'open' || !step.url) return;
+            openCounts[step.url] = (openCounts[step.url] || 0) + 1;
+            step.readIndex = openCounts[step.url];
+        });
+        const hintText = [
+            ...Object.keys(census.authors), ...Object.keys(census.contentTypes),
+            ...Object.keys(census.commands), ...Object.keys(census.recipients), ...Object.keys(census.hintKeys),
+        ].join(' ');
+        const looksLikeResearch = researchSteps.length > 0 || /research|tether|caterpillar|browser/i.test(hintText);
+        const dedupeSelected = dedupe(selectedSources, (item) => item.url);
+        const isDeepResearch = Boolean(deepResearchVersion) || Object.keys(asyncSources).length > 0 || dedupeSelected.length > 0 || researchSteps.length > 0;
+        const research = {
+            census,
+            looksLikeResearch,
+            isDeepResearch,
+            version: deepResearchVersion,
+            asyncSources,
+            selectedSources: dedupeSelected,
+            liveTrailPersisted: researchSteps.length > 0,
+            steps: researchSteps,
+            quotes: dedupe(researchQuotes, (quote) => `${quote.url}|${quote.text.slice(0, 80)}`),
+            stats: {
+                searches: researchSteps.filter((step) => step.command === 'search').length,
+                opens: researchSteps.filter((step) => step.command === 'open').length,
+                uniquePagesRead: Object.keys(openCounts).length,
+                reReads: Object.values(openCounts).filter((count) => count > 1).length,
+                finds: researchSteps.filter((step) => step.command === 'find').length,
+                other: researchSteps.filter((step) => !['search', 'open', 'find'].includes(step.command)).length,
+                findMisses: researchSteps.filter((step) => step.command === 'find' && step.findMiss).length,
+                linkFollows: researchSteps.filter((step) => step.fromUrl).length,
+                robotsBlocked: researchSteps.filter((step) => step.robotsBlocked).length,
+            },
+        };
 
         const normalizedSources = dedupe(sources, (source) => `${source.url || source.domain}|${source.pipeline}`);
         const normalizedCitations = dedupe(citations, (citation) => citation.url);
@@ -358,6 +598,7 @@
             memory,
             reasoning,
             reasoningRecap: Array.from(new Set(reasoningRecaps)).join('  ·  '),
+            deepResearch: research,
             stats: {
                 queries: normalizedQueries.length,
                 sources: normalizedSources.length,
@@ -367,6 +608,7 @@
                 products: normalizedProducts.length,
                 browseActions: normalizedBrowseActions.length,
                 memoryItems: memory.length,
+                researchSteps: researchSteps.length,
             },
         };
     }
