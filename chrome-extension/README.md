@@ -42,3 +42,7 @@ Runtime scripts:
 - `content-script.js`: floating button, route-change status, popup message bridge.
 
 The old direct `product_info` workflow was replaced because it depended on unstable internal request shapes. The current model analyzes real ChatGPT conversation output and only calls `product_update` when a product card already includes a valid lookup key.
+
+## Research Inspiration
+
+This v2 revamp was partly inspired by Suganthan Mohanadasan's research, [How ChatGPT Actually Picks Sources](https://suganthan.com/blog/how-chatgpt-picks-sources/), which documents source-selection signals visible in ChatGPT network traffic, including fan-out queries, source pipelines, and fetched-vs-cited behavior.
