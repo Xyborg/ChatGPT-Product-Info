@@ -19,7 +19,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        statusTextEl.innerHTML = `<span class="status-icon ${icon.modifier}" role="img" aria-label="${icon.label}"></span> <span>${message}</span>`;
+        const iconEl = document.createElement('span');
+        iconEl.className = `status-icon ${icon.modifier}`;
+        iconEl.setAttribute('role', 'img');
+        iconEl.setAttribute('aria-label', icon.label);
+        const messageEl = document.createElement('span');
+        messageEl.textContent = message;
+        statusTextEl.replaceChildren(iconEl, document.createTextNode(' '), messageEl);
     }
 
     // Check if we're on a ChatGPT tab
@@ -27,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
-            if (!activeTab.url.includes('chatgpt.com')) {
+            if (!activeTab || !(activeTab.url || '').includes('chatgpt.com')) {
                 statusEl.className = 'status status-bad';
                 setStatus('error', 'Please navigate to ChatGPT first');
                 openSearchBtn.disabled = true;
@@ -80,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
-            if (activeTab.url.includes('chatgpt.com')) {
+            if ((activeTab.url || '').includes('chatgpt.com')) {
                 // Already on ChatGPT, just refresh
                 await chrome.tabs.reload(activeTab.id);
             } else {

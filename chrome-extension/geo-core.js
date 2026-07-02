@@ -374,7 +374,11 @@
     function toCsv(rows) {
         if (!rows || !rows.length) return '';
         const keys = Object.keys(rows[0]);
-        const escapeCell = (value) => `"${String(value == null ? '' : value).replace(/"/g, '""')}"`;
+        const escapeCell = (value) => {
+            let text = String(value == null ? '' : value);
+            if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`; // guard against spreadsheet formula injection
+            return `"${text.replace(/"/g, '""')}"`;
+        };
         return [keys.join(','), ...rows.map((row) => keys.map((key) => escapeCell(row[key])).join(','))].join('\n');
     }
 
@@ -665,12 +669,12 @@
             throw new Error('This product has no lookup key for live offers.');
         }
         const authToken = token || await getSessionToken();
-        const response = await fetch('/backend-api/search/product_update', {
+        const doFetch = (bearer) => fetch('/backend-api/search/product_update', {
             method: 'POST',
             credentials: 'include',
             headers: {
                 accept: 'text/event-stream',
-                authorization: `Bearer ${authToken}`,
+                authorization: `Bearer ${bearer}`,
                 'content-type': 'application/json',
                 'oai-language': 'en-US',
                 'oai-device-id': generateDeviceId(),
@@ -679,6 +683,11 @@
             },
             body: JSON.stringify({ product_query: product.query || product.title, product_lookup_key: product.lookupKey }),
         });
+        let response = await doFetch(authToken);
+        if ((response.status === 401 || response.status === 403) && token) {
+            // cached token likely expired mid-session — retry once with a fresh one
+            response = await doFetch(await getSessionToken());
+        }
         if (!response.ok) {
             throw new Error(`Offer API returned HTTP ${response.status}`);
         }

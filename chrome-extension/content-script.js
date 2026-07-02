@@ -89,14 +89,8 @@
             updateButtonStatus();
         };
 
-        ['pushState', 'replaceState'].forEach((method) => {
-            const original = history[method];
-            history[method] = function patchedHistoryMethod() {
-                const result = original.apply(this, arguments);
-                setTimeout(notify, 0);
-                return result;
-            };
-        });
+        // NOTE: content scripts run in an isolated world, so patching history.pushState
+        // here would never see the page's own SPA navigation. Poll + popstate instead.
         window.addEventListener('popstate', notify);
 
         if (statusTimer) clearInterval(statusTimer);
