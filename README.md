@@ -66,6 +66,10 @@ The extension does not call the old direct `product_info` endpoint. It analyzes 
 
 If a saved scan is opened from cache, offers are not auto-refetched. Click **Reload offers** when you want fresh offer data.
 
+## Research Inspiration
+
+This v2 revamp was partly inspired by Suganthan Mohanadasan's research, [How ChatGPT Actually Picks Sources](https://suganthan.com/blog/how-chatgpt-picks-sources/), which documents source-selection signals visible in ChatGPT network traffic, including fan-out queries, source pipelines, and the difference between fetched, cited, and mentioned sources.
+
 ## Privacy
 
 - No external server is used.
