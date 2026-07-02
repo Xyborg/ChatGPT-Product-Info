@@ -1,14 +1,15 @@
-# ChatGPT GEO/AEO Product Research
+# ChatGPT GEO/AEO Research
 
 A Chrome extension that scans the current ChatGPT conversation and extracts GEO/AEO, source, citation, product, and offer intelligence.
 
 ## What It Does
 
 - Reads the active ChatGPT conversation JSON from your own logged-in session.
-- Extracts fan-out queries, fetched sources, cited domains, browsing actions, exposed reasoning recaps, memory/personalization metadata, and product carousel data.
+- Extracts fan-out queries, fetched sources, cited domains, exposed reasoning recaps, memory/personalization metadata, and product carousel data.
 - Optionally hydrates live product offers when ChatGPT provided a real `product_lookup_key`.
 - Saves normalized scan snapshots locally with `chrome.storage.local`.
-- Exports JSON, sources CSV, products CSV, and a flow SVG/PNG.
+- Organizes saved scans with local projects, tags, and notes.
+- Exports current scans, sources CSV, products CSV, flow SVG/PNG, and the saved scan library.
 
 ## Installation
 
@@ -21,8 +22,9 @@ A Chrome extension that scans the current ChatGPT conversation and extracts GEO/
 ## How To Use
 
 1. Open a ChatGPT conversation you want to analyze.
-2. Click the floating **GEO/AEO** pill or the extension popup button.
-3. Use the tabs to inspect Overview, Flow, Fan-out queries, Sources, Citations, Products, Browsing, Reasoning, and Saved scans.
+2. Click the floating **GEO/AEO Research** pill or the extension popup button.
+3. Use the tabs to inspect Overview, Request flow, Fan-out queries, Sources, Citations, Products, Reasoning, and Saved scans.
+4. Use **Saved** to assign scans to projects, add tags/notes, import backups, or export all saved research.
 
 ## Privacy
 
@@ -35,8 +37,8 @@ A Chrome extension that scans the current ChatGPT conversation and extracts GEO/
 
 Runtime scripts:
 
-- `geo-core.js`: session token, conversation fetch, extraction, saved snapshots, product offer hydration.
-- `geo-ui.js`: Shadow DOM modal and exports.
+- `geo-core.js`: session token, conversation fetch, extraction, saved snapshots, project/tag storage, imports, and product offer hydration.
+- `geo-ui.js`: Shadow DOM modal, saved scan organization, and exports.
 - `content-script.js`: floating button, route-change status, popup message bridge.
 
 The old direct `product_info` workflow was replaced because it depended on unstable internal request shapes. The current model analyzes real ChatGPT conversation output and only calls `product_update` when a product card already includes a valid lookup key.

@@ -1,4 +1,4 @@
-// ChatGPT GEO/AEO Product Research - content bootstrap.
+// ChatGPT GEO/AEO Research - content bootstrap.
 (function () {
     'use strict';
 
@@ -65,11 +65,20 @@
 
     async function openResearch() {
         if (!core() || !ui()) {
-            console.warn('GEO/AEO Product Research modules are not ready yet.');
+            console.warn('GEO/AEO Research modules are not ready yet.');
             return;
         }
-        await ui().open();
-        updateButtonStatus();
+        try {
+            await ui().open();
+            updateButtonStatus();
+        } catch (error) {
+            const button = document.getElementById(BUTTON_ID);
+            if (button) {
+                button.dataset.ready = 'false';
+                button.title = error && error.message ? error.message : 'Refresh this ChatGPT tab and try again.';
+            }
+            console.warn('Failed to open GEO/AEO Research:', error);
+        }
     }
 
     function watchRouteChanges() {
@@ -107,7 +116,7 @@
                 return true;
             }
 
-            if (message.action === 'openResearch' || message.action === 'openSearch') {
+            if (message.action === 'openResearch') {
                 openResearch()
                     .then(() => sendResponse({ status: 'opened' }))
                     .catch((error) => sendResponse({ status: 'error', message: error.message }));

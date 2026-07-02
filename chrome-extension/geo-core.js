@@ -1,8 +1,10 @@
-// ChatGPT GEO/AEO Product Research - core extraction and storage helpers.
+// ChatGPT GEO/AEO Research - core extraction and storage helpers.
 (function () {
     'use strict';
 
     const SNAPSHOT_KEY = 'cgptGeoResearchSnapshots';
+    const PROJECTS_KEY = 'cgptGeoResearchProjects';
+    const TAGS_KEY = 'cgptGeoResearchTags';
     const QUERY_JUNK = new Set(['deprecated', 'none', 'null', 'n/a', 'undefined']);
 
     function getConversationId(urlPath = window.location.href) {
@@ -376,6 +378,51 @@
         return [keys.join(','), ...rows.map((row) => keys.map((key) => escapeCell(row[key])).join(','))].join('\n');
     }
 
+    function makeId(prefix) {
+        return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function normalizeSnapshot(snapshot) {
+        if (!snapshot || typeof snapshot !== 'object') return null;
+        return {
+            ...snapshot,
+            stats: snapshot.stats || { sources: 0, citations: 0, products: 0 },
+            intel: snapshot.intel || {},
+            projectId: snapshot.projectId || null,
+            tags: Array.isArray(snapshot.tags) ? snapshot.tags : [],
+            notes: snapshot.notes || '',
+            updatedAt: snapshot.updatedAt || snapshot.scannedAt || new Date().toISOString(),
+        };
+    }
+
+    function normalizeProject(project) {
+        if (!project || typeof project !== 'object') return null;
+        const now = new Date().toISOString();
+        const name = String(project.name || '').trim();
+        if (!name) return null;
+        return {
+            id: project.id || makeId('project'),
+            name,
+            description: project.description || '',
+            createdAt: project.createdAt || now,
+            updatedAt: project.updatedAt || project.createdAt || now,
+        };
+    }
+
+    function normalizeTag(tag) {
+        if (!tag || typeof tag !== 'object') return null;
+        const now = new Date().toISOString();
+        const name = String(tag.name || '').trim();
+        if (!name) return null;
+        return {
+            id: tag.id || makeId('tag'),
+            name,
+            color: tag.color || '#2563eb',
+            createdAt: tag.createdAt || now,
+            updatedAt: tag.updatedAt || tag.createdAt || now,
+        };
+    }
+
     function storageGet(key, fallback) {
         return new Promise((resolve) => {
             if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
@@ -402,29 +449,150 @@
 
     async function loadSnapshots() {
         const snapshots = await storageGet(SNAPSHOT_KEY, []);
-        return Array.isArray(snapshots) ? snapshots : [];
+        return Array.isArray(snapshots) ? snapshots.map(normalizeSnapshot).filter(Boolean) : [];
     }
 
-    async function saveSnapshot(intel) {
+    async function saveSnapshot(intel, metadata = {}) {
         const snapshots = await loadSnapshots();
+        const previous = snapshots.find((item) => item.conversationId === intel.id || item.id === `${intel.id}:${intel.scannedAt}`);
+        const hasMeta = (key) => Object.prototype.hasOwnProperty.call(metadata, key);
         const summary = {
             id: `${intel.id}:${intel.scannedAt}`,
             conversationId: intel.id,
             title: intel.title,
             url: intel.url,
             scannedAt: intel.scannedAt,
+            updatedAt: new Date().toISOString(),
             prompt: intel.prompt,
             stats: intel.stats,
             intel,
+            projectId: hasMeta('projectId') ? metadata.projectId || null : (previous ? previous.projectId : null),
+            tags: hasMeta('tags') && Array.isArray(metadata.tags) ? metadata.tags : (previous ? previous.tags : []),
+            notes: hasMeta('notes') ? metadata.notes || '' : (previous ? previous.notes : ''),
         };
         const next = [summary, ...snapshots.filter((item) => item.id !== summary.id)].slice(0, 50);
         await storageSet({ [SNAPSHOT_KEY]: next });
         return summary;
     }
 
+    async function updateSnapshot(snapshotId, updates) {
+        const snapshots = await loadSnapshots();
+        const next = snapshots.map((snapshot) => {
+            if (snapshot.id !== snapshotId) return snapshot;
+            return normalizeSnapshot({
+                ...snapshot,
+                ...updates,
+                tags: Array.isArray(updates.tags) ? updates.tags : snapshot.tags,
+                projectId: Object.prototype.hasOwnProperty.call(updates, 'projectId') ? updates.projectId || null : snapshot.projectId,
+                updatedAt: new Date().toISOString(),
+            });
+        });
+        await storageSet({ [SNAPSHOT_KEY]: next });
+        return next.find((snapshot) => snapshot.id === snapshotId) || null;
+    }
+
     async function deleteSnapshot(snapshotId) {
         const snapshots = await loadSnapshots();
         await storageSet({ [SNAPSHOT_KEY]: snapshots.filter((item) => item.id !== snapshotId) });
+    }
+
+    async function loadProjects() {
+        const projects = await storageGet(PROJECTS_KEY, []);
+        return Array.isArray(projects) ? projects.map(normalizeProject).filter(Boolean) : [];
+    }
+
+    async function saveProjects(projects) {
+        const normalized = (projects || []).map(normalizeProject).filter(Boolean);
+        await storageSet({ [PROJECTS_KEY]: normalized });
+        return normalized;
+    }
+
+    async function createProject(name, description) {
+        const projects = await loadProjects();
+        const normalizedName = String(name || '').trim();
+        if (!normalizedName) throw new Error('Project name is required.');
+        if (projects.some((project) => project.name.toLowerCase() === normalizedName.toLowerCase())) {
+            throw new Error('A project with this name already exists.');
+        }
+        const project = normalizeProject({ name: normalizedName, description: description || '' });
+        await saveProjects([...projects, project]);
+        return project;
+    }
+
+    async function deleteProject(projectId) {
+        const projects = await loadProjects();
+        await saveProjects(projects.filter((project) => project.id !== projectId));
+        const snapshots = await loadSnapshots();
+        await storageSet({ [SNAPSHOT_KEY]: snapshots.map((snapshot) => snapshot.projectId === projectId ? { ...snapshot, projectId: null, updatedAt: new Date().toISOString() } : snapshot) });
+    }
+
+    async function loadTags() {
+        const tags = await storageGet(TAGS_KEY, []);
+        return Array.isArray(tags) ? tags.map(normalizeTag).filter(Boolean) : [];
+    }
+
+    async function saveTags(tags) {
+        const normalized = (tags || []).map(normalizeTag).filter(Boolean);
+        await storageSet({ [TAGS_KEY]: normalized });
+        return normalized;
+    }
+
+    async function createTag(name, color) {
+        const tags = await loadTags();
+        const normalizedName = String(name || '').trim();
+        if (!normalizedName) throw new Error('Tag name is required.');
+        if (tags.some((tag) => tag.name.toLowerCase() === normalizedName.toLowerCase())) {
+            throw new Error('A tag with this name already exists.');
+        }
+        const tag = normalizeTag({ name: normalizedName, color: color || '#2563eb' });
+        await saveTags([...tags, tag]);
+        return tag;
+    }
+
+    async function deleteTag(tagId) {
+        const tags = await loadTags();
+        await saveTags(tags.filter((tag) => tag.id !== tagId));
+        const snapshots = await loadSnapshots();
+        await storageSet({ [SNAPSHOT_KEY]: snapshots.map((snapshot) => snapshot.tags.includes(tagId) ? { ...snapshot, tags: snapshot.tags.filter((id) => id !== tagId), updatedAt: new Date().toISOString() } : snapshot) });
+    }
+
+    async function loadLibrary() {
+        const [snapshots, projects, tags] = await Promise.all([loadSnapshots(), loadProjects(), loadTags()]);
+        return { snapshots, projects, tags };
+    }
+
+    async function importLibrary(payload) {
+        if (!payload || typeof payload !== 'object') throw new Error('Invalid import file.');
+        const data = payload.data && typeof payload.data === 'object' ? payload.data : payload;
+        const snapshots = (data.snapshots || data.history || []).map((item) => normalizeSnapshot(item.intel ? item : {
+            id: item.id || makeId('snapshot'),
+            conversationId: item.conversationId || item.id || '',
+            title: item.title || item.query || '(imported)',
+            url: item.url || '',
+            scannedAt: item.scannedAt || item.timestamp || item.date || new Date().toISOString(),
+            prompt: item.prompt || item.query || '',
+            stats: item.stats || { sources: 0, citations: 0, products: 0 },
+            intel: item.intel || item.results || item.data || {},
+            projectId: item.projectId || null,
+            tags: item.tags || [],
+            notes: item.notes || '',
+        })).filter(Boolean);
+        const projects = (data.projects || []).map(normalizeProject).filter(Boolean);
+        const tags = (data.tags || []).map(normalizeTag).filter(Boolean);
+        if (!snapshots.length && !projects.length && !tags.length) throw new Error('No saved scans, projects, or tags found in import file.');
+
+        const current = await loadLibrary();
+        const mergedProjects = [...current.projects];
+        projects.forEach((project) => {
+            if (!mergedProjects.some((item) => item.id === project.id)) mergedProjects.push(project);
+        });
+        const mergedTags = [...current.tags];
+        tags.forEach((tag) => {
+            if (!mergedTags.some((item) => item.id === tag.id)) mergedTags.push(tag);
+        });
+        const mergedSnapshots = [...snapshots, ...current.snapshots.filter((snapshot) => !snapshots.some((item) => item.id === snapshot.id))].slice(0, 50);
+        await storageSet({ [SNAPSHOT_KEY]: mergedSnapshots, [PROJECTS_KEY]: mergedProjects, [TAGS_KEY]: mergedTags });
+        return { snapshots: mergedSnapshots, projects: mergedProjects, tags: mergedTags };
     }
 
     function generateDeviceId() {
@@ -487,7 +655,16 @@
         extractConversationIntel,
         loadSnapshots,
         saveSnapshot,
+        updateSnapshot,
         deleteSnapshot,
+        loadProjects,
+        createProject,
+        deleteProject,
+        loadTags,
+        createTag,
+        deleteTag,
+        loadLibrary,
+        importLibrary,
         loadProductOffers,
         toCsv,
         cleanDomain,

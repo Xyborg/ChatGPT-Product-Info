@@ -1,4 +1,4 @@
-// ChatGPT GEO/AEO Product Research - Shadow DOM UI.
+// ChatGPT GEO/AEO Research - Shadow DOM UI.
 (function () {
     'use strict';
 
@@ -29,6 +29,8 @@
         offersStarted: false,
         offerProgress: '',
         lastConversationId: '',
+        fromCache: false,
+        savedFilters: { projectId: '', tagId: '' },
     };
 
     const CSS = `
@@ -51,6 +53,8 @@
         .tablewrap{max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}th{position:sticky;top:0;background:var(--paper);text-align:left;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--line)}td{padding:8px 10px;border-bottom:1px solid #f0f2f4;vertical-align:top}tr:hover td{background:#fafbfc}.mut{color:var(--mut)}.url{color:var(--accent);text-decoration:none;max-width:360px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.url:hover{text-decoration:underline}.datecell{display:inline-block;min-width:86px;white-space:nowrap;font-variant-numeric:tabular-nums}
         .querylist{border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:260px;background:#fff}.queryrow{display:grid;grid-template-columns:46px minmax(150px,210px) minmax(0,1fr);gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid #f0f2f4}.queryrow:last-child{border-bottom:0}.queryrow:hover{background:#fafbfc}.qnum{font-family:var(--mono);font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums}.qvia{font-family:var(--mono);font-size:11px;color:#475467;background:#f2f4f7;border:1px solid #e4e7ec;border-radius:999px;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qvia.product{background:#f5f3ff;border-color:#ddd6fe;color:#6741d9}.qtext{font-size:13px;line-height:1.35;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .savedlist{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.savedhead,.savedrow{display:grid;grid-template-columns:minmax(220px,1fr) 170px 240px auto;gap:12px;align-items:center}.savedhead{padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);background:#fcfcfd}.savedrow{padding:9px 12px;border-bottom:1px solid #f0f2f4}.savedrow:last-child{border-bottom:0}.savedrow:hover{background:#fafbfc}.savedtitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedmeta{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap}.savedstats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:#475467}.savedstats b{color:var(--ink);font-weight:650}.savedacts{display:flex;gap:6px;justify-content:flex-end}.savedacts .btn{padding:5px 8px}
+        .savedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.savedfilters,.savedtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.select{border:1px solid var(--line);background-color:#fff;border-radius:7px;padding:7px 34px 7px 9px;font-family:var(--mono);font-size:12px;color:var(--ink);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2317191f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:14px 14px;background-position:right 10px center}.savedhead,.savedrow{grid-template-columns:minmax(260px,1.4fr) 150px minmax(220px,.9fr) minmax(180px,.75fr) auto}.savedorg{display:flex;flex-direction:column;gap:7px;min-width:0}.savedorg .select{width:100%;max-width:280px}.tagline{display:flex;gap:5px;flex-wrap:wrap}.tagchip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:650}.notes{font-size:12px;color:#475467;line-height:1.35;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.importfile{display:none}
+        .orgshade{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.34);padding:24px}.orgmodal{width:min(600px,calc(100vw - 56px));max-height:min(720px,calc(100vh - 80px));overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 24px 70px rgba(17,24,39,.28);padding:18px}.orghead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.orgtitle{font-size:16px;font-weight:700;margin:0}.orgsub{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px;line-height:1.4}.orggrid{display:grid;gap:14px}.orgfield{display:grid;gap:6px}.orgfield label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}.orginput,.orgtextarea{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:8px 10px;font-family:var(--mono);font-size:12px}.orgtextarea{min-height:86px;resize:vertical;font-family:var(--sans);line-height:1.4}.orgcolor{width:48px;height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:3px;cursor:pointer}.orgrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.orgrow.tags{grid-template-columns:minmax(0,1fr) auto 48px}.orghint{font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.4}.orgstatus{min-height:16px;font-family:var(--mono);font-size:11px;color:var(--mut)}.orgchips{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}.orgchip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-family:var(--mono);font-size:11px;font-weight:650}.orgchip button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font:inherit;opacity:.75}.orgactions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
         .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}.pgrid::-webkit-scrollbar{height:8px}.pgrid::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}.pgrid .pcard{flex:0 0 238px;width:238px;scroll-snap-align:start}.pcard{border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:7px}.thumblink{display:block;text-decoration:none}.thumb{height:130px;width:100%;object-fit:contain;border:0;border-radius:4px;background:transparent}.ptitle{font-weight:650;line-height:1.3}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:700}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:#6b7280}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{display:inline-flex;align-self:flex-start;border-radius:999px;background:#ecfdf3;color:#067647;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#4b5563;line-height:1.4}.sourcelink{display:inline-block;color:#475467;text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#1d4ed8}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #eef1f5;padding-top:6px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafbfc}.offer.best{color:#067647;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:#0f9f6e;margin-right:4px}.small{font-family:var(--mono);font-size:11px;color:var(--mut)}.loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:10px}.dotspin{width:12px;height:12px;border:2px solid #d8dce2;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
         .flowtools,.flowacts{display:flex;gap:8px;flex-wrap:wrap}.flowbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.flowlegend{display:flex;flex-wrap:wrap;gap:7px 14px}.lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--mut)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.exportmenu{position:relative}.exportmenu summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.exportmenu summary::-webkit-details-marker{display:none}.chev{width:13px;height:13px;transition:transform .16s ease}.exportmenu[open] .chev{transform:rotate(180deg)}.exportitems{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:170px;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 12px 28px rgba(17,24,39,.16);padding:5px}.exportitem{display:block;width:100%;border:0;background:transparent;color:var(--ink);text-align:left;border-radius:6px;padding:7px 9px;cursor:pointer;font-family:var(--mono);font-size:12px}.exportitem:hover{background:#f2f4f7}.flowbox,.flowwrap{overflow-y:auto;overflow-x:hidden;border:1px solid var(--line);border-radius:8px;background:#fcfcfd;padding:6px}.flowbox svg,.flowwrap svg{display:block;width:100%;height:auto}
         .reason{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}.reason b{font-size:13px}.reason pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:#374151;line-height:1.5;margin:8px 0 0}
@@ -79,8 +83,12 @@
     }
 
     function extensionUrl(path) {
-        if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function') {
-            return chrome.runtime.getURL(path);
+        try {
+            if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.getURL === 'function') {
+                return chrome.runtime.getURL(path);
+            }
+        } catch (_) {
+            return path;
         }
         return path;
     }
@@ -92,7 +100,14 @@
     }
 
     function ensureHost() {
-        if (state.host) return;
+        if (state.host && state.overlay) return;
+        if (state.host && !state.overlay) {
+            state.host.remove();
+            state.host = null;
+            state.shadow = null;
+            state.body = null;
+            state.status = null;
+        }
         document.getElementById('cgpt-geo-research-host')?.remove();
         state.host = h('div', { id: 'cgpt-geo-research-host' });
         state.host.style.position = 'fixed';
@@ -148,14 +163,26 @@
 
     async function open() {
         ensureHost();
+        if (!state.overlay) throw new Error('GEO/AEO Research UI could not initialize. Refresh this ChatGPT tab after reloading the extension.');
         state.overlay.classList.add('open');
         const status = CORE().getPageStatus();
-        const sameConversation = status.conversationId && status.conversationId === state.lastConversationId;
-        if (!state.intel || !sameConversation) await rescan();
-        else {
+        const conversationId = status.conversationId || '';
+        const sameConversation = conversationId && conversationId === state.lastConversationId;
+        if (state.intel && sameConversation) {
             render();
-            startOfferHydration();
+            if (!state.fromCache) startOfferHydration();
+            return;
         }
+        if (conversationId) {
+            const cached = await findCachedSnapshot(conversationId);
+            if (cached) {
+                loadCachedSnapshot(cached);
+                setStatus('loaded saved cache');
+                render();
+                return;
+            }
+        }
+        await rescan();
     }
 
     function close() {
@@ -172,6 +199,7 @@
             state.raw = result.raw;
             state.token = result.token;
             state.lastConversationId = result.intel.id;
+            state.fromCache = false;
             state.offersStarted = false;
             state.offerProgress = '';
             state.activeTab = 'overview';
@@ -182,6 +210,30 @@
             state.body.replaceChildren(h('div', { class: 'empty' }, error.message));
             setStatus('scan failed', true);
         }
+    }
+
+    async function findCachedSnapshot(conversationId) {
+        try {
+            const snapshots = await CORE().loadSnapshots();
+            return snapshots
+                .filter((snapshot) => snapshot.conversationId === conversationId || (snapshot.intel && snapshot.intel.id === conversationId))
+                .sort((a, b) => new Date(b.updatedAt || b.scannedAt || 0) - new Date(a.updatedAt || a.scannedAt || 0))[0] || null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function loadCachedSnapshot(snapshot) {
+        state.intel = snapshot.intel || {};
+        if (!state.intel.id) state.intel.id = snapshot.conversationId;
+        state.raw = null;
+        state.token = null;
+        state.lastConversationId = snapshot.conversationId || state.intel.id || '';
+        state.fromCache = true;
+        state.loadingOffers = false;
+        state.offersStarted = true;
+        state.offerProgress = '';
+        state.activeTab = 'overview';
     }
 
     function render() {
@@ -548,6 +600,13 @@
         const webQueries = queries.filter((query) => !/product/i.test(query.via || '') && !productQSet.has((query.query || '').trim().toLowerCase()));
         const shownQueries = webQueries.slice(0, 18);
         const moreQueries = webQueries.length - shownQueries.length;
+        const qMs = shownQueries.map((query) => ({ query, f: fit(query.query, null, false, queryW, 6) }));
+        if (moreQueries > 0) qMs.push({ more: true, f: fit(`+${moreQueries} more fan-out queries`, null, false, queryW) });
+        let qTot = 0;
+        qMs.forEach((item, index) => {
+            qTot += item.f.h;
+            if (index < qMs.length - 1) qTot += GAP;
+        });
 
         let yu = 0;
         const domL = [];
@@ -571,7 +630,7 @@
             pipeL.push({ key: pipeline, n: groupDomains.length, yMid: yu + groupH / 2, h: pf.h, w: pf.w, lines: pf.lines });
             yu += groupH;
         });
-        const upperH = Math.max(yu, NHMIN);
+        const upperH = Math.max(yu, qTot, NHMIN);
 
         const qOrder = [];
         const qGroups = {};
@@ -714,13 +773,6 @@
         const promptR = xPrompt + promptFit.w;
         const hubR = xHub + hubFit.w;
 
-        const qMs = shownQueries.map((query) => ({ query, f: fit(query.query, null, false, queryW, 6) }));
-        if (moreQueries > 0) qMs.push({ more: true, f: fit(`+${moreQueries} more fan-out queries`, null, false, queryW) });
-        let qTot = 0;
-        qMs.forEach((item, index) => {
-            qTot += item.f.h;
-            if (index < qMs.length - 1) qTot += GAP;
-        });
         let qy = spineY - qTot / 2;
         qMs.forEach((item) => {
             const cy = qy + item.f.h / 2;
@@ -804,6 +856,14 @@
 
     function pipelineDark(pipeline) {
         return { serp: '#495057', labrador: '#3b5bdb', bright: '#099268', oxylabs: '#E8590C' }[pipeline] || '#495057';
+    }
+
+    function tagStyle(tag) {
+        const bg = /^#[0-9a-f]{6}$/i.test(tag && tag.color || '') ? tag.color : '#2563eb';
+        const rgb = bg.slice(1).match(/.{2}/g).map((part) => parseInt(part, 16) / 255);
+        const linear = rgb.map((value) => value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+        const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+        return { background: bg, color: luminance > 0.58 ? '#111827' : '#ffffff', border: `1px solid ${bg}` };
     }
 
     function isBestOffer(offer) {
@@ -954,10 +1014,11 @@
             }),
             !offers.length && (state.loadingOffers || product.offerLoading) && product.lookupKey ? h('div', { class: 'loadingline', style: { margin: '4px 0 0' } }, h('span', { class: 'dotspin' }), 'loading live offers...') : null,
             !offers.length && product.offerError ? h('div', { class: 'small', text: 'live offers unavailable' }) : null,
-            !offers.length && !state.loadingOffers && product.lookupKey && !product.offerError ? h('div', { class: 'small', text: 'offers loading starts on open' }) : null);
+            !offers.length && !state.loadingOffers && product.lookupKey && !product.offerError ? h('div', { class: 'small', text: state.fromCache ? 'saved cache - reload offers to update' : 'offers loading starts on open' }) : null);
     }
 
     function startOfferHydration() {
+        if (state.fromCache) return;
         if (state.offersStarted || state.loadingOffers) return;
         const hasTargets = state.intel && state.intel.products.some((product) => product.lookupKey && !(product.offers && product.offers.length));
         if (!hasTargets) return;
@@ -1048,30 +1109,310 @@
 
     function renderSaved() {
         const mount = h('div', { class: 'empty' }, 'Loading saved scans...');
-        CORE().loadSnapshots().then((snapshots) => {
-            if (!snapshots.length) {
-                mount.replaceChildren(h('div', { class: 'empty' }, 'No saved scans yet.'));
-                return;
-            }
-            mount.className = 'savedlist';
-            mount.replaceChildren(
+        CORE().loadLibrary().then((library) => renderSavedLibrary(mount, library))
+            .catch((error) => mount.replaceChildren(h('div', { class: 'empty' }, error.message)));
+        return mount;
+    }
+
+    function renderSavedLibrary(mount, library) {
+        const snapshots = library.snapshots || [];
+        const projects = library.projects || [];
+        const tags = library.tags || [];
+        const projectMap = new Map(projects.map((project) => [project.id, project]));
+        const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
+        const filtered = snapshots.filter((snapshot) => {
+            if (state.savedFilters.projectId && snapshot.projectId !== state.savedFilters.projectId) return false;
+            if (state.savedFilters.tagId && !(snapshot.tags || []).includes(state.savedFilters.tagId)) return false;
+            return true;
+        });
+        const fileInput = h('input', { class: 'importfile', type: 'file', accept: 'application/json,.json', onChange: (event) => importSavedFile(event.target) });
+        const controls = h('div', { class: 'savedbar' },
+            h('div', { class: 'savedfilters' },
+                h('select', { class: 'select', value: state.savedFilters.projectId, onChange: (event) => { state.savedFilters.projectId = event.target.value; render(); } },
+                    h('option', { value: '', text: 'All projects' }),
+                    projects.map((project) => h('option', { value: project.id, selected: state.savedFilters.projectId === project.id ? 'selected' : null, text: project.name }))),
+                h('select', { class: 'select', value: state.savedFilters.tagId, onChange: (event) => { state.savedFilters.tagId = event.target.value; render(); } },
+                    h('option', { value: '', text: 'All tags' }),
+                    tags.map((tag) => h('option', { value: tag.id, selected: state.savedFilters.tagId === tag.id ? 'selected' : null, text: tag.name })))),
+            h('div', { class: 'savedtools' },
+                h('button', { class: 'btn', onClick: createProjectFromPrompt }, 'New project'),
+                h('button', { class: 'btn', onClick: createTagFromPrompt }, 'New tag'),
+                h('button', { class: 'btn', onClick: () => fileInput.click() }, 'Import'),
+                h('details', { class: 'exportmenu' },
+                    h('summary', { class: 'btn' }, 'Export', chevronIcon()),
+                    h('div', { class: 'exportitems' },
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); exportSavedJson(snapshots, projects, tags, 'all'); } }, 'All saved JSON'),
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); exportSavedJson(filtered, projects, tags, 'filtered'); } }, 'Filtered JSON'),
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); exportSavedSourcesCsv(snapshots, projects, tags); } }, 'All sources CSV'),
+                        h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); exportSavedProductsCsv(snapshots, projects, tags); } }, 'All products CSV'))),
+                fileInput));
+
+        if (!snapshots.length) {
+            mount.className = '';
+            mount.replaceChildren(controls, h('div', { class: 'empty' }, 'No saved scans yet.'));
+            return;
+        }
+        if (!filtered.length) {
+            mount.className = '';
+            mount.replaceChildren(controls, h('div', { class: 'empty' }, 'No saved scans match the selected filters.'));
+            return;
+        }
+        mount.className = '';
+        mount.replaceChildren(
+            controls,
+            h('div', { class: 'savedlist' },
                 h('div', { class: 'savedhead' },
                     h('span', { text: 'chat' }),
                     h('span', { text: 'saved' }),
+                    h('span', { text: 'organization' }),
                     h('span', { text: 'captured' }),
                     h('span', { text: 'actions' })),
-                ...snapshots.map((snapshot) => h('div', { class: 'savedrow', 'data-filter-row': '1' },
+                filtered.map((snapshot) => renderSavedRow(snapshot, projects, tags, projectMap, tagMap))));
+    }
+
+    function renderSavedRow(snapshot, projects, tags, projectMap, tagMap) {
+        const assignedTags = (snapshot.tags || []).map((id) => tagMap.get(id)).filter(Boolean);
+        return h('div', { class: 'savedrow', 'data-filter-row': '1' },
+            h('div', null,
                 h('div', { class: 'savedtitle', title: snapshot.title || '(untitled)', text: snapshot.title || '(untitled)' }),
-                h('div', { class: 'savedmeta', text: new Date(snapshot.scannedAt).toLocaleString() }),
-                h('div', { class: 'savedstats' },
-                    h('span', null, h('b', { text: snapshot.stats.sources || 0 }), ' sources'),
-                    h('span', null, h('b', { text: snapshot.stats.citations || 0 }), ' citations'),
-                    h('span', null, h('b', { text: snapshot.stats.products || 0 }), ' products')),
-                h('div', { class: 'savedacts' },
-                    h('button', { class: 'btn', onClick: () => { state.intel = snapshot.intel; state.activeTab = 'overview'; render(); } }, 'Open'),
-                    h('button', { class: 'btn danger', onClick: async () => { await CORE().deleteSnapshot(snapshot.id); state.activeTab = 'saved'; render(); } }, 'Delete')))));
-        }).catch((error) => mount.replaceChildren(h('div', { class: 'empty' }, error.message)));
-        return mount;
+                snapshot.prompt ? h('div', { class: 'small', title: snapshot.prompt, text: snapshot.prompt }) : null,
+                snapshot.notes ? h('div', { class: 'notes', title: snapshot.notes, text: snapshot.notes }) : null),
+            h('div', { class: 'savedmeta', text: new Date(snapshot.scannedAt).toLocaleString() }),
+            h('div', { class: 'savedorg' },
+                h('select', { class: 'select', value: snapshot.projectId || '', onChange: async (event) => { await CORE().updateSnapshot(snapshot.id, { projectId: event.target.value || null }); render(); } },
+                    h('option', { value: '', text: 'No project' }),
+                    projects.map((project) => h('option', { value: project.id, selected: snapshot.projectId === project.id ? 'selected' : null, text: project.name }))),
+                h('div', { class: 'tagline' },
+                    assignedTags.length ? assignedTags.map((tag) => h('span', { class: 'tagchip', title: tag.name, style: tagStyle(tag), text: tag.name })) : h('span', { class: 'small', text: 'No tags' }))),
+            h('div', { class: 'savedstats' },
+                h('span', null, h('b', { text: snapshot.stats.sources || 0 }), ' sources'),
+                h('span', null, h('b', { text: snapshot.stats.citations || 0 }), ' citations'),
+                h('span', null, h('b', { text: snapshot.stats.products || 0 }), ' products')),
+            h('div', { class: 'savedacts' },
+                h('button', { class: 'btn', onClick: () => { loadCachedSnapshot(snapshot); setStatus('loaded saved cache'); render(); } }, 'Open'),
+                h('button', { class: 'btn', onClick: () => organizeSavedSnapshot(snapshot) }, 'Organize'),
+                h('button', { class: 'btn danger', onClick: async () => { await CORE().deleteSnapshot(snapshot.id); state.activeTab = 'saved'; render(); } }, 'Delete')));
+    }
+
+    async function createProjectFromPrompt() {
+        const result = await openOrganizationModal({ title: 'Create project', mode: 'project' });
+        if (result) render();
+    }
+
+    async function createTagFromPrompt() {
+        const result = await openOrganizationModal({ title: 'Create tag', mode: 'tag' });
+        if (result) render();
+    }
+
+    async function organizeSavedSnapshot(snapshot) {
+        const result = await openOrganizationModal({
+            title: 'Organize saved scan',
+            subtitle: snapshot.title || '(untitled)',
+            initial: snapshot,
+        });
+        if (!result) return;
+        try {
+            await CORE().updateSnapshot(snapshot.id, result);
+            setStatus('saved scan updated');
+            render();
+        } catch (error) {
+            setStatus(error.message, true);
+        }
+    }
+
+    async function openOrganizationModal(options = {}) {
+        ensureHost();
+        const library = await CORE().loadLibrary();
+        let projects = library.projects || [];
+        let tags = library.tags || [];
+        let selectedProjectId = (options.initial && options.initial.projectId) || '';
+        const selectedTags = new Set((options.initial && options.initial.tags) || []);
+        const projectListId = `project-list-${Date.now()}`;
+        const tagListId = `tag-list-${Date.now()}`;
+        const shade = h('div', { class: 'orgshade' });
+        const projectSelect = h('select', { class: 'select', onChange: (event) => { selectedProjectId = event.target.value; } },
+            h('option', { value: '', text: 'No project' }),
+            projects.map((project) => h('option', { value: project.id, selected: selectedProjectId === project.id ? 'selected' : null, text: project.name })));
+        const projectInput = h('input', { class: 'orginput', list: projectListId, placeholder: 'Create or find project' });
+        const tagInput = h('input', { class: 'orginput', list: tagListId, placeholder: 'Add or create tag' });
+        const tagColor = h('input', { class: 'orgcolor', type: 'color', value: '#2563eb', title: 'New tag color' });
+        const tagSelect = h('select', { class: 'select' },
+            h('option', { value: '', text: 'Existing tag' }),
+            tags.map((tag) => h('option', { value: tag.id, text: tag.name })));
+        const notes = h('textarea', { class: 'orgtextarea', text: (options.initial && options.initial.notes) || '' });
+        const tagChips = h('div', { class: 'orgchips' });
+        const projectDatalist = h('datalist', { id: projectListId }, projects.map((project) => h('option', { value: project.name })));
+        const tagDatalist = h('datalist', { id: tagListId }, tags.map((tag) => h('option', { value: tag.name })));
+        const status = h('div', { class: 'orgstatus' });
+
+        const refreshProjects = () => {
+            projectSelect.replaceChildren(
+                h('option', { value: '', text: 'No project' }),
+                ...projects.map((project) => h('option', { value: project.id, selected: selectedProjectId === project.id ? 'selected' : null, text: project.name }))
+            );
+            projectSelect.value = selectedProjectId;
+            projectDatalist.replaceChildren(...projects.map((project) => h('option', { value: project.name })));
+        };
+        const refreshTags = () => {
+            tagSelect.replaceChildren(h('option', { value: '', text: 'Existing tag' }), ...tags.map((tag) => h('option', { value: tag.id, text: tag.name })));
+            tagDatalist.replaceChildren(...tags.map((tag) => h('option', { value: tag.name })));
+            tagChips.replaceChildren(...Array.from(selectedTags).map((id) => {
+                const tag = tags.find((item) => item.id === id);
+                if (!tag) return null;
+                return h('span', { class: 'orgchip', style: tagStyle(tag) },
+                    h('span', { text: tag.name }),
+                    h('button', { type: 'button', onClick: () => { selectedTags.delete(id); refreshTags(); } }, 'x'));
+            }).filter(Boolean));
+        };
+        const addTagByName = async (name) => {
+            const clean = String(name || '').trim();
+            if (!clean) return;
+            let tag = tags.find((item) => item.name.toLowerCase() === clean.toLowerCase());
+            if (!tag) {
+                tag = await CORE().createTag(clean, tagColor.value || '#2563eb');
+                tags = await CORE().loadTags();
+            }
+            selectedTags.add(tag.id);
+            tagInput.value = '';
+            tagSelect.value = '';
+            refreshTags();
+        };
+        const useProjectInput = async () => {
+            const name = projectInput.value.trim();
+            if (!name) return;
+            const existing = projects.find((project) => project.name.toLowerCase() === name.toLowerCase());
+            const project = existing || await CORE().createProject(name);
+            projects = await CORE().loadProjects();
+            selectedProjectId = project.id;
+            projectInput.value = '';
+            refreshProjects();
+            status.textContent = existing ? `Selected project: ${project.name}` : `Created and selected project: ${project.name}`;
+        };
+        const close = (value) => {
+            shade.remove();
+            resolveModal(value);
+        };
+        let resolveModal;
+        const promise = new Promise((resolve) => { resolveModal = resolve; });
+
+        const panel = h('div', { class: 'orgmodal', role: 'dialog', 'aria-modal': 'true' },
+            h('div', { class: 'orghead' },
+                h('div', null,
+                    h('h3', { class: 'orgtitle', text: options.title || 'Organize scan' }),
+                    h('div', { class: 'orgsub', text: options.subtitle || 'Choose project, tags, and notes before saving.' })),
+                h('button', { class: 'btn x', 'aria-label': 'Close', onClick: () => close(null) }, closeIcon())),
+            h('div', { class: 'orggrid' },
+                h('div', { class: 'orgfield' },
+                    h('label', { text: 'Project' }),
+                    h('div', { class: 'orgrow' }, projectSelect, h('button', { class: 'btn', type: 'button', onClick: async () => {
+                        try {
+                            await useProjectInput();
+                        } catch (error) {
+                            status.textContent = error.message;
+                        }
+                    } }, 'Create')),
+                    projectInput,
+                    projectDatalist,
+                    h('div', { class: 'orghint', text: 'Pick an existing project from the dropdown, or type a new project name and create it.' })),
+                h('div', { class: 'orgfield' },
+                    h('label', { text: 'Tags' }),
+                    h('div', { class: 'orgrow' }, tagSelect, h('button', { class: 'btn', type: 'button', onClick: () => { if (tagSelect.value) { selectedTags.add(tagSelect.value); refreshTags(); } } }, 'Add selected')),
+                    h('div', { class: 'orgrow tags' }, tagInput, h('button', { class: 'btn', type: 'button', onClick: () => addTagByName(tagInput.value) }, 'Add/create'), tagColor),
+                    tagDatalist,
+                    h('div', { class: 'orghint', text: 'Tags are saved as colored labels. Use the color swatch when creating a new tag.' }),
+                    tagChips),
+                h('div', { class: 'orgfield' },
+                    h('label', { text: 'Notes' }),
+                    notes),
+                status),
+            h('div', { class: 'orgactions' },
+                h('button', { class: 'btn', type: 'button', onClick: () => close(null) }, 'Cancel'),
+                h('button', { class: 'btn primary', type: 'button', onClick: async () => {
+                    try {
+                        if (projectInput.value.trim()) await useProjectInput();
+                        if (tagInput.value.trim()) await addTagByName(tagInput.value);
+                        close({ projectId: selectedProjectId || null, tags: Array.from(selectedTags), notes: notes.value || '' });
+                    } catch (error) {
+                        status.textContent = error.message;
+                    }
+                } }, options.actionText || (options.mode ? 'Done' : (options.initial && options.initial.id ? 'Update scan' : 'Save scan')))));
+        shade.appendChild(panel);
+        shade.addEventListener('click', (event) => {
+            if (event.target === shade) close(null);
+        });
+        state.overlay.appendChild(shade);
+        refreshProjects();
+        refreshTags();
+        projectInput.focus();
+        return promise;
+    }
+
+    function savedContext(snapshot, projectMap, tagMap) {
+        return {
+            savedId: snapshot.id,
+            conversationId: snapshot.conversationId,
+            title: snapshot.title,
+            scannedAt: snapshot.scannedAt,
+            project: snapshot.projectId && projectMap.get(snapshot.projectId) ? projectMap.get(snapshot.projectId).name : '',
+            tags: (snapshot.tags || []).map((id) => tagMap.get(id)).filter(Boolean).map((tag) => tag.name).join('; '),
+        };
+    }
+
+    function exportSavedJson(snapshots, projects, tags, scope) {
+        const payload = { version: 2, exportedAt: new Date().toISOString(), snapshots, projects, tags };
+        download(`geo-aeo-saved-${scope}-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(payload, null, 2), 'application/json');
+    }
+
+    function exportSavedSourcesCsv(snapshots, projects, tags) {
+        const projectMap = new Map(projects.map((project) => [project.id, project]));
+        const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
+        const rows = snapshots.flatMap((snapshot) => {
+            const ctx = savedContext(snapshot, projectMap, tagMap);
+            return ((snapshot.intel && snapshot.intel.sources) || []).map((source) => ({ ...ctx, ...source }));
+        });
+        download(`geo-aeo-saved-sources-${new Date().toISOString().slice(0, 10)}.csv`, CORE().toCsv(rows), 'text/csv');
+    }
+
+    function exportSavedProductsCsv(snapshots, projects, tags) {
+        const projectMap = new Map(projects.map((project) => [project.id, project]));
+        const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
+        const rows = snapshots.flatMap((snapshot) => {
+            const ctx = savedContext(snapshot, projectMap, tagMap);
+            return ((snapshot.intel && snapshot.intel.products) || []).map((product) => ({
+                ...ctx,
+                title: product.title,
+                price: product.price,
+                tag: product.tag,
+                merchants: product.merchants,
+                rating: product.rating,
+                reviews: product.reviews,
+                query: product.query,
+                providerUrl: product.providerUrl,
+                shoppingUrl: product.shoppingUrl,
+                offers: (product.offers || []).length,
+            }));
+        });
+        download(`geo-aeo-saved-products-${new Date().toISOString().slice(0, 10)}.csv`, CORE().toCsv(rows), 'text/csv');
+    }
+
+    function importSavedFile(input) {
+        const file = input.files && input.files[0];
+        input.value = '';
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async () => {
+            try {
+                const payload = JSON.parse(String(reader.result || '{}'));
+                await CORE().importLibrary(payload);
+                setStatus('saved library imported');
+                state.activeTab = 'saved';
+                render();
+            } catch (error) {
+                setStatus(error.message, true);
+            }
+        };
+        reader.onerror = () => setStatus('import failed', true);
+        reader.readAsText(file);
     }
 
     function table(headers, rows) {
@@ -1090,8 +1431,15 @@
     async function saveCurrent() {
         if (!state.intel) return;
         try {
-            await CORE().saveSnapshot(state.intel);
+            const metadata = await openOrganizationModal({
+                title: 'Save scan',
+                subtitle: state.intel.title || '(untitled)',
+                initial: {},
+            });
+            if (!metadata) return;
+            await CORE().saveSnapshot(state.intel, metadata);
             setStatus('saved locally');
+            if (state.activeTab === 'saved') render();
         } catch (error) {
             setStatus(error.message, true);
         }

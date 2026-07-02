@@ -1,4 +1,4 @@
-// ChatGPT GEO/AEO Product Research Extension - Popup Script
+// ChatGPT GEO/AEO Research Extension - Popup Script
 
 document.addEventListener('DOMContentLoaded', async () => {
     const statusEl = document.getElementById('status');
@@ -62,16 +62,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Open the GEO/AEO Product Research modal
+    // Open the GEO/AEO Research modal
     openSearchBtn.addEventListener('click', async () => {
         try {
             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
             await chrome.tabs.sendMessage(activeTab.id, { action: 'openResearch' });
             window.close(); // Close the popup
         } catch (error) {
-            console.error('Failed to open GEO/AEO Product Research:', error);
+            console.error('Failed to open GEO/AEO Research:', error);
             statusEl.className = 'status status-bad';
-            setStatus('error', 'Failed to open GEO/AEO Product Research. Please refresh the page.');
+            setStatus('error', 'Failed to open GEO/AEO Research. Please refresh the page.');
         }
     });
 
