@@ -425,8 +425,18 @@
             h('div', { class: 'stats' }, statItems),
             h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'source pipelines')), renderBars(pipelineCounts(state.intel.sources))),
             h('div', { class: 'grid2' },
+                h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'query intent (GEO/AEO stage)')), renderBars(metaCounts(stats.queryStages, STAGE_META))),
+                h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'source types')), renderBars(metaCounts(stats.sourceCategories, CATEGORY_META)))),
+            h('div', { class: 'grid2' },
                 h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'top fetched domains')), renderBars(domainCounts(state.intel.sources))),
                 h('div', { class: 'panel' }, h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, 'top cited domains')), renderBars(domainCounts(state.intel.citations)))));
+    }
+
+    function metaCounts(counts, meta) {
+        const map = counts || {};
+        return Object.keys(map)
+            .map((key) => ({ label: (meta[key] && meta[key].label) || (typeof meta[key] === 'string' ? meta[key] : key), value: map[key], color: (meta[key] && meta[key].color) || '#a1a1aa' }))
+            .sort((left, right) => right.value - left.value);
     }
 
     function pipelineCounts(items) {
@@ -482,9 +492,11 @@
     }
 
     function renderQueries() {
-        return table(['#', 'fan-out query', 'found via'], state.intel.queries.map((query, index) => [
+        return table(['#', 'fan-out query', 'stage', 'type', 'found via'], state.intel.queries.map((query, index) => [
             index + 1,
             query.query,
+            query.stage ? h('span', { style: { color: (STAGE_META[query.stage] || {}).color || 'inherit', fontWeight: '650' }, text: (STAGE_META[query.stage] || {}).label || query.stage }) : '',
+            query.qtype ? (QTYPE_META[query.qtype] || query.qtype) : '',
             query.via,
         ]));
     }
@@ -911,6 +923,30 @@
         return preferred.filter((key) => counts[key]).concat(Object.keys(counts).filter((key) => !preferred.includes(key)));
     }
 
+    const STAGE_META = {
+        problem: { label: 'Problem-aware', color: '#2563eb' },
+        solution: { label: 'Solution-aware', color: '#7c3aed' },
+        decision: { label: 'Decision-aware', color: '#16a34a' },
+        retention: { label: 'Retention', color: '#d97706' },
+        unaware: { label: 'Unaware', color: '#71717a' },
+    };
+    const QTYPE_META = {
+        comparison: 'Comparison', 'how-to': 'How-to', bofu: 'BoFu', branded: 'Branded', operator: 'Operator', other: 'Other',
+    };
+    const CATEGORY_META = {
+        firstparty: { label: 'first-party / vendor', color: '#0f766e' },
+        review: { label: 'review / test site', color: '#d97706' },
+        reddit: { label: 'reddit', color: '#e5533d' },
+        news: { label: 'news / media', color: '#2563eb' },
+        blog: { label: 'blog', color: '#8b5cf6' },
+        forum: { label: 'forum / Q&A', color: '#6d28d9' },
+        social: { label: 'social / video', color: '#db2777' },
+        wiki: { label: 'encyclopedia', color: '#71717a' },
+        docs: { label: 'docs / repo', color: '#0284c7' },
+        'gov-edu': { label: 'gov / edu', color: '#4d7c0f' },
+        other: { label: 'other', color: '#a1a1aa' },
+    };
+
     function pipelineColor(pipeline) {
         return { serp: '#8A8F98', labrador: '#4C6EF5', bright: '#12B886', oxylabs: '#F59F00', bing: '#0B7285' }[pipeline] || '#CBD2D9';
     }
@@ -1009,9 +1045,10 @@
     }
 
     function renderSources() {
-        return table(['domain', 'pipeline', 'title', 'url', 'date'], state.intel.sources.map((source) => [
+        return table(['domain', 'pipeline', 'type', 'title', 'url', 'date'], state.intel.sources.map((source) => [
             source.domain,
             source.pipeline,
+            source.category ? h('span', { style: { color: (CATEGORY_META[source.category] || {}).color || 'inherit' }, text: (CATEGORY_META[source.category] || {}).label || source.category }) : '',
             source.title,
             link(source.url),
             h('span', { class: 'datecell', text: formatDate(source.pubDate) }),

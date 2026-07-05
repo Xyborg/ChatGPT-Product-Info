@@ -585,9 +585,11 @@
         };
 
         const normalizedSources = dedupe(sources, (source) => `${source.url || source.domain}|${source.pipeline}`);
+        normalizedSources.forEach((source) => { source.category = classifyDomain(source.domain); });
         const normalizedCitations = dedupe(citations, (citation) => citation.url);
         const normalizedProducts = dedupe(products, (product) => `${product.title}|${product.price}|${product.tag}`);
         const normalizedQueries = dedupe(queries, (query) => query.query.toLowerCase());
+        normalizedQueries.forEach((query) => { Object.assign(query, classifyQuery(query.query)); });
         const normalizedBrowseActions = dedupe(browseActions, (action) => `${action.action}|${action.arg}`);
         const answerText = assistantTexts.join('\n\n');
 
@@ -639,8 +641,62 @@
                 browseActions: normalizedBrowseActions.length,
                 memoryItems: memory.length,
                 researchSteps: researchSteps.length,
+                queryStages: (() => { const counts = {}; normalizedQueries.forEach((query) => { counts[query.stage] = (counts[query.stage] || 0) + 1; }); return counts; })(),
+                queryTypes: (() => { const counts = {}; normalizedQueries.forEach((query) => { counts[query.qtype] = (counts[query.qtype] || 0) + 1; }); return counts; })(),
+                sourceCategories: (() => { const counts = {}; normalizedSources.forEach((source) => { counts[source.category] = (counts[source.category] || 0) + 1; }); return counts; })(),
             },
         };
+    }
+
+    // Query-intent + source-type classification, adapted from Taylor Scher's AEO
+    // framework (stage x type). Heuristic keyword matching: EN, DE, ES, FR, IT, NL, PT.
+    // Queries are diacritic/apostrophe-normalized first (cómo -> como, qu'est -> qu est)
+    // so patterns stay ASCII and unaccented user input matches too.
+    function classifyQuery(raw) {
+        const query = String(raw || '')
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/['\u2019\u02bc\u0060\u00b4]/g, ' ');
+        const isHowTo = /\bhow (to|do|does|can)\b|\bguide\b|\btutorials?\b|\btutoriel\b|\bstep[-\s]?by[-\s]?step\b|\bset ?up\b|\banleitung\b|\bwie (kann|macht|funktioniert|geht)\b|\bschritt\b|\bcomo (se |hacer|instalar|configurar|funciona|usar|fazer|criar|crear|montar)\b|\bcomment (faire|installer|configurer|fonctionne|utiliser|marche)\b|\bcome (fare|installare|configurare|funziona|usare|creare)\b|\bhoe (kan|werkt|maak|installeer|stel|gebruik)\b|\bhandleiding\b|\bstap voor stap\b|\bpaso a paso\b|\bpasso (a|dopo) passo\b|\betape par etape\b|\bguia\b/.test(query);
+        const isComparison = /\b(vs\.?|versus)\b|\bcompared?\b|\bcomparison\b|\balternatives?\b|\bvergleich\b|\balternativen?\b|\bunterschied\b|\bcomparacion\b|\bcomparativ[ao]s?\b|\balternativas?\b|\bdiferencias?\b|\bcomparatifs?\b|\bcomparaison\b|\bdifference\b|\bconfronto\b|\bcomparazione\b|\bdifferenz[ae]\b|\bvergelijk(ing)?\b|\balternatieven?\b|\bverschil\b|\bcomparacao\b|\bdiferencas?\b/.test(query);
+        const isPricing = /\bpricing\b|\bprice[ds]?\b|\bcost(s|ing)?\b|\bhow much\b|\bcheap(est|er)?\b|\bpreis(e|werte?)?\b|\bkosten\b|\bgunstig(e|st)?\b|\bbillig\b|\bangebot(e)?\b|\bkaufen\b|\bwhere to buy\b|\bbuy\b|\bdeal(s)?\b|\bprecios?\b|\bcost[eo]s?\b|\bcuanto cuesta\b|\bbarat[ao]s?\b|\b(donde|onde) comprar\b|\bcomprare?\b|\bofertas?\b|\bprix\b|\bcouts?\b|\bcombien coute\b|\bpas cher\b|\bacheter\b|\bpromo(tion)?\b|\bprezz[oi]\b|\bquanto (costa|custa)\b|\beconomic[oa]\b|\bdove comprare\b|\bprij(s|zen)\b|\bhoeveel kost\b|\bgoedkoop\b|\bkopen\b|\bwaar (te )?kopen\b|\baanbieding(en)?\b|\bprecos?\b|\bcustos?\b|\bpromocao\b/.test(query);
+        const isReviews = /\breviews?\b|\bratings?\b|\btestimonials?\b|\bworth it\b|\bpros and cons\b|\berfahrung(en)?\b|\btest(bericht|sieger)?\b|\bbewertung(en)?\b|\bstiftung warentest\b|\bopinion(es)?\b|\bresenas?\b|\bvaloraciones\b|\bvale la pena\b|\bavis\b|\bvaut (le coup|la peine)\b|\brecensioni?\b|\bopinioni\b|\bvale la pena\b|\bervaringen\b|\bbeoordelingen\b|\bde moeite waard\b|\bavaliacoes\b|\bopinioes\b|\bresenhas?\b|\bvale a pena\b/.test(query);
+        const isBestTop = /\bbest(e[rsn]?|es)?\b|\btop ?\d*\b|\bleading\b|\bmost popular\b|\brecommended\b|\bempfehlung(en)?\b|\bmejor(es)?\b|\brecomendad[oa]s?\b|\bmeilleurs?e?s?\b|\brecommandes?\b|\bmiglior[ei]?\b|\bconsigliat[oi]\b|\baanbevolen\b|\bmelhor(es)?\b/.test(query);
+        const isWhatWhy = /\bwhat (is|are)\b|\bwhy\b|\bdefinitions?\b|\bwas (ist|sind)\b|\bwarum\b|\bbedeutung\b|\bque (es|son)\b|\bpor ?que\b|\bsignificado\b|\bqu ?est[- ]ce\b|\bpourquoi\b|\bsignification\b|\b(che )?cos ?a? e\b|\bperche\b|\bsignificato\b|\bwat (is|zijn)\b|\bwaarom\b|\bbetekenis\b|\bo que (e|sao)\b/.test(query);
+        const isTroubleshoot = /\b(fix|error|not working|troubleshoot|broken)\b|\b(problem|fehler|kaputt|funktioniert nicht)\b|\bno funciona\b|\barreglar\b|\bsolucionar\b|\bne (fonctionne|marche) pas\b|\berreur\b|\breparer\b|\bnon funziona\b|\berrore\b|\briparare\b|\bwerkt niet\b|\bfout\b|\brepareren\b|\bnao funciona\b|\berro\b|\bconsertar\b/.test(query);
+        const isBoFu = isPricing || isReviews || isBestTop || isComparison;
+
+        let type = 'other';
+        if (isComparison) type = 'comparison';
+        else if (isHowTo && !isTroubleshoot) type = 'how-to';
+        else if (isBoFu) type = 'bofu';
+
+        let stage;
+        if (isPricing || isReviews) stage = 'decision';
+        else if (isComparison) stage = 'solution';
+        else if (isBestTop || isWhatWhy || isHowTo || isTroubleshoot) stage = 'problem';
+        else stage = 'solution';
+        return { stage, qtype: type };
+    }
+
+    const DOMAIN_CATEGORY_RULES = [
+        ['reddit', /(^|\.)reddit\.com$/i],
+        ['review', /(^|\.)(g2|capterra|trustpilot|trustradius|getapp|softwareadvice|gartner|producthunt|testberichte|vergleich)\.(com|org|de|net)$|(^|\.)(test|chip|computerbild)\.de$|stiftung/i],
+        ['news', /(^|\.)(theverge|techcrunch|wired|zdnet|cnbc|forbes|businessinsider|reuters|bloomberg|nytimes|cnn|bbc|techradar|tomsguide|t3|heise|golem|spiegel|faz|sueddeutsche|zeit|welt|t-online|bild)\.(com|net|org|de)$/i],
+        ['social', /(^|\.)(youtube|youtu|twitter|linkedin|facebook|instagram|tiktok|pinterest)\.(com|be)$|(^|\.)x\.com$/i],
+        ['forum', /(^|\.)(stackoverflow|stackexchange|quora|superuser|gutefrage)\.(com|net)$|news\.ycombinator\.com$/i],
+        ['wiki', /(^|\.)wikipedia\.org$|(^|\.)fandom\.com$|(^|\.)wiktionary\.org$/i],
+        ['blog', /(^|\.)(medium|substack|blogspot|wordpress|beehiiv)\.(com|io)$/i],
+        ['docs', /(^|\.)github\.com$|(^|\.)gitlab\.com$|^docs\.|^developer\./i],
+        ['gov-edu', /\.(gov|edu)$|(^|\.)nih\.gov$|(^|\.)europa\.eu$|arbeiterkammer/i],
+    ];
+    function classifyDomain(domain) {
+        const value = String(domain || '').toLowerCase();
+        if (!value) return 'other';
+        for (const [category, pattern] of DOMAIN_CATEGORY_RULES) {
+            if (pattern.test(value)) return category;
+        }
+        return 'firstparty';
     }
 
     function toCsv(rows) {
@@ -973,6 +1029,8 @@
         fetchConversation,
         scanCurrentConversation,
         scanConversationById,
+        classifyQuery,
+        classifyDomain,
         extractConversationIntel,
         loadSnapshots,
         saveSnapshot,
