@@ -204,18 +204,19 @@
                 return;
             }
         }
-        await rescan();
+        await rescan(conversationId);
     }
 
     function close() {
         if (state.overlay) state.overlay.classList.remove('open');
     }
 
-    async function rescan() {
+    async function rescan(targetConversationId) {
         ensureHost();
-        // rescan follows the scan being viewed, not whatever chat the page happens to be on —
-        // the conversation API is fetchable by id from any ChatGPT tab.
-        const targetId = state.lastConversationId || (state.intel && state.intel.id) || '';
+        const explicitId = typeof targetConversationId === 'string' ? targetConversationId : '';
+        const pageId = (CORE().getPageStatus() || {}).conversationId || '';
+        const viewedId = state.lastConversationId || (state.intel && state.intel.id) || '';
+        const targetId = explicitId || viewedId || pageId;
         state.body.replaceChildren(h('div', { class: 'loading' }, h('div', { class: 'spinner' }), targetId ? `Scanning conversation ${targetId}...` : 'Scanning current ChatGPT conversation...'));
         setStatus('scanning...');
         try {
@@ -284,7 +285,7 @@
                     return h('div', { class: 'cachenote' },
                         h('span', null,
                             `Loaded from saved cache${state.intel.scannedAt ? ` (${new Date(state.intel.scannedAt).toLocaleString()})` : ''} — live offers are frozen at save time.`,
-                            mismatch ? ' This scan belongs to a different chat than the page behind — Rescan updates the saved chat, not this page.' : ''),
+                            mismatch ? ' This scan belongs to a different chat than the page behind — Rescan updates the saved chat shown here.' : ''),
                         h('span', { style: { display: 'inline-flex', gap: '8px', flex: 'none' } },
                             mismatch ? h('a', { class: 'btn', href: `https://chatgpt.com/c/${scanId}`, title: 'Navigate this tab to the scanned chat (reloads the page)' }, 'Open chat') : null,
                             h('button', { class: 'btn', onClick: rescan }, 'Rescan now')));
