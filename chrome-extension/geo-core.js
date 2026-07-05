@@ -58,18 +58,23 @@
         return response.json();
     }
 
+    async function scanConversationById(conversationId) {
+        if (!conversationId) throw new Error('No conversation id to scan.');
+        const token = await getSessionToken();
+        const raw = await fetchConversation(conversationId, token);
+        const intel = extractConversationIntel(raw, {
+            id: conversationId,
+            url: `https://chatgpt.com/c/${conversationId}`,
+        });
+        return { intel, raw, token };
+    }
+
     async function scanCurrentConversation() {
         const status = getPageStatus();
         if (!status.ready) {
             throw new Error(status.message);
         }
-        const token = await getSessionToken();
-        const raw = await fetchConversation(status.conversationId, token);
-        const intel = extractConversationIntel(raw, {
-            id: status.conversationId,
-            url: window.location.href,
-        });
-        return { intel, raw, token };
+        return scanConversationById(status.conversationId);
     }
 
     function cleanDomain(value) {
@@ -359,6 +364,13 @@
                     || (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue) && !Object.keys(fieldValue).length);
                 bump(census.hintKeys, isEmpty ? `${key}:empty` : key);
             });
+            // retrieval experiments: the telemetry research observed A/B experiment names in the wild
+            Object.keys(meta).forEach((key) => {
+                if (!/experiment|ab_?test|statsig|feature_flag|feed_serving/i.test(key)) return;
+                bump(census.hintKeys, key);
+                if (!census.samples) census.samples = {};
+                if (!census.samples[key]) { try { census.samples[key] = JSON.stringify(meta[key]).slice(0, 300); } catch (_) { /* ignore */ } }
+            });
             // sample the first NON-EMPTY value of every citation-bearing field so shapes are visible
             census.samples = census.samples || {};
             ['citations', 'content_references', 'search_result_groups', 'selected_sources', 'selected_mcp_sources', '_cite_metadata', 'caterpillar_selected_sources'].forEach((key) => {
@@ -602,6 +614,24 @@
             stats: {
                 queries: normalizedQueries.length,
                 sources: normalizedSources.length,
+                primaryPipeline: (() => {
+                    const counts = {};
+                    normalizedSources.forEach((source) => { const key = source.pipeline || '?'; counts[key] = (counts[key] || 0) + 1; });
+                    const top = Object.keys(counts).sort((left, right) => counts[right] - counts[left])[0] || '';
+                    return top;
+                })(),
+                primaryPipelineShare: (() => {
+                    if (!normalizedSources.length) return 0;
+                    const counts = {};
+                    normalizedSources.forEach((source) => { const key = source.pipeline || '?'; counts[key] = (counts[key] || 0) + 1; });
+                    const top = Object.keys(counts).sort((left, right) => counts[right] - counts[left])[0];
+                    return Math.round(counts[top] / normalizedSources.length * 100);
+                })(),
+                pipelineMix: (() => {
+                    const counts = {};
+                    normalizedSources.forEach((source) => { const key = source.pipeline || '?'; counts[key] = (counts[key] || 0) + 1; });
+                    return counts;
+                })(),
                 domains: new Set(normalizedSources.map((source) => source.domain).filter(Boolean)).size,
                 citations: normalizedCitations.length,
                 citedDomains: new Set(normalizedCitations.map((citation) => citation.domain).filter(Boolean)).size,
@@ -942,6 +972,7 @@
         getSessionToken,
         fetchConversation,
         scanCurrentConversation,
+        scanConversationById,
         extractConversationIntel,
         loadSnapshots,
         saveSnapshot,

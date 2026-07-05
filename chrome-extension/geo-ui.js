@@ -57,7 +57,7 @@
         .btn{height:34px;border:1px solid var(--input);background:var(--card);color:var(--foreground);border-radius:calc(var(--radius) - 2px);padding:0 12px;cursor:pointer;font-size:13px;font-weight:500;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;box-shadow:0 1px 1px rgba(9,9,11,.03);transition:background .14s ease,color .14s ease,border-color .14s ease,box-shadow .14s ease}.btn:hover{background:var(--accent);color:var(--accent-foreground)}.btn.primary{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary);box-shadow:0 1px 2px rgba(9,9,11,.16)}.btn.primary:hover{background:#27272a;border-color:#27272a}.btn.secondary{background:var(--secondary);color:var(--secondary-foreground);border-color:transparent;box-shadow:none}.btn.secondary:hover{background:#e4e4e7;color:var(--secondary-foreground)}.btn.ghost{background:transparent;border-color:transparent;box-shadow:none}.btn.ghost:hover{background:var(--accent);color:var(--accent-foreground)}.btn.danger{background:var(--destructive);color:var(--destructive-foreground);border-color:var(--destructive);box-shadow:0 1px 2px rgba(220,38,38,.22)}.btn.danger:hover{background:#b91c1c;border-color:#b91c1c;color:var(--destructive-foreground)}.btn:disabled{opacity:.5;cursor:not-allowed}.x{width:34px;padding:0;border-radius:calc(var(--radius) - 2px);box-shadow:none;border-color:transparent;background:transparent}.x svg{width:17px;height:17px}
         .body{flex:1;overflow:auto;padding:18px 20px 22px}.body::-webkit-scrollbar,.tablewrap::-webkit-scrollbar,.pgrid::-webkit-scrollbar,.flowbox::-webkit-scrollbar,.flowwrap::-webkit-scrollbar{width:10px;height:10px}.body::-webkit-scrollbar-thumb,.tablewrap::-webkit-scrollbar-thumb,.pgrid::-webkit-scrollbar-thumb,.flowbox::-webkit-scrollbar-thumb,.flowwrap::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:999px;border:2px solid transparent;background-clip:padding-box}.foot{height:30px;flex:0 0 30px;border-top:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.foot a{color:var(--foreground);text-decoration:none;font-weight:600}.foot a:hover{text-decoration:underline}.loading,.empty{min-height:132px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:36px;text-align:center;color:var(--muted-foreground);font-size:13px}.spinner{width:28px;height:28px;border:3px solid #e4e4e7;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}@keyframes spin{to{transform:rotate(360deg)}}
         .meta{margin-bottom:14px}.meta h2{font-size:18px;margin:0 0 4px}.meta p{margin:0;color:var(--muted-foreground);font-family:var(--mono);font-size:12px;word-break:break-word}
-        .scanwrap{display:block}.scanhead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 12px}.scantitle{font-size:20px;line-height:1.25;margin:2px 0 0;font-weight:650;letter-spacing:0}.cachecompact{display:flex;align-items:center;gap:8px;max-width:min(560px,48vw);margin-top:3px;color:#854d0e;font-size:12px;line-height:1.35}.cachecompact span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cachecompact .btn{height:30px;padding:0 10px;flex:none}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-foreground);font-weight:600}
+        .scanwrap{display:block}.scanhead{margin:0 0 12px}.scantitle{font-size:20px;line-height:1.25;margin:2px 0 0;font-weight:650;letter-spacing:0}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-foreground);font-weight:600}
         .tabs{display:inline-flex;max-width:100%;gap:3px;background:var(--muted);border:1px solid var(--border);border-radius:calc(var(--radius) + 2px);margin:0 0 14px;padding:4px;overflow:auto}.tab{height:34px;border:0;background:transparent;color:var(--muted-foreground);border-radius:calc(var(--radius) - 2px);padding:0 10px;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex:none}.tab:hover{color:var(--foreground);background:rgba(255,255,255,.55)}.tab.active{color:var(--foreground);background:var(--card);box-shadow:0 1px 2px rgba(9,9,11,.08)}.tabicon{width:15px;height:15px;flex:none}.tabcount{font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}
         .filter,.select,.orginput,.orgtextarea{width:100%;border:1px solid var(--input);border-radius:calc(var(--radius) - 2px);background:var(--card);color:var(--foreground);box-shadow:0 1px 1px rgba(9,9,11,.02)}.filter{height:38px;padding:0 12px;margin-bottom:14px;font-size:13px}.filter::placeholder{color:var(--muted-foreground)}.select{height:34px;padding:0 34px 0 10px;font-size:13px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:14px 14px;background-position:right 10px center}
         .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(144px,1fr));gap:12px;margin:12px 0 16px}.stat,.panel,.pcard,.reason{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 2px rgba(9,9,11,.03)}.stat{padding:14px}.num{font-family:var(--mono);font-size:25px;line-height:1.1;font-weight:750;letter-spacing:0}.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted-foreground);font-weight:600;margin-top:7px}.panel{padding:15px;margin-bottom:14px}.panelh{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -65,13 +65,14 @@
         .tablewrap{max-height:55vh;overflow:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--card)}table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}th{position:sticky;top:0;background:var(--card);text-align:left;color:var(--muted-foreground);font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;border-bottom:1px solid var(--border);font-weight:700}td{padding:10px 12px;border-bottom:1px solid #f4f4f5;vertical-align:top}tr:hover td{background:#fafafa}.mut{color:var(--muted-foreground)}.url{color:#2563eb;text-decoration:none;max-width:360px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.url:hover{text-decoration:underline}.datecell{display:inline-block;min-width:86px;white-space:nowrap;font-variant-numeric:tabular-nums}
         .querylist,.savedlist{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card)}.querylist{overflow:auto;max-height:260px}.queryrow{display:grid;grid-template-columns:46px minmax(150px,210px) minmax(0,1fr);gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #f4f4f5}.queryrow:last-child{border-bottom:0}.queryrow:hover{background:#fafafa}.qnum,.qvia{font-family:var(--mono);font-size:11px}.qnum{color:var(--muted-foreground);font-variant-numeric:tabular-nums}.qvia{color:#52525b;background:var(--secondary);border:1px solid var(--border);border-radius:999px;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qvia.product{background:#f5f3ff;border-color:#ddd6fe;color:#6d28d9}.qtext{font-size:13px;line-height:1.35;color:var(--foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .savedhead,.savedrow{display:grid;grid-template-columns:minmax(260px,1.4fr) 150px minmax(220px,.9fr) minmax(180px,.75fr) auto;gap:12px;align-items:center}.savedhead{padding:10px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-foreground);background:#fafafa;font-weight:700}.savedrow{padding:10px 12px;border-bottom:1px solid #f4f4f5}.savedrow:last-child{border-bottom:0}.savedrow:hover{background:#fafafa}.savedtitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedmeta,.savedstats{font-family:var(--mono);font-size:12px;color:var(--muted-foreground)}.savedmeta{white-space:nowrap}.savedstats{display:flex;gap:12px;flex-wrap:wrap}.savedstats b{color:var(--foreground);font-weight:650}.savedacts{display:flex;gap:6px;justify-content:flex-end}.savedacts .btn{height:30px;padding:0 9px;font-size:12px}
-        .savedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.savedfilters,.savedtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.savedfilters .select{width:180px;max-width:calc(50vw - 32px)}.savedorg{display:flex;flex-direction:column;gap:6px;min-width:0;align-items:flex-start}.savedorg .select.inline{height:30px;width:auto;max-width:220px;padding:0 26px 0 8px;font-size:12px;font-weight:500;border-color:transparent;background-color:transparent;box-shadow:none;background-position:right 7px center;cursor:pointer}.savedorg .select.inline:hover,.savedorg .select.inline:focus-visible{border-color:var(--input);background-color:var(--card)}.savedorg .select.inline.noproject{color:var(--muted-foreground);font-weight:400}.tagline{display:flex;gap:5px;flex-wrap:wrap;align-items:center}.addtag{display:inline-flex;align-items:center;border:1px dashed var(--border);background:transparent;color:var(--muted-foreground);border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:600;cursor:pointer;line-height:1.4}.addtag:hover{color:var(--foreground);border-style:solid;border-color:#d4d4d8;background:var(--card)}.tagchip,.orgchip,.pill,.rchip,.rbadge{display:inline-flex;align-items:center;border-radius:999px}.tagchip{padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:650}.notes{font-size:12px;color:#52525b;line-height:1.35;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.importfile{display:none}
+        .savedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.savedfilters,.savedtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.savedorg{display:flex;flex-direction:column;gap:6px;min-width:0;align-items:flex-start}.savedorg .select.inline{height:30px;width:auto;max-width:220px;padding:0 26px 0 8px;font-size:12px;font-weight:500;border-color:transparent;background-color:transparent;box-shadow:none;background-position:right 7px center;cursor:pointer}.savedorg .select.inline:hover,.savedorg .select.inline:focus-visible{border-color:var(--input);background-color:var(--card)}.savedorg .select.inline.noproject{color:var(--muted-foreground);font-weight:400}.tagline{display:flex;gap:5px;flex-wrap:wrap;align-items:center}.addtag{display:inline-flex;align-items:center;border:1px dashed var(--border);background:transparent;color:var(--muted-foreground);border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:600;cursor:pointer;line-height:1.4}.addtag:hover{color:var(--foreground);border-style:solid;border-color:#d4d4d8;background:var(--card)}.tagchip,.orgchip,.pill,.rchip,.rbadge{display:inline-flex;align-items:center;border-radius:999px}.tagchip{padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:650}.notes{font-size:12px;color:#52525b;line-height:1.35;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.importfile{display:none}
         .orgshade{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(9,9,11,.42);padding:24px}.orgmodal{width:min(600px,calc(100vw - 56px));max-height:min(720px,calc(100vh - 80px));overflow:auto;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);border-radius:calc(var(--radius) + 2px);box-shadow:0 24px 70px rgba(9,9,11,.26);padding:18px}.orgmodal.wide{width:min(760px,calc(100vw - 56px))}.orghead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.orgtitle{font-size:16px;font-weight:650;margin:0}.orgsub{font-size:12px;color:var(--muted-foreground);margin-top:4px;line-height:1.45}.orggrid{display:grid;gap:14px}.orgfield{display:grid;gap:6px}.orgfield label{font-size:12px;font-weight:600;color:var(--foreground)}.orginput{height:36px;padding:0 10px;font-size:13px}.orgtextarea{min-height:86px;resize:vertical;padding:9px 10px;font-size:13px;line-height:1.4}.orgcolor{width:48px;height:34px;border:1px solid var(--input);border-radius:calc(var(--radius) - 2px);background:var(--card);padding:3px;cursor:pointer}.orgrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.orgrow.tags{grid-template-columns:minmax(0,1fr) auto 48px}.orghint,.orgstatus,.managecount,.small{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);line-height:1.4}.orgchips{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}.orgchip{gap:6px;padding:4px 8px;font-family:var(--mono);font-size:11px;font-weight:650}.orgchip button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font:inherit;opacity:.75}.orgactions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.managebody{display:grid;gap:18px}.managesec{display:grid;gap:8px}.managerow{display:grid;grid-template-columns:minmax(0,1fr) 84px auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f4f4f5}.managerow:last-child{border-bottom:0}.managerow.tag{grid-template-columns:minmax(0,1fr) 48px 84px auto auto}.managecount{text-align:right}
         .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#d4d4d8 transparent}.pgrid .pcard{flex:0 0 248px;width:248px;scroll-snap-align:start}.pcard{padding:12px;display:flex;flex-direction:column;gap:8px}.thumblink{display:block;text-decoration:none}.thumb{height:132px;width:100%;object-fit:contain;border:1px solid #f4f4f5;border-radius:calc(var(--radius) - 2px);background:#fafafa}.ptitle{font-weight:650;line-height:1.35}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:750}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{align-self:flex-start;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#52525b;line-height:1.4}.sourcelink{display:inline-block;color:var(--muted-foreground);text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#2563eb}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #f4f4f5;padding-top:7px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafafa}.offer.best{color:#15803d;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:var(--success);margin-right:4px}
         .loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:#2563eb;margin-bottom:10px}.cachenote{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);padding:9px 12px;margin-bottom:12px;font-size:12px;color:#854d0e}.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.rchip{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);background:var(--card);border:1px solid var(--border);padding:4px 10px}.rchip b{color:var(--foreground);margin-right:2px}.rnote{font-size:12px;color:#52525b;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:var(--radius);padding:9px 11px;margin-bottom:12px;line-height:1.5}.rsteps{display:grid;gap:7px}.rstep{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:9px 11px}.rstep-blocked{border-color:#fecaca;background:#fef2f2}.rbadge{flex:none;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;margin-top:1px;color:#fff;background:#71717a}.rbadge-search{background:#0f766e}.rbadge-open{background:#2563eb}.rbadge-find{background:#7c3aed}.rbadge-click{background:#71717a}.rbadge-quote{background:#16a34a}.rbadge-other{background:#52525b}.rbadge-blocked{background:#dc2626}.rstepbody{min-width:0;flex:1}.rmain{display:block;font-family:var(--mono);font-size:11.5px;color:var(--foreground);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}a.rmain:hover{text-decoration:underline;color:#2563eb}.rmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted-foreground);margin-top:2px;line-height:1.45}.rstep-blocked .rmeta{color:#b91c1c}.rcensus{margin-top:18px;border-top:1px solid var(--border);padding-top:12px}.rcensus>summary{cursor:pointer;margin-bottom:8px}.rcensus>.rstep{margin-bottom:6px}.rquote{border-left:3px solid #d4d4d8;background:var(--card);border-radius:0 var(--radius) var(--radius) 0;padding:9px 12px;margin-bottom:8px;font-size:12px;color:#3f3f46;line-height:1.5}.dotspin{width:12px;height:12px;border:2px solid #e4e4e7;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+        .cmpstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 4px}.cmpstat{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:11px 12px;box-shadow:0 1px 2px rgba(9,9,11,.03)}.cmpnum{font-family:var(--mono);font-size:21px;font-weight:750;line-height:1.1}.cmplbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-foreground);font-weight:600;margin-top:5px}.cmptrack{height:6px;background:var(--muted);border-radius:999px;margin-top:9px;overflow:hidden}.cmpfill{height:100%;border-radius:999px;background:var(--chart)}.cmproute{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;margin:12px 0 2px;border:1px solid var(--border);border-radius:999px;background:var(--card);padding:6px 7px 6px 13px;box-shadow:0 1px 2px rgba(9,9,11,.04)}.routearrow{width:16px;height:16px;color:#a1a1aa;flex:none}.routediv{width:1px;height:16px;background:var(--border);margin:0 3px;flex:none}.routestatus{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:4px 9px;border:1px solid;line-height:1}.routestatus.stable{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}.routestatus.changed{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.cmpresults{display:grid;gap:14px;margin-top:18px}.cmpresults .cmproute{margin:0;justify-self:start}.cmpresults .rnote{margin-bottom:0}.cmpresults .cmpstats{margin:0}.cmpresults .cmpcols{margin-top:0}.cmpresults .cmpsec{margin-top:0}.pipedot{width:9px;height:9px;border-radius:50%;flex:none}.cmpcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.cmpcard{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:12px;box-shadow:0 1px 2px rgba(9,9,11,.03)}.cmpcard .eyebrow{display:block;margin-bottom:8px}.mixbar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--muted);margin-bottom:8px}.mixseg{height:100%}.mixlegend{display:flex;flex-wrap:wrap;gap:5px 12px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.cmpcounts{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);margin-top:9px;padding-top:8px;border-top:1px solid #f4f4f5}.cmpcounts b{color:var(--foreground)}.cmpsec{margin-top:14px}.cmpsec>.eyebrow{display:block;margin-bottom:7px}.domscroll{max-height:206px;overflow-y:auto;overflow-x:hidden;padding-right:4px}.domlist{columns:3 170px;column-gap:20px;font-family:var(--mono);font-size:11px;line-height:1.95;color:#52525b;padding:2px 0}.domlist span{display:block;break-inside:avoid;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.domlist span.shared{color:var(--foreground);font-weight:650}.domlist span.more{color:var(--muted-foreground);font-style:italic}
         .flowtools,.flowacts{display:flex;gap:8px;flex-wrap:wrap}.flowbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.flowlegend{display:flex;flex-wrap:wrap;gap:7px 14px}.lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.exportmenu{position:relative}.exportmenu summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.exportmenu summary::-webkit-details-marker{display:none}.chev{width:13px;height:13px;transition:transform .16s ease}.exportmenu[open] .chev{transform:rotate(180deg)}.exportitems{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:178px;border:1px solid var(--border);border-radius:var(--radius);background:var(--popover);box-shadow:0 12px 30px rgba(9,9,11,.14);padding:5px}.exportitem{display:block;width:100%;border:0;background:transparent;color:var(--popover-foreground);text-align:left;border-radius:calc(var(--radius) - 2px);padding:8px 9px;cursor:pointer;font-size:13px}.exportitem:hover{background:var(--accent)}.flowbox,.flowwrap{overflow-y:auto;overflow-x:hidden;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:8px}.flowbox svg,.flowwrap svg{display:block;width:100%;height:auto}
         .reason{padding:12px;margin-bottom:8px}.reason b{font-size:13px}.reason pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:#3f3f46;line-height:1.55;margin:8px 0 0}
-        @media(max-width:760px){.overlay{padding:0}.grid2{grid-template-columns:1fr}.modal{width:100vw;height:100vh;border-radius:0}.head{align-items:flex-start}.sub{display:none}.body{padding:14px}.acts{justify-content:flex-end}.scanhead{display:grid;gap:8px}.cachecompact{max-width:none;margin-top:0}.cachecompact span{white-space:normal}.tabs{display:flex;width:100%}.bar{grid-template-columns:110px 1fr 38px}.queryrow{grid-template-columns:36px 1fr}.qtext{grid-column:1 / -1;white-space:normal}.qvia{min-width:0}.savedbar{align-items:stretch}.savedfilters,.savedtools{width:100%}.savedfilters .select{width:100%;max-width:none}.savedhead{display:none}.savedrow{grid-template-columns:1fr}.savedacts{justify-content:flex-start}.orgrow,.orgrow.tags,.managerow,.managerow.tag{grid-template-columns:1fr}.orgcolor{width:100%}}
+        @media(max-width:760px){.overlay{padding:0}.grid2{grid-template-columns:1fr}.modal{width:100vw;height:100vh;border-radius:0}.head{align-items:flex-start}.sub{display:none}.body{padding:14px}.acts{justify-content:flex-end}.tabs{display:flex;width:100%}.bar{grid-template-columns:110px 1fr 38px}.queryrow{grid-template-columns:36px 1fr}.qtext{grid-column:1 / -1;white-space:normal}.qvia{min-width:0}.savedbar{align-items:stretch}.savedfilters,.savedtools{width:100%}.savedhead{display:none}.savedrow{grid-template-columns:1fr}.savedacts{justify-content:flex-start}.orgrow,.orgrow.tags,.managerow,.managerow.tag{grid-template-columns:1fr}.orgcolor{width:100%}}
         @media(prefers-reduced-motion:reduce){.spinner,.dotspin{animation:none}}
     `;
 
@@ -212,10 +213,13 @@
 
     async function rescan() {
         ensureHost();
-        state.body.replaceChildren(h('div', { class: 'loading' }, h('div', { class: 'spinner' }), 'Scanning current ChatGPT conversation...'));
+        // rescan follows the scan being viewed, not whatever chat the page happens to be on —
+        // the conversation API is fetchable by id from any ChatGPT tab.
+        const targetId = state.lastConversationId || (state.intel && state.intel.id) || '';
+        state.body.replaceChildren(h('div', { class: 'loading' }, h('div', { class: 'spinner' }), targetId ? `Scanning conversation ${targetId}...` : 'Scanning current ChatGPT conversation...'));
         setStatus('scanning...');
         try {
-            const result = await CORE().scanCurrentConversation();
+            const result = targetId ? await CORE().scanConversationById(targetId) : await CORE().scanCurrentConversation();
             state.intel = result.intel;
             state.raw = result.raw;
             state.token = result.token;
@@ -264,19 +268,28 @@
         if (state.activeTab === 'browse' && !state.intel.browseActions.length) state.activeTab = 'overview';
         const subtitle = state.shadow.getElementById('geo-research-subtitle');
         if (subtitle) {
-            subtitle.replaceChildren(
+            subtitle.replaceChildren(...[
                 h('span', { class: 'metaitem' }, h('span', { class: 'metalabel' }, 'Conversation'), h('span', { class: 'metavalue', title: state.intel.id, text: state.intel.id })),
                 state.intel.prompt ? h('span', { class: 'metasep' }, '·') : null,
-                state.intel.prompt ? h('span', { class: 'metaitem' }, h('span', { class: 'metalabel' }, 'Prompt'), h('span', { class: 'metavalue', title: state.intel.prompt, text: state.intel.prompt })) : null);
+                state.intel.prompt ? h('span', { class: 'metaitem' }, h('span', { class: 'metalabel' }, 'Prompt'), h('span', { class: 'metavalue', title: state.intel.prompt, text: state.intel.prompt })) : null,
+            ].filter(Boolean));
         }
 
         state.body.replaceChildren(
             h('div', { class: 'scanwrap' },
-                h('div', { class: 'scanhead' },
-                    h('div', null, h('span', { class: 'eyebrow' }, 'Current scan'), h('h2', { class: 'scantitle', text: state.intel.title })),
-                    state.fromCache ? h('div', { class: 'cachecompact' },
-                        h('span', { title: 'Loaded from saved cache. Live offers are frozen at save time.', text: `Loaded from cache${state.intel.scannedAt ? ` (${new Date(state.intel.scannedAt).toLocaleString()})` : ''}. Offers are frozen.` }),
-                        h('button', { class: 'btn', onClick: rescan }, 'Rescan now')) : null),
+                state.fromCache ? (() => {
+                    const pageId = (CORE().getPageStatus() || {}).conversationId || '';
+                    const scanId = state.lastConversationId || state.intel.id || '';
+                    const mismatch = Boolean(pageId && scanId && pageId !== scanId);
+                    return h('div', { class: 'cachenote' },
+                        h('span', null,
+                            `Loaded from saved cache${state.intel.scannedAt ? ` (${new Date(state.intel.scannedAt).toLocaleString()})` : ''} — live offers are frozen at save time.`,
+                            mismatch ? ' This scan belongs to a different chat than the page behind — Rescan updates the saved chat, not this page.' : ''),
+                        h('span', { style: { display: 'inline-flex', gap: '8px', flex: 'none' } },
+                            mismatch ? h('a', { class: 'btn', href: `https://chatgpt.com/c/${scanId}`, title: 'Navigate this tab to the scanned chat (reloads the page)' }, 'Open chat') : null,
+                            h('button', { class: 'btn', onClick: rescan }, 'Rescan now')));
+                })() : null,
+                h('div', { class: 'scanhead' }, h('span', { class: 'eyebrow' }, 'Current scan'), h('h2', { class: 'scantitle', text: state.intel.title })),
                 renderTabs(),
                 renderFilter(),
                 renderActiveTab()));
@@ -399,6 +412,7 @@
         const stats = state.intel.stats;
         const statItems = [
             stat(stats.queries, 'fan-out queries'),
+            stats.primaryPipeline ? stat(`${stats.primaryPipelineShare}%`, `primary: ${stats.primaryPipeline}`) : null,
             stat(stats.sources, 'sources'),
             stat(stats.domains, 'domains'),
             stat(stats.citations, 'citations'),
@@ -489,7 +503,7 @@
                     h('span', { class: 'lg' }, h('i', { style: { background: 'transparent', border: '2px solid #17191f', width: '10px', height: '10px' } }), 'cited'),
                     hasProducts ? h('span', { class: 'lg' }, h('i', { style: { background: '#0CA678' } }), 'best price') : null),
                 h('div', { class: 'flowtools' },
-                    state.intel.products.some((product) => product.lookupKey) ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : 'Reload offers') : null,
+                    state.intel.products.some((product) => product.lookupKey) ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : (state.intel.products.some((product) => product.offers && product.offers.length) ? 'Reload offers' : 'Load offers')) : null,
                     h('details', { class: 'exportmenu' },
                         h('summary', { class: 'btn' }, 'Export', chevronIcon()),
                         h('div', { class: 'exportitems' },
@@ -940,6 +954,12 @@
         return icon;
     }
 
+    function arrowRightIcon() {
+        const icon = svgNode('svg', { class: 'routearrow', viewBox: '0 0 24 24', width: '16', height: '16', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+        icon.appendChild(svgNode('path', { d: 'M12.5 8.45596V9L6.5 9C5.56812 9 5.10218 9 4.73463 9.15224C4.24458 9.35523 3.85523 9.74458 3.65224 10.2346C3.5 10.6022 3.5 11.0681 3.5 12C3.5 12.9319 3.5 13.3978 3.65224 13.7654C3.85523 14.2554 4.24458 14.6448 4.73463 14.8478C5.10218 15 5.56812 15 6.5 15H12.5V15.544C12.5 17.6268 12.5 18.6681 13.1003 18.9422C13.7006 19.2163 14.4183 18.5026 15.8536 17.0751L19.4172 13.5311C20.1391 12.8132 20.5 12.4542 20.5 12C20.5 11.5458 20.1391 11.1868 19.4172 10.4689L15.8536 6.92487C14.4183 5.49743 13.7006 4.78372 13.1003 5.05779C12.5 5.33185 12.5 6.37322 12.5 8.45596Z' }));
+        return icon;
+    }
+
     function chevronIcon() {
         const icon = svgNode('svg', { class: 'chev', viewBox: '0 0 24 24', width: '13', height: '13', 'aria-hidden': 'true' });
         icon.appendChild(svgNode('path', { d: 'M6 9l6 6 6-6', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
@@ -1119,9 +1139,12 @@
         return h('div', null,
             h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, `${state.intel.products.length} products`),
                 h('div', { class: 'flowtools' },
-                    canHydrate ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : 'Reload offers') : null,
+                    canHydrate ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : (state.intel.products.some((product) => product.offers && product.offers.length) ? 'Reload offers' : 'Load offers')) : null,
                     h('button', { class: 'btn', onClick: exportProductsCsv }, 'Products CSV'))),
             state.loadingOffers ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.offerProgress || 'loading live offers...') : null,
+            !state.loadingOffers && canHydrate && !state.intel.products.some((product) => product.offers && product.offers.length)
+                ? h('div', { class: 'rnote' }, 'Live offers are fetched on demand (one request per product) to stay under ChatGPT rate limits — nothing is requested until you click Load offers.')
+                : null,
             h('div', { class: 'pgrid' }, ordered.map((item) => renderProductCard(item.product))));
     }
 
@@ -1157,7 +1180,7 @@
             }),
             !offers.length && (state.loadingOffers || product.offerLoading) && product.lookupKey ? h('div', { class: 'loadingline', style: { margin: '4px 0 0' } }, h('span', { class: 'dotspin' }), 'loading live offers...') : null,
             !offers.length && product.offerError ? h('div', { class: 'small', text: 'live offers unavailable' }) : null,
-            !offers.length && !state.loadingOffers && product.lookupKey && !product.offerError ? h('div', { class: 'small', text: 'click Reload offers to fetch live prices' }) : null);
+            !offers.length && !state.loadingOffers && product.lookupKey && !product.offerError ? h('div', { class: 'small', text: state.fromCache ? 'saved cache - reload offers to update' : 'on-demand: use Load offers above (or the per-product refresh in the flow)' }) : null);
     }
 
     async function refreshProductOffers(product) {
@@ -1285,6 +1308,7 @@
                 h('button', { class: 'btn secondary', onClick: createProjectFromPrompt }, 'New project'),
                 h('button', { class: 'btn secondary', onClick: createTagFromPrompt }, 'New tag'),
                 h('button', { class: 'btn', onClick: openLibraryManagementModal }, 'Manage'),
+                snapshots.length > 1 ? h('button', { class: 'btn secondary', onClick: () => openCompareModal(snapshots) }, 'Compare runs') : null,
                 h('button', { class: 'btn', onClick: () => fileInput.click() }, 'Import'),
                 h('details', { class: 'exportmenu' },
                     h('summary', { class: 'btn' }, 'Export', chevronIcon()),
@@ -1318,6 +1342,119 @@
                 filtered.map((snapshot) => renderSavedRow(snapshot, projects, tags, projectMap, tagMap))));
     }
 
+    function compareIntel(intelA, intelB) {
+        const urls = (intel) => new Set(((intel && intel.sources) || []).map((source) => (source.url || '').replace(/[#?].*$/, '')).filter(Boolean));
+        const isHostname = (value) => /^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i.test(String(value || '').trim());
+        const domains = (intel) => new Set(((intel && intel.sources) || []).map((source) => source.domain).filter(isHostname));
+        const citedDomains = (intel) => new Set(((intel && intel.citations) || []).map((citation) => citation.domain).filter(Boolean));
+        const jaccard = (setA, setB) => {
+            if (!setA.size && !setB.size) return null;
+            let shared = 0;
+            setA.forEach((value) => { if (setB.has(value)) shared += 1; });
+            return shared / (setA.size + setB.size - shared);
+        };
+        const mix = (intel) => (intel && intel.stats && intel.stats.pipelineMix) || {};
+        const primary = (intel) => (intel && intel.stats && intel.stats.primaryPipeline) || '?';
+        const domainsA = domains(intelA);
+        const domainsB = domains(intelB);
+        const onlyA = [...domainsA].filter((domain) => !domainsB.has(domain));
+        const onlyB = [...domainsB].filter((domain) => !domainsA.has(domain));
+        const shared = [...domainsA].filter((domain) => domainsB.has(domain));
+        return {
+            primaryA: primary(intelA), primaryB: primary(intelB),
+            routingChanged: primary(intelA) !== primary(intelB),
+            mixA: mix(intelA), mixB: mix(intelB),
+            urlOverlap: jaccard(urls(intelA), urls(intelB)),
+            domainOverlap: jaccard(domainsA, domainsB),
+            citedOverlap: jaccard(citedDomains(intelA), citedDomains(intelB)),
+            onlyA, onlyB, shared,
+        };
+    }
+
+    function openCompareModal(snapshots) {
+        ensureHost();
+        const shade = h('div', { class: 'orgshade' });
+        const results = h('div', { class: 'cmpresults' });
+        const option = (snapshot, selectedId) => h('option', { value: snapshot.id, selected: snapshot.id === selectedId ? 'selected' : null, text: `${snapshot.title || '(untitled)'} — ${new Date(snapshot.scannedAt).toLocaleString()}` });
+        let idA = snapshots[0].id;
+        let idB = (snapshots[1] || snapshots[0]).id;
+        const selectA = h('select', { class: 'select', onChange: (event) => { idA = event.target.value; draw(); } }, snapshots.map((snapshot) => option(snapshot, idA)));
+        const selectB = h('select', { class: 'select', onChange: (event) => { idB = event.target.value; draw(); } }, snapshots.map((snapshot) => option(snapshot, idB)));
+
+        const overlapCard = (value, label) => h('div', { class: 'cmpstat' },
+            h('div', { class: 'cmpnum', text: value == null ? 'n/a' : `${Math.round(value * 100)}%` }),
+            h('div', { class: 'cmplbl', text: label }),
+            h('div', { class: 'cmptrack' }, h('div', { class: 'cmpfill', style: { width: `${Math.max(2, Math.round((value || 0) * 100))}%` } })));
+        const mixCard = (label, snapshot, mixCounts) => {
+            const total = Object.values(mixCounts).reduce((sum, count) => sum + count, 0);
+            const keys = Object.keys(mixCounts).sort((left, right) => mixCounts[right] - mixCounts[left]);
+            const stats = (snapshot.intel && snapshot.intel.stats) || snapshot.stats || {};
+            return h('div', { class: 'cmpcard' },
+                h('span', { class: 'eyebrow', text: label }),
+                total ? h('div', { class: 'mixbar' }, keys.map((key) => h('div', { class: 'mixseg', title: `${key} ${Math.round(mixCounts[key] / total * 100)}%`, style: { width: `${mixCounts[key] / total * 100}%`, background: pipelineColor(key) } }))) : null,
+                total ? h('div', { class: 'mixlegend' }, keys.map((key) => h('span', null, h('i', { class: 'pipedot', style: { display: 'inline-block', background: pipelineColor(key), marginRight: '4px', verticalAlign: 'middle' } }), `${key} ${Math.round(mixCounts[key] / total * 100)}%`))) : h('div', { class: 'rmeta' }, 'no sources captured'),
+                h('div', { class: 'cmpcounts' }, h('b', { text: String(stats.sources || 0) }), ' sources  ·  ', h('b', { text: String(stats.citations || 0) }), ' citations  ·  ', h('b', { text: String(stats.queries || 0) }), ' fan-out'));
+        };
+        const cloud = (label, items, shared) => h('div', { class: 'cmpsec' },
+            h('span', { class: 'eyebrow', text: `${label} (${items.length})` }),
+            items.length ? h('div', { class: 'domscroll' }, h('div', { class: 'domlist' },
+                items.slice(0, 120).map((domain) => h('span', { class: shared ? 'shared' : null, title: domain, text: domain })),
+                items.length > 120 ? h('span', { class: 'more', text: `+${items.length - 120} more` }) : null))
+                : h('div', { class: 'rmeta' }, '—'));
+        const normalizePrompt = (snapshot) => String(snapshot.prompt || (snapshot.intel && snapshot.intel.prompt) || '').trim().toLowerCase();
+
+        const draw = () => {
+            const snapshotA = snapshots.find((snapshot) => snapshot.id === idA);
+            const snapshotB = snapshots.find((snapshot) => snapshot.id === idB);
+            if (!snapshotA || !snapshotB) return;
+            if (snapshotA.id === snapshotB.id) {
+                results.replaceChildren(h('div', { class: 'small', style: { margin: '8px 0' } }, 'Pick two different saved scans to compare.'));
+                return;
+            }
+            const compared = compareIntel(snapshotA.intel, snapshotB.intel);
+            const differentPrompts = normalizePrompt(snapshotA) && normalizePrompt(snapshotB) && normalizePrompt(snapshotA) !== normalizePrompt(snapshotB);
+            const blocks = [
+                h('div', { class: 'cmproute' },
+                    h('i', { class: 'pipedot', style: { background: pipelineColor(compared.primaryA) } }),
+                    h('b', { text: compared.primaryA }),
+                    arrowRightIcon(),
+                    h('i', { class: 'pipedot', style: { background: pipelineColor(compared.primaryB) } }),
+                    h('b', { text: compared.primaryB }),
+                    h('span', { class: 'routediv' }),
+                    h('span', { class: `routestatus ${compared.routingChanged ? 'changed' : 'stable'}`, text: compared.routingChanged ? 'routing changed' : 'routing stable' })),
+                differentPrompts ? h('div', { class: 'rnote' }, 'These scans come from different prompts, so low overlap is expected and mostly reflects topic difference. Overlap metrics are most meaningful between repeated runs of the same prompt.') : null,
+                compared.routingChanged && !differentPrompts ? h('div', { class: 'rnote' }, 'Primary search source differs between these runs. Published telemetry research found routing changes cut URL overlap by roughly 45% — treat these runs as drawing on different retrieval ecosystems rather than a re-roll of the same one.') : null,
+                h('div', { class: 'cmpstats' },
+                    overlapCard(compared.urlOverlap, 'URL overlap'),
+                    overlapCard(compared.domainOverlap, 'domain overlap'),
+                    overlapCard(compared.citedOverlap, 'cited-domain overlap')),
+                h('div', { class: 'cmpcols' },
+                    mixCard('Run A source mix', snapshotA, compared.mixA),
+                    mixCard('Run B source mix', snapshotB, compared.mixB)),
+                cloud('Shared domains', compared.shared, true),
+                cloud('Only in A', compared.onlyA, false),
+                cloud('Only in B', compared.onlyB, false),
+            ].filter(Boolean);
+            results.replaceChildren(...blocks);
+        };
+        const closeModal = () => shade.remove();
+        const panel = h('div', { class: 'orgmodal wide', role: 'dialog', 'aria-modal': 'true' },
+            h('div', { class: 'orghead' },
+                h('div', null,
+                    h('h3', { class: 'orgtitle', text: 'Compare runs' }),
+                    h('div', { class: 'orgsub', text: 'How retrieval differed between two saved scans: search-source routing, evidence overlap, and which domains only one run surfaced.' })),
+                h('button', { class: 'btn x', 'aria-label': 'Close', onClick: closeModal }, closeIcon())),
+            h('div', { class: 'cmpcols', style: { marginTop: '0' } },
+                h('div', { class: 'orgfield' }, h('label', { text: 'Run A' }), selectA),
+                h('div', { class: 'orgfield' }, h('label', { text: 'Run B' }), selectB)),
+            results,
+            h('div', { class: 'orgactions' }, h('button', { class: 'btn primary', type: 'button', onClick: closeModal }, 'Done')));
+        shade.appendChild(panel);
+        shade.addEventListener('click', (event) => { if (event.target === shade) closeModal(); });
+        state.overlay.appendChild(shade);
+        draw();
+    }
+
     function renderSavedRow(snapshot, projects, tags, projectMap, tagMap) {
         const assignedTags = (snapshot.tags || []).map((id) => tagMap.get(id)).filter(Boolean);
         return h('div', { class: 'savedrow', 'data-filter-row': '1' },
@@ -1334,6 +1471,7 @@
                     assignedTags.map((tag) => h('span', { class: 'tagchip', title: tag.name, style: tagStyle(tag), text: tag.name })),
                     h('button', { class: 'addtag', type: 'button', title: 'Edit project, tags, and notes', onClick: () => organizeSavedSnapshot(snapshot) }, assignedTags.length ? '+ tag' : '+ add tags'))),
             h('div', { class: 'savedstats' },
+                snapshot.stats.primaryPipeline ? h('span', { title: 'primary search source for this run' }, h('b', { text: snapshot.stats.primaryPipeline }), ` ${snapshot.stats.primaryPipelineShare || 0}%`) : null,
                 h('span', null, h('b', { text: snapshot.stats.sources || 0 }), ' sources'),
                 h('span', null, h('b', { text: snapshot.stats.citations || 0 }), ' citations'),
                 h('span', null, h('b', { text: snapshot.stats.products || 0 }), ' products')),
