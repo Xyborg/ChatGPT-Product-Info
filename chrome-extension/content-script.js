@@ -7,6 +7,7 @@
     const BUTTON_ID = 'openGeoResearchBtn';
     let lastUrl = window.location.href;
     let statusTimer = null;
+    let modulesPromise = null;
 
     function ready(fn) {
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
@@ -19,6 +20,35 @@
 
     function ui() {
         return window.CgptGeoResearchUI;
+    }
+
+    function getConversationId(urlPath = window.location.href) {
+        const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+        const directMatch = String(urlPath || '').match(uuidPattern);
+        if (directMatch) return directMatch[0];
+
+        const candidates = [
+            window.location.pathname,
+            document.querySelector('link[rel="canonical"]')?.href,
+            document.querySelector('meta[property="og:url"]')?.content,
+        ];
+        for (const candidate of candidates) {
+            const match = String(candidate || '').match(uuidPattern);
+            if (match) return match[0];
+        }
+        return null;
+    }
+
+    function getPageStatus() {
+        if (core()) return core().getPageStatus();
+        if (!window.location.hostname.includes('chatgpt.com')) {
+            return { ready: false, reason: 'not_chatgpt', message: 'Open ChatGPT first.' };
+        }
+        const conversationId = getConversationId();
+        if (!conversationId) {
+            return { ready: false, reason: 'no_conversation', message: 'Open a ChatGPT conversation to scan.' };
+        }
+        return { ready: true, reason: 'ready', conversationId, message: 'Ready to scan this conversation.' };
     }
 
     function getIconUrl() {
@@ -57,22 +87,44 @@
 
     function updateButtonStatus() {
         const button = document.getElementById(BUTTON_ID);
-        if (!button || !core()) return;
-        const status = core().getPageStatus();
+        if (!button) return;
+        const status = getPageStatus();
         button.dataset.ready = status.ready ? 'true' : 'false';
         button.title = status.ready ? 'Open ChatGPT GEO/AEO Research' : status.message;
     }
 
-    async function openResearch() {
-        if (!core() || !ui()) {
-            console.warn('GEO/AEO Research modules are not ready yet.');
-            return;
+    async function loadResearchModules() {
+        if (core() && ui()) return;
+        if (!modulesPromise) {
+            modulesPromise = (async () => {
+                const getUrl = (path) => {
+                    if (typeof chrome === 'undefined' || !chrome.runtime || typeof chrome.runtime.getURL !== 'function') {
+                        throw new Error('Extension runtime is unavailable. Refresh this ChatGPT tab and try again.');
+                    }
+                    return chrome.runtime.getURL(path);
+                };
+                await import(getUrl('geo-core.js'));
+                await import(getUrl('geo-ui.js'));
+            })().catch((error) => {
+                modulesPromise = null;
+                throw error;
+            });
         }
+        await modulesPromise;
+        if (!core() || !ui()) {
+            modulesPromise = null;
+            throw new Error('GEO/AEO Research modules could not initialize. Refresh this ChatGPT tab and try again.');
+        }
+    }
+
+    async function openResearch() {
+        const button = document.getElementById(BUTTON_ID);
         try {
+            if (button) button.title = 'Loading ChatGPT GEO/AEO Research...';
+            await loadResearchModules();
             await ui().open();
             updateButtonStatus();
         } catch (error) {
-            const button = document.getElementById(BUTTON_ID);
             if (button) {
                 button.dataset.ready = 'false';
                 button.title = error && error.message ? error.message : 'Refresh this ChatGPT tab and try again.';
@@ -105,8 +157,7 @@
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (message.action === 'ping') {
-                const pageStatus = core() ? core().getPageStatus() : { ready: false, reason: 'loading', message: 'Extension is loading.' };
-                sendResponse({ status: 'ready', pageStatus });
+                sendResponse({ status: 'ready', pageStatus: getPageStatus() });
                 return true;
             }
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT GEO/AEO Research",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Extract GEO/AEO, source, citation, and product intelligence from ChatGPT conversations and export to JSON or CSV.",
   "permissions": [
     "activeTab",
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["https://chatgpt.com/*", "https://*.chatgpt.com/*"],
-      "js": ["geo-core.js", "geo-ui.js", "content-script.js"],
+      "js": ["content-script.js"],
       "css": ["styles.css"],
       "run_at": "document_end"
     }
@@ -42,7 +42,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["icons/*", "assets/icons-ui/*"],
+      "resources": ["geo-core.js", "geo-ui.js", "icons/*", "assets/icons-ui/*"],
       "matches": ["https://chatgpt.com/*", "https://*.chatgpt.com/*"]
     }
   ]
