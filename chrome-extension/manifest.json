@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT GEO/AEO Research",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Extract GEO/AEO, source, citation, and product intelligence from ChatGPT conversations and export to JSON or CSV.",
   "permissions": [
     "activeTab",
