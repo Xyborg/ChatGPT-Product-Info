@@ -938,24 +938,105 @@
         return { stage, qtype: type };
     }
 
+    const GOV_EDU_SUFFIXES = [
+        '.gov', '.edu', '.mil',
+        'gov.uk', 'ac.uk', 'gov.ie', 'gov.pl', 'gov.pt', 'gov.it', 'gob.es', 'gv.at',
+    ];
+    const GOV_EDU_DOMAINS = [
+        'europa.eu', 'ec.europa.eu', 'data.europa.eu', 'eur-lex.europa.eu',
+        'gouv.fr', 'service-public.fr', 'bund.de', 'bundestag.de', 'rijksoverheid.nl', 'overheid.nl',
+        'nih.gov', 'who.int', 'oecd.org', 'arbeiterkammer.at',
+    ];
+    const DOMAIN_CATEGORY_SETS = {
+        docs: [
+            'github.com', 'gitlab.com', 'bitbucket.org', 'npmjs.com', 'pypi.org', 'developer.mozilla.org',
+        ],
+        social: [
+            'youtube.com', 'youtu.be', 'x.com', 'twitter.com', 'linkedin.com', 'facebook.com', 'instagram.com',
+            'tiktok.com', 'pinterest.com', 'threads.net', 'vimeo.com',
+        ],
+        forum: [
+            'stackoverflow.com', 'stackexchange.com', 'superuser.com', 'serverfault.com', 'askubuntu.com',
+            'quora.com', 'gutefrage.net', 'gutefrage.de', 'news.ycombinator.com',
+        ],
+        wiki: [
+            'wikipedia.org', 'fandom.com', 'wiktionary.org',
+        ],
+        blog: [
+            'medium.com', 'substack.com', 'blogspot.com', 'wordpress.com', 'beehiiv.com', 'ghost.org',
+        ],
+        review: [
+            'g2.com', 'capterra.com', 'trustpilot.com', 'trustradius.com', 'getapp.com', 'softwareadvice.com',
+            'gartner.com', 'producthunt.com', 'wirecutter.com', 'consumerreports.org', 'pcmag.com',
+            'testberichte.de', 'vergleich.org', 'chip.de', 'computerbild.de',
+        ],
+        price: [
+            'idealo.de', 'idealo.co.uk', 'idealo.fr', 'idealo.it', 'idealo.es',
+            'pricerunner.com', 'pricerunner.co.uk', 'kelkoo.com', 'kelkoo.co.uk', 'kelkoo.fr',
+            'geizhals.de', 'geizhals.at', 'billiger.de', 'pricespy.co.uk',
+        ],
+        retailer: [
+            'amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.fr', 'amazon.it', 'amazon.es', 'amazon.nl',
+            'amazon.se', 'amazon.pl', 'walmart.com', 'target.com', 'bestbuy.com', 'costco.com',
+            'ebay.com', 'ebay.co.uk', 'ebay.de', 'ebay.fr', 'etsy.com', 'zalando.com', 'zalando.de',
+            'otto.de', 'mediamarkt.de', 'mediamarkt.es', 'mediamarkt.nl', 'saturn.de', 'fnac.com',
+            'darty.com', 'bol.com', 'coolblue.nl', 'coolblue.be', 'currys.co.uk', 'argos.co.uk',
+            'tesco.com', 'carrefour.fr', 'carrefour.es', 'elcorteingles.es', 'allegro.pl',
+        ],
+        brand: [
+            'apple.com', 'microsoft.com', 'google.com', 'google.de', 'google.fr', 'google.co.uk',
+            'adobe.com', 'samsung.com', 'samsung.de', 'sony.com', 'sony.co.uk', 'lg.com',
+            'lenovo.com', 'hp.com', 'dell.com', 'bosch.com', 'bosch-home.com', 'bosch-home.co.uk',
+            'siemens.com', 'philips.com', 'miele.com', 'miele.de', 'dyson.com', 'dyson.co.uk',
+            'nike.com', 'adidas.com',
+        ],
+        news: [
+            'theverge.com', 'techcrunch.com', 'wired.com', 'zdnet.com', 'cnbc.com', 'forbes.com',
+            'businessinsider.com', 'reuters.com', 'bloomberg.com', 'nytimes.com', 'washingtonpost.com',
+            'wsj.com', 'cnn.com', 'bbc.com', 'bbc.co.uk', 'theguardian.com', 'guardian.co.uk',
+            'techradar.com', 'tomsguide.com', 't3.com', 'heise.de', 'golem.de', 'spiegel.de',
+            'faz.net', 'sueddeutsche.de', 'zeit.de', 'welt.de', 't-online.de', 'bild.de',
+        ],
+    };
     const DOMAIN_CATEGORY_RULES = [
         ['reddit', /(^|\.)reddit\.com$/i],
-        ['review', /(^|\.)(g2|capterra|trustpilot|trustradius|getapp|softwareadvice|gartner|producthunt|testberichte|vergleich)\.(com|org|de|net)$|(^|\.)(test|chip|computerbild)\.de$|stiftung/i],
-        ['news', /(^|\.)(theverge|techcrunch|wired|zdnet|cnbc|forbes|businessinsider|reuters|bloomberg|nytimes|cnn|bbc|techradar|tomsguide|t3|heise|golem|spiegel|faz|sueddeutsche|zeit|welt|t-online|bild)\.(com|net|org|de)$/i],
-        ['social', /(^|\.)(youtube|youtu|twitter|linkedin|facebook|instagram|tiktok|pinterest)\.(com|be)$|(^|\.)x\.com$/i],
-        ['forum', /(^|\.)(stackoverflow|stackexchange|quora|superuser|gutefrage)\.(com|net)$|news\.ycombinator\.com$/i],
-        ['wiki', /(^|\.)wikipedia\.org$|(^|\.)fandom\.com$|(^|\.)wiktionary\.org$/i],
-        ['blog', /(^|\.)(medium|substack|blogspot|wordpress|beehiiv)\.(com|io)$/i],
-        ['docs', /(^|\.)github\.com$|(^|\.)gitlab\.com$|^docs\.|^developer\./i],
-        ['gov-edu', /\.(gov|edu)$|(^|\.)nih\.gov$|(^|\.)europa\.eu$|arbeiterkammer/i],
+        ['review', /stiftung/i],
+        ['docs', /^docs\.|^developer\.|^developers\.|^learn\.|^support\./i],
     ];
+    function normalizeHostname(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/^https?:\/\//, '')
+            .replace(/^www\./, '')
+            .split('/')[0]
+            .split('?')[0]
+            .split('#')[0]
+            .replace(/:\d+$/, '');
+    }
+    function matchesExactOrSubdomain(domain, root) {
+        return domain === root || domain.endsWith(`.${root}`);
+    }
+    function matchesKnownSuffix(domain, suffix) {
+        return suffix.charAt(0) === '.'
+            ? domain.endsWith(suffix)
+            : matchesExactOrSubdomain(domain, suffix);
+    }
+    function matchesAnyDomain(domain, domains) {
+        return domains.some((root) => matchesExactOrSubdomain(domain, root));
+    }
     function classifyDomain(domain) {
-        const value = String(domain || '').toLowerCase();
+        const value = normalizeHostname(domain);
         if (!value) return 'other';
+        if (GOV_EDU_SUFFIXES.some((suffix) => matchesKnownSuffix(value, suffix)) || matchesAnyDomain(value, GOV_EDU_DOMAINS)) return 'gov-edu';
+        const orderedSets = ['docs', 'social', 'forum', 'wiki', 'blog', 'review', 'price', 'retailer', 'brand', 'news'];
+        for (const category of orderedSets) {
+            if (matchesAnyDomain(value, DOMAIN_CATEGORY_SETS[category] || [])) return category;
+        }
         for (const [category, pattern] of DOMAIN_CATEGORY_RULES) {
             if (pattern.test(value)) return category;
         }
-        return 'firstparty';
+        return 'commercial';
     }
 
     function toCsv(rows) {
