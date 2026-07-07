@@ -6,6 +6,47 @@
     const PROJECTS_KEY = 'cgptGeoResearchProjects';
     const TAGS_KEY = 'cgptGeoResearchTags';
     const QUERY_JUNK = new Set(['deprecated', 'none', 'null', 'n/a', 'undefined']);
+    const UNKNOWN_PIPELINE = 'Unknown';
+
+    function normalizePipeline(value) {
+        const pipeline = String(value || '').trim();
+        return pipeline && pipeline !== '?' ? pipeline : UNKNOWN_PIPELINE;
+    }
+
+    function pipelineCountsFromSources(sources) {
+        const counts = {};
+        (sources || []).forEach((source) => {
+            const key = normalizePipeline(source && source.pipeline);
+            counts[key] = (counts[key] || 0) + 1;
+        });
+        return counts;
+    }
+
+    function normalizePipelineMix(mix) {
+        const counts = {};
+        Object.keys(mix || {}).forEach((key) => {
+            const pipeline = normalizePipeline(key);
+            const value = Number(mix[key] || 0);
+            counts[pipeline] = (counts[pipeline] || 0) + (Number.isFinite(value) ? value : 0);
+        });
+        return counts;
+    }
+
+    function normalizeStatsPipelines(stats) {
+        const next = { ...(stats || {}) };
+        if (next.primaryPipeline) next.primaryPipeline = normalizePipeline(next.primaryPipeline);
+        if (next.pipelineMix) next.pipelineMix = normalizePipelineMix(next.pipelineMix);
+        return next;
+    }
+
+    function normalizeIntelPipelines(intel) {
+        const next = { ...(intel || {}) };
+        if (Array.isArray(next.sources)) {
+            next.sources = next.sources.map((source) => ({ ...source, pipeline: normalizePipeline(source && source.pipeline) }));
+        }
+        next.stats = normalizeStatsPipelines(next.stats || {});
+        return next;
+    }
 
     function getConversationId(urlPath = window.location.href) {
         const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
@@ -164,6 +205,205 @@
         return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(unique.join(' '))}`;
     }
 
+    function decodeBase64Json(value) {
+        const token = String(value || '').trim();
+        if (!token) return null;
+        try {
+            const normalized = token.replace(/-/g, '+').replace(/_/g, '/');
+            const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+            const json = typeof atob === 'function'
+                ? decodeURIComponent(escape(atob(padded)))
+                : '';
+            return json ? JSON.parse(json) : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function parseMaybeJsonObject(value) {
+        if (!value) return null;
+        if (typeof value === 'object') return value;
+        if (typeof value !== 'string') return null;
+        const trimmed = value.trim();
+        if (!trimmed || !/^[{[]/.test(trimmed)) return null;
+        try {
+            return JSON.parse(trimmed);
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function looksLikeGoogleCatalogId(value) {
+        return /^\d{8,}$/.test(String(value || '').trim());
+    }
+
+    function buildGoogleShoppingCandidateUrl({
+        catalogId,
+        headlineOfferDocid,
+        imageDocid,
+        rds,
+        gpcid,
+        merchantId,
+        query = '',
+        pvt = 'hg',
+        uule = null,
+        gl = 'de',
+        hl = 'en',
+        overlay = true,
+    }) {
+        if (!catalogId) return null;
+        const prdsParts = [`catalogid:${catalogId}`];
+        if (headlineOfferDocid) prdsParts.push(`headlineOfferDocid:${headlineOfferDocid}`);
+        if (imageDocid) prdsParts.push(`imageDocid:${imageDocid}`);
+        if (rds) prdsParts.push(`rds:${rds}`);
+        if (gpcid) prdsParts.push(`gpcid:${gpcid}`);
+        if (merchantId) prdsParts.push(`mid:${merchantId}`);
+        if (pvt) prdsParts.push(`pvt:${pvt}`);
+
+        const params = new URLSearchParams();
+        if (overlay) params.set('ibp', 'oshop');
+        params.set('udm', '28');
+        params.set('q', String(query || '').replace(/\+/g, ' ').trim());
+        params.set('hl', hl || 'en');
+        params.set('gl', gl || 'de');
+        if (uule) params.set('uule', uule);
+        params.set('prds', prdsParts.join(','));
+
+        const queryString = params.toString()
+            .replace(/%3A/g, ':')
+            .replace(/%2C/g, ',');
+        return `https://www.google.com/search?${queryString}`;
+    }
+
+    function normalizeGoogleShoppingProduct(raw = {}) {
+        if (!raw || typeof raw !== 'object') return null;
+        const catalogId = raw.catalogid || raw.catalog_id || null;
+        const productId = raw.productid || raw.product_id || null;
+        const headlineOfferDocid = raw.headlineOfferDocid || raw.headline_offer_docid || null;
+        const imageDocid = raw.imageDocid || raw.image_docid || null;
+        const gpcid = raw.gpcid || null;
+        const merchantId = raw.mid || null;
+        const rds = raw.rds || null;
+        const query = raw.query || '';
+        const pvt = raw.pvt || 'hg';
+        const uule = raw.uule || null;
+        const gl = raw.gl || 'de';
+        const hl = raw.hl || 'en';
+        const ei = raw.ei || null;
+        const googleShoppingCandidateUrl = buildGoogleShoppingCandidateUrl({
+            catalogId,
+            headlineOfferDocid,
+            imageDocid,
+            rds,
+            gpcid,
+            merchantId,
+            query,
+            pvt,
+            uule,
+            gl,
+            hl,
+        });
+        if (!catalogId && !googleShoppingCandidateUrl) return null;
+        return {
+            source: 'chatgpt_google_shopping_product',
+            catalogId,
+            productId: productId || null,
+            gpcid,
+            headlineOfferDocid,
+            imageDocid,
+            merchantId,
+            rds,
+            query,
+            pvt,
+            uule,
+            gl,
+            hl,
+            ei,
+            googleShoppingCandidateUrl,
+        };
+    }
+
+    function pushGoogleShoppingProduct(products, raw) {
+        const normalized = normalizeGoogleShoppingProduct(raw);
+        if (normalized && normalized.googleShoppingCandidateUrl) products.push(normalized);
+    }
+
+    function googleShoppingProductsFromAny(value, products = [], seen = new WeakSet(), depth = 0) {
+        if (depth > 8 || !value) return products;
+        const parsed = parseMaybeJsonObject(value) || value;
+        if (!parsed || typeof parsed !== 'object') return products;
+        if (seen.has(parsed)) return products;
+        seen.add(parsed);
+
+        if (Array.isArray(parsed)) {
+            parsed.forEach((item) => googleShoppingProductsFromAny(item, products, seen, depth + 1));
+            return products;
+        }
+
+        if (parsed.type === 'chat_gpt_google_shopping_product' || parsed.catalogid || parsed.catalog_id) {
+            pushGoogleShoppingProduct(products, parsed);
+        }
+
+        const tokenMap = parsed.id_to_token_map;
+        if (tokenMap && typeof tokenMap === 'object') {
+            Object.keys(tokenMap).forEach((id) => {
+                pushGoogleShoppingProduct(products, decodeBase64Json(tokenMap[id]));
+            });
+        }
+
+        Object.keys(parsed).forEach((key) => {
+            const child = parsed[key];
+            if (!child || (typeof child !== 'object' && typeof child !== 'string')) return;
+            googleShoppingProductsFromAny(child, products, seen, depth + 1);
+        });
+        return products;
+    }
+
+    function googleShoppingProductsFromLookupData(lookupData) {
+        return googleShoppingProductsFromAny(lookupData);
+    }
+
+    function googleShoppingProductsFromProductIds(product) {
+        const ids = Array.isArray(product && product.product_ids) ? product.product_ids : [];
+        const products = [];
+        for (const item of ids) {
+            if (!item || typeof item !== 'object') continue;
+            if (item.type !== 'chat_gpt_google_shopping_product') continue;
+            const normalized = normalizeGoogleShoppingProduct(item);
+            if (normalized && normalized.googleShoppingCandidateUrl) products.push(normalized);
+        }
+        return products;
+    }
+
+    function firstGoogleShoppingProduct(products) {
+        const seen = new Set();
+        const deduped = [];
+        (products || []).forEach((product) => {
+            const key = product.catalogId || product.googleShoppingCandidateUrl;
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            deduped.push(product);
+        });
+        return deduped.find((product) => product.googleShoppingCandidateUrl) || deduped[0] || null;
+    }
+
+    function googleShoppingProductFromOuterProduct(product, query) {
+        if (!product || typeof product !== 'object') return null;
+        const catalogId = [
+            product.catalogid,
+            product.catalog_id,
+            product.googleCatalogId,
+            product.product_id,
+            product.id,
+        ].find(looksLikeGoogleCatalogId) || null;
+        if (!catalogId) return null;
+        return normalizeGoogleShoppingProduct({
+            catalog_id: catalogId,
+            product_id: product.productid || null,
+            query: query || product.query || '',
+        });
+    }
+
     function mapOffers(offers) {
         return (offers || []).map((offer) => {
             const details = offer.price_details || {};
@@ -191,7 +431,7 @@
         if (!entry || (!entry.url && !entry.attribution)) return;
         sources.push({
             domain: cleanDomain(entry.attribution || entry.url),
-            pipeline: entry.result_source || '?',
+            pipeline: normalizePipeline(entry.result_source || entry.pipeline),
             title: entry.title || '',
             url: entry.url || '',
             pubDate: entry.pub_date || '',
@@ -205,14 +445,25 @@
         const firstValue = (...values) => values.find((value) => value !== undefined && value !== null && value !== '');
         let providerUrl = '';
         let generatedQuery = '';
+        let lookupData = null;
         try {
-            const lookupData = JSON.parse((product.product_lookup_key && product.product_lookup_key.data) || '{}');
+            lookupData = parseMaybeJsonObject(product.product_lookup_key && product.product_lookup_key.data) || {};
             providerUrl = lookupData.provider_url || '';
             generatedQuery = lookupData.generated_product_query || lookupData.request_query || '';
         } catch (_) {
             providerUrl = '';
             generatedQuery = '';
         }
+        const googleProducts = [
+            ...googleShoppingProductsFromProductIds(product),
+            ...googleShoppingProductsFromAny(product.product_lookup_data),
+            ...googleShoppingProductsFromAny(product.product_lookup_key),
+            ...googleShoppingProductsFromLookupData(lookupData),
+        ];
+        const outerGoogleProduct = googleShoppingProductFromOuterProduct(product, generatedQuery);
+        if (outerGoogleProduct) googleProducts.push(outerGoogleProduct);
+        const googleProduct = firstGoogleShoppingProduct(googleProducts);
+        const googleQuery = (googleProduct && googleProduct.query) || generatedQuery;
 
         const showcase = product.showcase_metadata || null;
         const image = (showcase && showcase.image && showcase.image.url) || (product.image_urls && product.image_urls[0]) || '';
@@ -229,7 +480,21 @@
             reviews: firstValue(product.num_reviews, product.review_count, product.reviews_count, product.rating_count, product.numRatings, product.num_ratings, product.reviews) || null,
             image,
             providerUrl: providerUrl || product.url || '',
-            shoppingUrl: googleShoppingUrl([product.title, generatedQuery, product.merchants]),
+            shoppingUrl: '',
+            googleCatalogId: googleProduct && googleProduct.catalogId || null,
+            googleProductId: googleProduct && googleProduct.productId || null,
+            googleGpcid: googleProduct && googleProduct.gpcid || null,
+            googleHeadlineOfferDocid: googleProduct && googleProduct.headlineOfferDocid || null,
+            googleImageDocid: googleProduct && googleProduct.imageDocid || null,
+            googleMerchantId: googleProduct && googleProduct.merchantId || null,
+            googleRds: googleProduct && googleProduct.rds || null,
+            googlePvt: googleProduct && googleProduct.pvt || null,
+            googleEi: googleProduct && googleProduct.ei || null,
+            googleQuery: googleQuery || null,
+            googleGl: googleProduct && googleProduct.gl || null,
+            googleHl: googleProduct && googleProduct.hl || null,
+            googleUule: googleProduct && googleProduct.uule || null,
+            googleShoppingCandidateUrl: googleProduct && googleProduct.googleShoppingCandidateUrl || null,
             query: generatedQuery,
             showcased: Boolean(showcase),
             position: index || 0,
@@ -617,23 +882,17 @@
                 queries: normalizedQueries.length,
                 sources: normalizedSources.length,
                 primaryPipeline: (() => {
-                    const counts = {};
-                    normalizedSources.forEach((source) => { const key = source.pipeline || '?'; counts[key] = (counts[key] || 0) + 1; });
+                    const counts = pipelineCountsFromSources(normalizedSources);
                     const top = Object.keys(counts).sort((left, right) => counts[right] - counts[left])[0] || '';
                     return top;
                 })(),
                 primaryPipelineShare: (() => {
                     if (!normalizedSources.length) return 0;
-                    const counts = {};
-                    normalizedSources.forEach((source) => { const key = source.pipeline || '?'; counts[key] = (counts[key] || 0) + 1; });
+                    const counts = pipelineCountsFromSources(normalizedSources);
                     const top = Object.keys(counts).sort((left, right) => counts[right] - counts[left])[0];
                     return Math.round(counts[top] / normalizedSources.length * 100);
                 })(),
-                pipelineMix: (() => {
-                    const counts = {};
-                    normalizedSources.forEach((source) => { const key = source.pipeline || '?'; counts[key] = (counts[key] || 0) + 1; });
-                    return counts;
-                })(),
+                pipelineMix: pipelineCountsFromSources(normalizedSources),
                 domains: new Set(normalizedSources.map((source) => source.domain).filter(Boolean)).size,
                 citations: normalizedCitations.length,
                 citedDomains: new Set(normalizedCitations.map((citation) => citation.domain).filter(Boolean)).size,
@@ -716,10 +975,13 @@
 
     function normalizeSnapshot(snapshot) {
         if (!snapshot || typeof snapshot !== 'object') return null;
+        const intel = normalizeIntelPipelines(snapshot.intel || {});
+        const stats = normalizeStatsPipelines(snapshot.stats || intel.stats || { sources: 0, citations: 0, products: 0 });
+        if (!intel.stats || !Object.keys(intel.stats).length) intel.stats = stats;
         return {
             ...snapshot,
-            stats: snapshot.stats || { sources: 0, citations: 0, products: 0 },
-            intel: snapshot.intel || {},
+            stats,
+            intel,
             projectId: snapshot.projectId || null,
             tags: Array.isArray(snapshot.tags) ? snapshot.tags : [],
             notes: snapshot.notes || '',
