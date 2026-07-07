@@ -15,6 +15,19 @@
         ['reasoning', 'Reasoning'],
         ['saved', 'Saved'],
     ];
+    const PRODUCT_MARKET_COUNTRIES = [
+        ['us', 'United States'], ['de', 'Germany'], ['gb', 'United Kingdom'], ['ca', 'Canada'], ['au', 'Australia'],
+        ['fr', 'France'], ['es', 'Spain'], ['it', 'Italy'], ['nl', 'Netherlands'], ['be', 'Belgium'],
+        ['ch', 'Switzerland'], ['at', 'Austria'], ['se', 'Sweden'], ['dk', 'Denmark'], ['no', 'Norway'],
+        ['fi', 'Finland'], ['ie', 'Ireland'], ['pl', 'Poland'], ['pt', 'Portugal'], ['br', 'Brazil'],
+        ['mx', 'Mexico'], ['ar', 'Argentina'], ['cl', 'Chile'], ['co', 'Colombia'], ['jp', 'Japan'],
+        ['kr', 'South Korea'], ['in', 'India'],
+    ];
+    const PRODUCT_MARKET_LANGUAGES = [
+        ['en', 'English'], ['de', 'German'], ['es', 'Spanish'], ['fr', 'French'], ['it', 'Italian'],
+        ['nl', 'Dutch'], ['pt', 'Portuguese'], ['sv', 'Swedish'], ['da', 'Danish'], ['no', 'Norwegian'],
+        ['fi', 'Finnish'], ['pl', 'Polish'], ['ja', 'Japanese'], ['ko', 'Korean'], ['hi', 'Hindi'],
+    ];
 
     const state = {
         host: null,
@@ -27,8 +40,13 @@
         raw: null,
         token: null,
         loadingOffers: false,
+        loadingInsights: false,
         offersStarted: false,
         offerProgress: '',
+        insightProgress: '',
+        openInsights: {},
+        productMarket: null,
+        productMarketLoaded: false,
         lastConversationId: '',
         fromCache: false,
         savedFilters: { projectId: '', tagId: '' },
@@ -68,8 +86,8 @@
         .savedhead,.savedrow{display:grid;grid-template-columns:minmax(260px,1.4fr) 150px minmax(220px,.9fr) minmax(180px,.75fr) auto;gap:12px;align-items:center}.savedhead{padding:10px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-foreground);background:#fafafa;font-weight:700}.savedrow{padding:10px 12px;border-bottom:1px solid #f4f4f5}.savedrow:last-child{border-bottom:0}.savedrow:hover{background:#fafafa}.savedtitle{font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.savedmeta,.savedstats{font-family:var(--mono);font-size:12px;color:var(--muted-foreground)}.savedmeta{white-space:nowrap}.savedstats{display:flex;gap:12px;flex-wrap:wrap}.savedstats b{color:var(--foreground);font-weight:650}.savedacts{display:flex;gap:6px;justify-content:flex-end}.savedacts .btn{height:30px;padding:0 9px;font-size:12px}
         .savedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.savedfilters,.savedtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.savedorg{display:flex;flex-direction:column;gap:6px;min-width:0;align-items:flex-start}.savedorg .select.inline{height:30px;width:auto;max-width:220px;padding:0 26px 0 8px;font-size:12px;font-weight:500;border-color:transparent;background-color:transparent;box-shadow:none;background-position:right 7px center;cursor:pointer}.savedorg .select.inline:hover,.savedorg .select.inline:focus-visible{border-color:var(--input);background-color:var(--card)}.savedorg .select.inline.noproject{color:var(--muted-foreground);font-weight:400}.tagline{display:flex;gap:5px;flex-wrap:wrap;align-items:center}.addtag{display:inline-flex;align-items:center;border:1px dashed var(--border);background:transparent;color:var(--muted-foreground);border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:600;cursor:pointer;line-height:1.4}.addtag:hover{color:var(--foreground);border-style:solid;border-color:#d4d4d8;background:var(--card)}.tagchip,.orgchip,.pill,.rchip,.rbadge{display:inline-flex;align-items:center;border-radius:999px}.tagchip{padding:2px 8px;font-family:var(--mono);font-size:10.5px;font-weight:650}.notes{font-size:12px;color:#52525b;line-height:1.35;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.importfile{display:none}
         .orgshade{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(9,9,11,.42);padding:24px}.orgmodal{width:min(600px,calc(100vw - 56px));max-height:min(720px,calc(100vh - 80px));overflow:auto;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);border-radius:calc(var(--radius) + 2px);box-shadow:0 24px 70px rgba(9,9,11,.26);padding:18px}.orgmodal.wide{width:min(760px,calc(100vw - 56px))}.orghead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}.orgtitle{font-size:16px;font-weight:650;margin:0}.orgsub{font-size:12px;color:var(--muted-foreground);margin-top:4px;line-height:1.45}.orggrid{display:grid;gap:14px}.orgfield{display:grid;gap:6px}.orgfield label{font-size:12px;font-weight:600;color:var(--foreground)}.orginput{height:36px;padding:0 10px;font-size:13px}.orgtextarea{min-height:86px;resize:vertical;padding:9px 10px;font-size:13px;line-height:1.4}.orgcolor{width:48px;height:34px;border:1px solid var(--input);border-radius:calc(var(--radius) - 2px);background:var(--card);padding:3px;cursor:pointer}.orgrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.orgrow.tags{grid-template-columns:minmax(0,1fr) auto 48px}.orghint,.orgstatus,.managecount,.small{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);line-height:1.4}.orgchips{display:flex;gap:6px;flex-wrap:wrap;min-height:26px}.orgchip{gap:6px;padding:4px 8px;font-family:var(--mono);font-size:11px;font-weight:650}.orgchip button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font:inherit;opacity:.75}.orgactions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.managebody{display:grid;gap:18px}.managesec{display:grid;gap:8px}.managerow{display:grid;grid-template-columns:minmax(0,1fr) 84px auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #f4f4f5}.managerow:last-child{border-bottom:0}.managerow.tag{grid-template-columns:minmax(0,1fr) 48px 84px auto auto}.managecount{text-align:right}
-        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#d4d4d8 transparent}.pgrid .pcard{flex:0 0 248px;width:248px;scroll-snap-align:start}.pcard{padding:12px;display:flex;flex-direction:column;gap:8px}.thumblink{display:block;text-decoration:none}.thumb{height:132px;width:100%;object-fit:contain;border:1px solid #f4f4f5;border-radius:calc(var(--radius) - 2px);background:#fafafa}.ptitle{font-weight:650;line-height:1.35}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:750}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{align-self:flex-start;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#52525b;line-height:1.4}.gmeta{display:grid;gap:3px;border-top:1px solid #f4f4f5;padding-top:7px}.gmrow{font-family:var(--mono);font-size:10.5px;color:var(--muted-foreground);line-height:1.35;white-space:normal;overflow-wrap:anywhere}.gmrow b{color:#52525b;font-weight:650}.sourcelink{display:inline-block;color:var(--muted-foreground);text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#2563eb}.shoppinglink{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;color:#1a73e8;text-decoration:none;font-family:var(--mono);font-size:11px;font-weight:650;line-height:1.2;padding:5px 8px 5px 6px;border:1px solid #dbeafe;border-radius:6px;background:#fff}.shoppinglink:hover{background:#eff6ff;border-color:#bfdbfe;color:#174ea6;text-decoration:none}.gshopicon{width:15px;height:17px;flex:none}.offerbtn{height:28px;align-self:flex-start;padding:0 9px;font-family:var(--mono);font-size:11px}.offerbtn svg{width:13px;height:13px}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #f4f4f5;padding-top:7px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafafa}.offer.best{color:#15803d;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:var(--success);margin-right:4px}
-        .loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:#2563eb;margin-bottom:10px}.cachenote{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);padding:9px 12px;margin-bottom:12px;font-size:12px;color:#854d0e}.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.rchip{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);background:var(--card);border:1px solid var(--border);padding:4px 10px}.rchip b{color:var(--foreground);margin-right:2px}.rnote{font-size:12px;color:#52525b;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:var(--radius);padding:9px 11px;margin-bottom:12px;line-height:1.5}.rsteps{display:grid;gap:7px}.rstep{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:9px 11px}.rstep-blocked{border-color:#fecaca;background:#fef2f2}.rbadge{flex:none;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;margin-top:1px;color:#fff;background:#71717a}.rbadge-search{background:#0f766e}.rbadge-open{background:#2563eb}.rbadge-find{background:#7c3aed}.rbadge-click{background:#71717a}.rbadge-quote{background:#16a34a}.rbadge-other{background:#52525b}.rbadge-blocked{background:#dc2626}.rstepbody{min-width:0;flex:1}.rmain{display:block;font-family:var(--mono);font-size:11.5px;color:var(--foreground);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}a.rmain:hover{text-decoration:underline;color:#2563eb}.rmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted-foreground);margin-top:2px;line-height:1.45}.rstep-blocked .rmeta{color:#b91c1c}.rcensus{margin-top:18px;border-top:1px solid var(--border);padding-top:12px}.rcensus>summary{cursor:pointer;margin-bottom:8px}.rcensus>.rstep{margin-bottom:6px}.rquote{border-left:3px solid #d4d4d8;background:var(--card);border-radius:0 var(--radius) var(--radius) 0;padding:9px 12px;margin-bottom:8px;font-size:12px;color:#3f3f46;line-height:1.5}.dotspin{width:12px;height:12px;border:2px solid #e4e4e7;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+        .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.pgrid{display:flex;align-items:flex-start;gap:14px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:2px 2px 18px;scrollbar-width:thin;scrollbar-color:#d4d4d8 transparent}.pgrid .pcard{flex:0 0 372px;width:372px;scroll-snap-align:start}.pcard{padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}.thumblink{display:block;text-decoration:none}.thumb{height:170px;width:100%;object-fit:contain;border:1px solid #f4f4f5;border-radius:calc(var(--radius) - 2px);background:#fafafa}.ptitle{font-weight:650;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}.plink{color:inherit;text-decoration:none}.plink:hover{text-decoration:underline}.price{font-family:var(--mono);font-size:17px;font-weight:750}.ratingline{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.ratingstar{width:14px;height:14px;display:inline-block;flex:none}.pill{align-self:flex-start;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;padding:2px 8px;font-family:var(--mono);font-size:10px}.desc{font-size:12px;color:#52525b;line-height:1.4;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}.gmeta{display:grid;gap:3px;border-top:1px solid #f4f4f5;padding-top:7px}.gmrow{font-family:var(--mono);font-size:10.5px;color:var(--muted-foreground);line-height:1.35;white-space:normal;overflow-wrap:anywhere}.gmrow b{color:#52525b;font-weight:650}.sourcelink{display:inline-block;color:var(--muted-foreground);text-decoration:none}.sourcelink:hover{text-decoration:underline;color:#2563eb}.shoppinglink{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;color:#1a73e8;text-decoration:none;font-family:var(--mono);font-size:11px;font-weight:650;line-height:1.2;padding:5px 8px 5px 6px;border:1px solid #dbeafe;border-radius:6px;background:#fff}.shoppinglink:hover{background:#eff6ff;border-color:#bfdbfe;color:#174ea6;text-decoration:none}.gshopicon{width:15px;height:17px;flex:none}.offerbtn{height:28px;align-self:flex-start;padding:0 9px;font-family:var(--mono);font-size:11px}.offerbtn svg{width:13px;height:13px}.offerlink{display:block;color:inherit;text-decoration:none}.offer{border-top:1px solid #f4f4f5;padding-top:7px;font-family:var(--mono);font-size:11px;display:flex;justify-content:space-between;gap:8px}.offerlink:hover .offer{background:#fafafa}.offer.best{color:#15803d;font-weight:700}.offer span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.offer strong{white-space:nowrap}.bestmark{color:var(--success);margin-right:4px}.insightcard{border-top:1px solid #f4f4f5;padding-top:8px;display:block}.insightcard summary{cursor:pointer;list-style:none;border:1px solid var(--border);border-radius:var(--radius);background:#fafafa;padding:9px 10px;display:grid;gap:7px}.insightcard summary::-webkit-details-marker{display:none}.insighttop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.insightlabel{font-size:12px;color:#27272a;font-weight:750}.insightaction{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;color:#52525b;white-space:nowrap}.insightaction:before{content:'Show details'}.insightaction:after{content:'+';font-size:13px;color:#71717a}.insightcard[open] .insightaction:before{content:'Hide details'}.insightcard[open] .insightaction:after{content:'-'}.insightchips{display:flex;flex-wrap:wrap;gap:4px 14px}.insightchip{display:inline-flex;align-items:center;max-width:100%;background:transparent;border:0;border-radius:0;padding:0;font-size:12px;font-weight:650;color:#52525b;min-width:0}.insightchip strong{font-weight:inherit;color:inherit;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.insightchip.positive{color:#15803d}.insightchip.negative{color:#b91c1c}.insightchip.neutral{color:#52525b}.insightchip.muted{color:var(--muted-foreground);font-weight:500}.senticon{width:14px;height:14px;flex:none;color:currentColor}.insightbody{display:grid;gap:10px;padding:10px 2px 0}.insighttitle{font-size:12px;color:#27272a;font-weight:700}.insighttext{font-size:12px;line-height:1.42;color:#3f3f46}.sentwrap{display:grid;gap:7px}.sentbar{display:flex;gap:3px;height:6px}.sentbar i{display:block;height:100%;flex-basis:0;min-width:10px;border-radius:999px}.sent-positive{background:#16a34a}.sent-neutral{background:#c4c4cc}.sent-negative{background:#dc2626}.sentlegend{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:#3f3f46}.sentitem{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.sentitem b{font-weight:750}.sentdot{width:7px;height:7px;border-radius:50%;flex:none}.senttotal{margin-left:auto;color:var(--muted-foreground)}.reviewsources{display:flex;flex-direction:column}.reviewsources .insighttitle{padding-bottom:4px}.reviewrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 2px;margin:0 -2px;color:inherit;text-decoration:none;border-radius:6px}.reviewrow+.reviewrow{border-top:1px solid #f4f4f5}a.reviewrow:hover{background:#fafafa}a.reviewrow:hover .reviewname{color:#2563eb}.reviewrowmain{display:grid;gap:2px;min-width:0}.reviewname{font-size:12.5px;font-weight:650;color:#27272a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .1s}.reviewmeta{font-size:11px;line-height:1.35;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.senttag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;color:#52525b;white-space:nowrap}.senttag .senticon{width:15px;height:15px}.senttag.positive{color:#166534}.senttag.negative{color:#991b1b}.senttag.neutral{color:#52525b}
+        .panelhleft{display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-width:0}.marketgroup{display:inline-flex;align-items:stretch;height:34px;border:1.5px solid var(--foreground);border-radius:9px;background:#fff;box-shadow:0 1px 2px rgba(9,9,11,.08)}.marketgroup .mgl{display:inline-flex;align-items:center;padding:0 10px;background:var(--foreground);color:#fafafa;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;border-radius:6px 0 0 6px;user-select:none}.marketgroup .mselect{display:flex}.marketgroup .mtrigger{height:auto;border:0;border-radius:0;background:transparent;padding:0 10px}.marketgroup .mselect+.mselect .mtrigger{border-left:1px solid var(--border)}.marketgroup .mtrigger:hover{background:#fafafa;border-color:transparent;box-shadow:none}.marketgroup .mtrigger:focus-visible,.marketgroup .mselect.open .mtrigger{border-color:transparent;box-shadow:inset 0 0 0 2px rgba(24,24,27,.16);background:#fafafa}.marketinfo{display:inline-flex;align-items:center;justify-content:center;padding:0 9px;border:0;border-left:1px solid var(--border);background:transparent;color:#a1a1aa;cursor:help;border-radius:0 6px 6px 0}.marketinfo:hover,.marketinfo:focus-visible{color:#3f3f46;background:#fafafa;outline:none}.marketinfo svg{width:15px;height:15px}.loadingline{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:#2563eb;margin-bottom:10px}.mselect{position:relative}.mtrigger{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 9px 0 10px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--foreground);transition:border-color .12s,box-shadow .12s,background .12s}.mtrigger:hover{border-color:#d4d4d8;background:#fafafa}.mtrigger:focus-visible{outline:none;border-color:#a1a1aa;box-shadow:0 0 0 3px rgba(24,24,27,.08)}.mselect.open .mtrigger{border-color:#a1a1aa;box-shadow:0 0 0 3px rgba(24,24,27,.08);background:#fff}.mflag{display:inline-flex;align-items:center;flex:none;line-height:0}.mflag svg{width:19px;height:12.5px;border-radius:2.5px;box-shadow:inset 0 0 0 .5px rgba(9,9,11,.14)}.mlang{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;color:#52525b;background:var(--secondary);border-radius:4px;padding:2px 4px;line-height:1.2}.mtriglabel{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mtrigcode{font-family:var(--mono);font-size:9.5px;font-weight:700;color:var(--muted-foreground)}.mchevron{width:14px;height:14px;flex:none;color:var(--muted-foreground);transition:transform .15s}.mselect.open .mchevron{transform:rotate(180deg)}.mpop{position:absolute;top:calc(100% + 6px);left:0;z-index:60;min-width:236px;max-height:300px;display:none;flex-direction:column;background:var(--popover);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px -8px rgba(0,0,0,.16),0 4px 12px -6px rgba(0,0,0,.1);overflow:hidden}.mselect.open .mpop{display:flex;animation:mpopin .12s ease}@keyframes mpopin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}.mpopsearch{flex:none;height:36px;width:100%;border:0;border-bottom:1px solid var(--border);padding:0 12px;font-family:var(--sans);font-size:12.5px;color:var(--foreground);background:transparent}.mpopsearch:focus{outline:none}.mpopsearch::placeholder{color:var(--muted-foreground)}.mpoplist{overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:1px;scrollbar-width:thin}.mopt{display:grid;grid-template-columns:24px minmax(0,1fr) auto 16px;align-items:center;gap:8px;width:100%;border:0;background:transparent;border-radius:7px;padding:7px 8px;font-family:var(--sans);font-size:12.5px;color:var(--foreground);cursor:pointer;text-align:left}.mopt.nocode{grid-template-columns:24px minmax(0,1fr) 16px}.mopt:hover,.mopt.active{background:var(--secondary)}.mopt.selected{font-weight:650}.moptlabel{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.moptcode{font-family:var(--mono);font-size:10px;color:var(--muted-foreground)}.mcheck{width:14px;height:14px;color:#16a34a;justify-self:end}.mempty{padding:14px 12px;font-size:12px;color:var(--muted-foreground);text-align:center}.cachenote{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);padding:9px 12px;margin-bottom:12px;font-size:12px;color:#854d0e}.producthint{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);margin:-6px 0 10px;line-height:1.45}.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.rchip{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);background:var(--card);border:1px solid var(--border);padding:4px 10px}.rchip b{color:var(--foreground);margin-right:2px}.rnote{font-size:12px;color:#52525b;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:var(--radius);padding:9px 11px;margin-bottom:12px;line-height:1.5}.rsteps{display:grid;gap:7px}.rstep{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:9px 11px}.rstep-blocked{border-color:#fecaca;background:#fef2f2}.rbadge{flex:none;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;margin-top:1px;color:#fff;background:#71717a}.rbadge-search{background:#0f766e}.rbadge-open{background:#2563eb}.rbadge-find{background:#7c3aed}.rbadge-click{background:#71717a}.rbadge-quote{background:#16a34a}.rbadge-other{background:#52525b}.rbadge-blocked{background:#dc2626}.rstepbody{min-width:0;flex:1}.rmain{display:block;font-family:var(--mono);font-size:11.5px;color:var(--foreground);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}a.rmain:hover{text-decoration:underline;color:#2563eb}.rmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted-foreground);margin-top:2px;line-height:1.45}.rstep-blocked .rmeta{color:#b91c1c}.rcensus{margin-top:18px;border-top:1px solid var(--border);padding-top:12px}.rcensus>summary{cursor:pointer;margin-bottom:8px}.rcensus>.rstep{margin-bottom:6px}.rquote{border-left:3px solid #d4d4d8;background:var(--card);border-radius:0 var(--radius) var(--radius) 0;padding:9px 12px;margin-bottom:8px;font-size:12px;color:#3f3f46;line-height:1.5}.dotspin{width:12px;height:12px;border:2px solid #e4e4e7;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
         .cmpstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 4px}.cmpstat{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:11px 12px;box-shadow:0 1px 2px rgba(9,9,11,.03)}.cmpnum{font-family:var(--mono);font-size:21px;font-weight:750;line-height:1.1}.cmplbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-foreground);font-weight:600;margin-top:5px}.cmptrack{height:6px;background:var(--muted);border-radius:999px;margin-top:9px;overflow:hidden}.cmpfill{height:100%;border-radius:999px;background:var(--chart)}.cmproute{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;margin:12px 0 2px;border:1px solid var(--border);border-radius:999px;background:var(--card);padding:6px 7px 6px 13px;box-shadow:0 1px 2px rgba(9,9,11,.04)}.routearrow{width:16px;height:16px;color:#a1a1aa;flex:none}.routediv{width:1px;height:16px;background:var(--border);margin:0 3px;flex:none}.routestatus{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:4px 9px;border:1px solid;line-height:1}.routestatus.stable{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}.routestatus.changed{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.cmpresults{display:grid;gap:14px;margin-top:18px}.cmpresults .cmproute{margin:0;justify-self:start}.cmpresults .rnote{margin-bottom:0}.cmpresults .cmpstats{margin:0}.cmpresults .cmpcols{margin-top:0}.cmpresults .cmpsec{margin-top:0}.pipedot{width:9px;height:9px;border-radius:50%;flex:none}.cmpcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.cmpcard{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:12px;box-shadow:0 1px 2px rgba(9,9,11,.03)}.cmpcard .eyebrow{display:block;margin-bottom:8px}.mixbar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--muted);margin-bottom:8px}.mixseg{height:100%}.mixlegend{display:flex;flex-wrap:wrap;gap:5px 12px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.cmpcounts{font-family:var(--mono);font-size:11px;color:var(--muted-foreground);margin-top:9px;padding-top:8px;border-top:1px solid #f4f4f5}.cmpcounts b{color:var(--foreground)}.cmpsec{margin-top:14px}.cmpsec>.eyebrow{display:block;margin-bottom:7px}.domscroll{max-height:206px;overflow-y:auto;overflow-x:hidden;padding-right:4px}.domlist{columns:3 170px;column-gap:20px;font-family:var(--mono);font-size:11px;line-height:1.95;color:#52525b;padding:2px 0}.domlist span{display:block;break-inside:avoid;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.domlist span.shared{color:var(--foreground);font-weight:650}.domlist span.more{color:var(--muted-foreground);font-style:italic}
         .flowtools,.flowacts{display:flex;gap:8px;flex-wrap:wrap}.flowbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.flowlegend{display:flex;flex-wrap:wrap;gap:7px 14px}.lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted-foreground)}.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.exportmenu{position:relative}.exportmenu summary{list-style:none;display:inline-flex;align-items:center;gap:6px}.exportmenu summary::-webkit-details-marker{display:none}.chev{width:13px;height:13px;transition:transform .16s ease}.exportmenu[open] .chev{transform:rotate(180deg)}.exportitems{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:178px;border:1px solid var(--border);border-radius:var(--radius);background:var(--popover);box-shadow:0 12px 30px rgba(9,9,11,.14);padding:5px}.exportitem{display:block;width:100%;border:0;background:transparent;color:var(--popover-foreground);text-align:left;border-radius:calc(var(--radius) - 2px);padding:8px 9px;cursor:pointer;font-size:13px}.exportitem:hover{background:var(--accent)}.flowbox,.flowwrap{overflow-y:auto;overflow-x:hidden;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:8px}.flowbox svg,.flowwrap svg{display:block;width:100%;height:auto}
         .reason{padding:12px;margin-bottom:8px}.reason b{font-size:13px}.reason pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:#3f3f46;line-height:1.55;margin:8px 0 0}
@@ -86,6 +104,7 @@
                 if (key === 'class') el.className = value;
                 else if (key === 'text') el.textContent = value;
                 else if (key === 'style') Object.assign(el.style, value);
+                else if (key === 'value') el.value = value;
                 else if (key.startsWith('on') && typeof value === 'function') el.addEventListener(key.slice(2).toLowerCase(), value);
                 else el.setAttribute(key, value);
             });
@@ -106,6 +125,54 @@
             return path;
         }
         return path;
+    }
+
+    function detectedProductMarket() {
+        const language = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
+        const parts = String(language).toLowerCase().split(/[-_]/);
+        const detectedHl = PRODUCT_MARKET_LANGUAGES.some(([code]) => code === parts[0]) ? parts[0] : 'en';
+        const detectedGl = PRODUCT_MARKET_COUNTRIES.some(([code]) => code === parts[1]) ? parts[1] : 'us';
+        return { gl: detectedGl, hl: detectedHl };
+    }
+
+    function normalizeProductMarket(market) {
+        const fallback = detectedProductMarket();
+        const gl = PRODUCT_MARKET_COUNTRIES.some(([code]) => code === String(market && market.gl || '').toLowerCase())
+            ? String(market.gl).toLowerCase()
+            : fallback.gl;
+        const hl = PRODUCT_MARKET_LANGUAGES.some(([code]) => code === String(market && market.hl || '').toLowerCase())
+            ? String(market.hl).toLowerCase()
+            : fallback.hl;
+        return { gl, hl };
+    }
+
+    async function ensureProductMarket() {
+        if (state.productMarketLoaded && state.productMarket) return state.productMarket;
+        try {
+            const settings = await CORE().loadSettings();
+            state.productMarket = normalizeProductMarket(settings.productMarket || null);
+        } catch (_) {
+            state.productMarket = normalizeProductMarket(null);
+        }
+        state.productMarketLoaded = true;
+        return state.productMarket;
+    }
+
+    async function setProductMarket(patch) {
+        state.productMarket = normalizeProductMarket({ ...(state.productMarket || detectedProductMarket()), ...patch });
+        state.productMarketLoaded = true;
+        try {
+            await CORE().saveSettings({ productMarket: state.productMarket });
+            setStatus(`requested market ${productMarketLabel(state.productMarket)} saved`);
+        } catch (_) {
+            setStatus('requested market changed for this session');
+        }
+        renderProductState();
+    }
+
+    function productMarketLabel(market) {
+        const normalized = normalizeProductMarket(market);
+        return `${normalized.gl.toUpperCase()}/${normalized.hl.toUpperCase()}`;
     }
 
     function setStatus(text, isError) {
@@ -189,6 +256,7 @@
         ensureHost();
         if (!state.overlay) throw new Error('GEO/AEO Research UI could not initialize. Refresh this ChatGPT tab after reloading the extension.');
         state.overlay.classList.add('open');
+        await ensureProductMarket();
         const status = CORE().getPageStatus();
         const conversationId = status.conversationId || '';
         const sameConversation = conversationId && conversationId === state.lastConversationId;
@@ -227,8 +295,11 @@
             state.token = result.token;
             state.lastConversationId = result.intel.id;
             state.fromCache = false;
+            state.loadingInsights = false;
             state.offersStarted = false;
             state.offerProgress = '';
+            state.insightProgress = '';
+            state.openInsights = {};
             state.activeTab = 'overview';
             setStatus('scan complete');
             render();
@@ -257,8 +328,11 @@
         state.lastConversationId = snapshot.conversationId || state.intel.id || '';
         state.fromCache = true;
         state.loadingOffers = false;
+        state.loadingInsights = false;
         state.offersStarted = true;
         state.offerProgress = '';
+        state.insightProgress = '';
+        state.openInsights = {};
         state.activeTab = 'overview';
     }
 
@@ -316,6 +390,10 @@
     }
 
     function renderOfferState() {
+        if (state.activeTab === 'products' || state.activeTab === 'flow') render();
+    }
+
+    function renderProductState() {
         if (state.activeTab === 'products' || state.activeTab === 'flow') render();
     }
 
@@ -915,7 +993,7 @@
                 const y = loTop + offer.y + offer.h / 2;
                 const best = offer.best;
                 edge(xLP + offer.pw, loTop + offer.pmid, xLO, y, best ? '#0CA678' : '#CBD2D9', best ? 1.6 : 1, 0.5);
-                const offerHref = offer.o.url || offer.o.shoppingUrl || '';
+                const offerHref = offer.o.url || marketShoppingUrl(offer.o.shoppingUrl || '');
                 node(xLO, loTop + offer.y, offer.w, offer.h, offer.lines, { dot: best ? '#0CA678' : null, stroke: best ? '#0CA678' : '#E7E9ED', sw: best ? 1.6 : 1, tc: best ? '#0CA678' : '#42464d', bold: best, meta: offer.o.total || offer.o.price || '', rc: best ? '#0CA678' : '#69717d', href: offerHref, title: `${offer.o.merchant || ''} · ${offer.o.total || offer.o.price || ''}${offer.o.details ? ` · ${offer.o.details}` : ''}${offerHref ? ` · ${offer.o.url ? offerHref : `Google Shopping fallback: ${offerHref}`}` : ''}` });
             });
         }
@@ -1022,6 +1100,15 @@
         return `${reviews} reviews`;
     }
 
+    function canLoadInsight(product) {
+        return Boolean(product && product.lookupKey && product.messageId);
+    }
+
+    function insightSentimentTotal(insight) {
+        const counts = (insight && insight.sentimentCounts) || {};
+        return (counts.positive || 0) + (counts.neutral || 0) + (counts.negative || 0);
+    }
+
     function starIcon() {
         const icon = svgNode('svg', { class: 'ratingstar', viewBox: '0 0 24 24', width: '14', height: '14', 'aria-hidden': 'true' });
         icon.appendChild(svgNode('path', { d: 'M13.7276 3.44418L15.4874 6.99288C15.7274 7.48687 16.3673 7.9607 16.9073 8.05143L20.0969 8.58575C22.1367 8.92853 22.6167 10.4206 21.1468 11.8925L18.6671 14.3927C18.2471 14.8161 18.0172 15.6327 18.1471 16.2175L18.8571 19.3125C19.417 21.7623 18.1271 22.71 15.9774 21.4296L12.9877 19.6452C12.4478 19.3226 11.5579 19.3226 11.0079 19.6452L8.01827 21.4296C5.8785 22.71 4.57865 21.7522 5.13859 19.3125L5.84851 16.2175C5.97849 15.6327 5.74852 14.8161 5.32856 14.3927L2.84884 11.8925C1.389 10.4206 1.85895 8.92853 3.89872 8.58575L7.08837 8.05143C7.61831 7.9607 8.25824 7.48687 8.49821 6.99288L10.258 3.44418C11.2179 1.51861 12.7777 1.51861 13.7276 3.44418Z', fill: '#efc823', stroke: '#efc823', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
@@ -1071,6 +1158,17 @@
         if (!url) return '';
         const domain = CORE().cleanDomain(url);
         return domain || String(url).replace(/^https?:\/\//, '').split(/[/?#]/)[0];
+    }
+
+    // Google Shopping links open with the requested market applied (gl/hl);
+    // non-Google URLs and metadata-provided locales pass through untouched.
+    function marketShoppingUrl(url) {
+        if (!url) return '';
+        try {
+            return CORE().applyMarketToGoogleShoppingUrl(url, normalizeProductMarket(state.productMarket)) || url;
+        } catch (_) {
+            return url;
+        }
     }
 
     function isChatGptUrl(url) {
@@ -1222,22 +1320,414 @@
         ]));
     }
 
+    // Simplified inline SVG flags (viewBox 0 0 30 20). Static trusted markup only.
+    const FLAG_SVGS = {
+        us: '<rect width="30" height="20" fill="#B22234"/><g fill="#fff"><rect y="1.54" width="30" height="1.54"/><rect y="4.62" width="30" height="1.54"/><rect y="7.69" width="30" height="1.54"/><rect y="10.77" width="30" height="1.54"/><rect y="13.85" width="30" height="1.54"/><rect y="16.92" width="30" height="1.54"/></g><rect width="12" height="10.77" fill="#3C3B6E"/><g fill="#fff"><circle cx="2.2" cy="2.2" r=".62"/><circle cx="5" cy="2.2" r=".62"/><circle cx="7.8" cy="2.2" r=".62"/><circle cx="10.6" cy="2.2" r=".62"/><circle cx="3.6" cy="4.6" r=".62"/><circle cx="6.4" cy="4.6" r=".62"/><circle cx="9.2" cy="4.6" r=".62"/><circle cx="2.2" cy="7" r=".62"/><circle cx="5" cy="7" r=".62"/><circle cx="7.8" cy="7" r=".62"/><circle cx="10.6" cy="7" r=".62"/><circle cx="3.6" cy="9.2" r=".62"/><circle cx="6.4" cy="9.2" r=".62"/><circle cx="9.2" cy="9.2" r=".62"/></g>',
+        de: '<rect width="30" height="20"/><rect y="6.67" width="30" height="6.67" fill="#DD0000"/><rect y="13.33" width="30" height="6.67" fill="#FFCE00"/>',
+        gb: '<rect width="30" height="20" fill="#012169"/><path d="M0 0L30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0L30 20M30 0L0 20" stroke="#C8102E" stroke-width="1.6"/><path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="6.5"/><path d="M15 0V20M0 10H30" stroke="#C8102E" stroke-width="3.9"/>',
+        ca: '<rect width="30" height="20" fill="#fff"/><rect width="7.5" height="20" fill="#D80621"/><rect x="22.5" width="7.5" height="20" fill="#D80621"/><path fill="#D80621" d="M15 4.2l.9 1.9 1.7-.8-.5 2 2.1-.3-1.1 1.7 1.8.8-1.8.8 1.1 1.7-2.1-.3.3 1.9-1.9-.5-.2 2.7h-.6l-.2-2.7-1.9.5.3-1.9-2.1.3 1.1-1.7-1.8-.8 1.8-.8-1.1-1.7 2.1.3-.5-2 1.7.8z"/>',
+        au: '<rect width="30" height="20" fill="#012169"/><g transform="scale(.5)"><path d="M0 0L30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0L30 20M30 0L0 20" stroke="#C8102E" stroke-width="1.6"/><path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="6.5"/><path d="M15 0V20M0 10H30" stroke="#C8102E" stroke-width="3.9"/></g><g fill="#fff"><circle cx="7.5" cy="15" r="1.15"/><circle cx="23" cy="3.6" r=".85"/><circle cx="27" cy="7.6" r=".85"/><circle cx="23" cy="16.2" r=".85"/><circle cx="19.6" cy="10.2" r=".85"/><circle cx="25.4" cy="11.4" r=".55"/></g>',
+        fr: '<rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#002654"/><rect x="20" width="10" height="20" fill="#CE1126"/>',
+        es: '<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/><circle cx="9" cy="10" r="1.4" fill="#AA151B"/>',
+        it: '<rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#008C45"/><rect x="20" width="10" height="20" fill="#CD212A"/>',
+        nl: '<rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#AE1C28"/><rect y="13.33" width="30" height="6.67" fill="#21468B"/>',
+        be: '<rect width="30" height="20" fill="#FFCD00"/><rect width="10" height="20"/><rect x="20" width="10" height="20" fill="#C8102E"/>',
+        ch: '<rect width="30" height="20" fill="#DA291C"/><rect x="12.8" y="6" width="4.4" height="8" fill="#fff"/><rect x="11" y="7.8" width="8" height="4.4" fill="#fff"/>',
+        at: '<rect width="30" height="20" fill="#EF3340"/><rect y="6.67" width="30" height="6.67" fill="#fff"/>',
+        se: '<rect width="30" height="20" fill="#006AA7"/><rect x="9" width="3.6" height="20" fill="#FECC02"/><rect y="8.2" width="30" height="3.6" fill="#FECC02"/>',
+        dk: '<rect width="30" height="20" fill="#C8102E"/><rect x="9" width="3.6" height="20" fill="#fff"/><rect y="8.2" width="30" height="3.6" fill="#fff"/>',
+        no: '<rect width="30" height="20" fill="#BA0C2F"/><rect x="8" width="5" height="20" fill="#fff"/><rect y="7.5" width="30" height="5" fill="#fff"/><rect x="9.25" width="2.5" height="20" fill="#00205B"/><rect y="8.75" width="30" height="2.5" fill="#00205B"/>',
+        fi: '<rect width="30" height="20" fill="#fff"/><rect x="8.6" width="4.8" height="20" fill="#002F6C"/><rect y="7.6" width="30" height="4.8" fill="#002F6C"/>',
+        ie: '<rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#009A44"/><rect x="20" width="10" height="20" fill="#FF8200"/>',
+        pl: '<rect width="30" height="20" fill="#fff"/><rect y="10" width="30" height="10" fill="#DC143C"/>',
+        pt: '<rect width="30" height="20" fill="#DA291C"/><rect width="12" height="20" fill="#046A38"/><circle cx="12" cy="10" r="3.6" fill="#FFE900"/><circle cx="12" cy="10" r="1.9" fill="#DA291C"/><circle cx="12" cy="10" r="1.1" fill="#fff"/>',
+        br: '<rect width="30" height="20" fill="#009739"/><path d="M15 2.7 27.3 10 15 17.3 2.7 10Z" fill="#FEDD00"/><circle cx="15" cy="10" r="3.7" fill="#012169"/><path d="M11.6 9.2c2.3-.7 4.9 0 6.7 1.5" stroke="#fff" stroke-width=".7" fill="none"/>',
+        mx: '<rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#006341"/><rect x="20" width="10" height="20" fill="#C8102E"/><circle cx="15" cy="10" r="1.9" fill="#8F4620"/>',
+        ar: '<rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#6CACE4"/><rect y="13.33" width="30" height="6.67" fill="#6CACE4"/><circle cx="15" cy="10" r="2" fill="#FFB81C"/><circle cx="15" cy="10" r="2" fill="none" stroke="#8a5d1a" stroke-width=".3"/>',
+        cl: '<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#DA291C"/><rect width="10" height="10" fill="#0032A0"/><path fill="#fff" d="M5 2.4l.78 2.4h2.52L6.26 6.28l.78 2.4L5 7.2 2.96 8.68l.78-2.4L1.7 4.8h2.52z"/>',
+        co: '<rect width="30" height="20" fill="#C8102E"/><rect width="30" height="15" fill="#003087"/><rect width="30" height="10" fill="#FFCD00"/>',
+        jp: '<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/>',
+        kr: '<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="5.5" fill="#0047A0"/><path d="M9.5 10a5.5 5.5 0 0 1 11 0 2.75 2.75 0 0 0-5.5 0 2.75 2.75 0 0 1-5.5 0Z" fill="#CD2E3A"/>',
+        in: '<rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#FF9933"/><rect y="13.33" width="30" height="6.67" fill="#046A38"/><circle cx="15" cy="10" r="2.2" fill="none" stroke="#06038D" stroke-width=".7"/><circle cx="15" cy="10" r=".5" fill="#06038D"/>',
+    };
+    const FLAG_FALLBACK = '<rect width="30" height="20" fill="#E4E4E7"/><circle cx="15" cy="10" r="5.2" fill="none" stroke="#A1A1AA" stroke-width="1.1"/><path d="M15 4.8v10.4M9.8 10h10.4M15 4.8c-2.4 2.6-2.4 7.8 0 10.4M15 4.8c2.4 2.6 2.4 7.8 0 10.4" fill="none" stroke="#A1A1AA" stroke-width=".9"/>';
+
+    function countryFlagNode(code) {
+        const inner = FLAG_SVGS[String(code || '').toLowerCase()] || FLAG_FALLBACK;
+        const span = h('span', { class: 'mflag', 'aria-hidden': 'true' });
+        span.innerHTML = `<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" focusable="false">${inner}</svg>`;
+        return span;
+    }
+
+    function chevronIcon() {
+        const icon = svgNode('svg', { class: 'mchevron', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+        icon.appendChild(svgNode('path', { d: 'M6 9L12 15L18 9' }));
+        return icon;
+    }
+
+    function checkIcon() {
+        const icon = svgNode('svg', { class: 'mcheck', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2.2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+        icon.appendChild(svgNode('path', { d: 'M5 13L9 17L19 7' }));
+        return icon;
+    }
+
+    function infoIcon() {
+        const icon = svgNode('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+        icon.appendChild(svgNode('circle', { cx: '12', cy: '12', r: '10' }));
+        icon.appendChild(svgNode('path', { d: 'M12 16V12' }));
+        icon.appendChild(svgNode('path', { d: 'M12.125 8.25H12M12.25 8.25C12.25 8.11193 12.1381 8 12 8C11.8619 8 11.75 8.11193 11.75 8.25C11.75 8.38807 11.8619 8.5 12 8.5C12.1381 8.5 12.25 8.38807 12.25 8.25Z' }));
+        return icon;
+    }
+
+    // Accessible combobox: trigger button + popover with type-to-filter search,
+    // arrow-key navigation, Enter to select, Escape / outside click to dismiss.
+    function renderMarketSelect(config) {
+        const { value, options, ariaLabel, searchPlaceholder, iconFor, onSelect } = config;
+        const showCode = config.showCode !== false;
+        const selected = options.find(([code]) => code === value) || options[0];
+        let filtered = options.slice();
+        let activeIndex = Math.max(0, filtered.findIndex(([code]) => code === value));
+        let isOpen = false;
+
+        const root = h('div', { class: 'mselect' });
+        const list = h('div', { class: 'mpoplist', role: 'listbox', 'aria-label': ariaLabel });
+        const search = options.length > 7
+            ? h('input', { class: 'mpopsearch', type: 'text', placeholder: searchPlaceholder, 'aria-label': searchPlaceholder, autocomplete: 'off', spellcheck: 'false' })
+            : null;
+        const pop = h('div', { class: 'mpop' }, search, list);
+        const trigger = h('button', { class: 'mtrigger', type: 'button', 'aria-haspopup': 'listbox', 'aria-expanded': 'false', 'aria-label': `${ariaLabel}: ${selected[1]}`, title: `${ariaLabel}: ${selected[1]}` },
+            iconFor(selected[0]),
+            h('span', { class: 'mtriglabel', text: selected[1] }),
+            showCode ? h('span', { class: 'mtrigcode', text: selected[0].toUpperCase() }) : null,
+            chevronIcon());
+        root.appendChild(trigger);
+        root.appendChild(pop);
+
+        function buildList() {
+            list.textContent = '';
+            if (!filtered.length) {
+                list.appendChild(h('div', { class: 'mempty', text: 'No matches' }));
+                return;
+            }
+            filtered.forEach(([code, label], index) => {
+                const isSelected = code === value;
+                const option = h('button', {
+                    class: `mopt${showCode ? '' : ' nocode'}${isSelected ? ' selected' : ''}${index === activeIndex ? ' active' : ''}`,
+                    type: 'button',
+                    role: 'option',
+                    'aria-selected': isSelected ? 'true' : 'false',
+                    onClick: () => choose(code),
+                    onMousemove: () => setActive(index),
+                },
+                iconFor(code),
+                h('span', { class: 'moptlabel', text: label }),
+                showCode ? h('span', { class: 'moptcode', text: code.toUpperCase() }) : null,
+                isSelected ? checkIcon() : h('span'));
+                list.appendChild(option);
+            });
+        }
+
+        function setActive(index) {
+            if (index === activeIndex) return;
+            activeIndex = index;
+            Array.from(list.children).forEach((node, nodeIndex) => node.classList.toggle('active', nodeIndex === activeIndex));
+        }
+
+        function scrollActiveIntoView() {
+            const node = list.children[activeIndex];
+            if (node && node.scrollIntoView) node.scrollIntoView({ block: 'nearest' });
+        }
+
+        function applyFilter(query) {
+            const text = String(query || '').trim().toLowerCase();
+            filtered = text
+                ? options.filter(([code, label]) => label.toLowerCase().includes(text) || code.includes(text))
+                : options.slice();
+            activeIndex = Math.max(0, filtered.findIndex(([code]) => code === value));
+            if (text) activeIndex = 0;
+            buildList();
+            scrollActiveIntoView();
+        }
+
+        function onDocPointerDown(event) {
+            if (!event.composedPath().includes(root)) close();
+        }
+
+        function onKeyDown(event) {
+            if (event.key === 'Escape') {
+                event.stopPropagation();
+                close();
+                trigger.focus();
+                return;
+            }
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (!filtered.length) return;
+                const delta = event.key === 'ArrowDown' ? 1 : -1;
+                setActive((activeIndex + delta + filtered.length) % filtered.length);
+                scrollActiveIntoView();
+                return;
+            }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (filtered[activeIndex]) choose(filtered[activeIndex][0]);
+            }
+        }
+
+        function openPop() {
+            if (isOpen) return;
+            isOpen = true;
+            root.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+            applyFilter('');
+            if (search) {
+                search.value = '';
+                setTimeout(() => search.focus(), 0);
+            }
+            document.addEventListener('pointerdown', onDocPointerDown, true);
+            root.addEventListener('keydown', onKeyDown);
+        }
+
+        function close() {
+            if (!isOpen) return;
+            isOpen = false;
+            root.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+            document.removeEventListener('pointerdown', onDocPointerDown, true);
+            root.removeEventListener('keydown', onKeyDown);
+        }
+
+        function choose(code) {
+            close();
+            if (code !== value) onSelect(code);
+        }
+
+        trigger.addEventListener('click', () => (isOpen ? close() : openPop()));
+        if (search) search.addEventListener('input', () => applyFilter(search.value));
+        return root;
+    }
+
+    function renderProductMarketControls() {
+        const market = normalizeProductMarket(state.productMarket);
+        return h('div', { class: 'marketgroup', role: 'group', 'aria-label': 'Requested market' },
+            h('span', { class: 'mgl', text: 'Market' }),
+            renderMarketSelect({
+                value: market.gl,
+                options: PRODUCT_MARKET_COUNTRIES,
+                ariaLabel: 'Country',
+                searchPlaceholder: 'Search country\u2026',
+                iconFor: countryFlagNode,
+                onSelect: (code) => setProductMarket({ gl: code }),
+            }),
+            renderMarketSelect({
+                value: market.hl,
+                options: PRODUCT_MARKET_LANGUAGES,
+                ariaLabel: 'Language',
+                searchPlaceholder: 'Search language\u2026',
+                showCode: false,
+                iconFor: (code) => h('span', { class: 'mlang', 'aria-hidden': 'true', text: code.toUpperCase() }),
+                onSelect: (code) => setProductMarket({ hl: code }),
+            }),
+            h('span', { class: 'marketinfo', tabindex: '0', role: 'img', 'aria-label': 'Market notice', title: `Requested market ${productMarketLabel(market)} applies to new insight/offer requests and Google Shopping links. ChatGPT may still use account, session, or VPN context internally, so the backend may not fully honor it.` }, infoIcon()));
+    }
+
     function renderProducts() {
         if (!state.intel.products.length) return h('div', { class: 'empty' }, 'No product carousel was captured in this conversation.');
         const canHydrate = state.intel.products.some((product) => product.lookupKey);
+        const canInsight = state.intel.products.some(canLoadInsight);
+        const hintParts = [
+            canInsight && !state.intel.products.some((product) => product.sidebarInsight) ? 'Insights and review sources load on demand.' : '',
+            canHydrate && !state.intel.products.some((product) => product.offers && product.offers.length) ? 'Offers load separately when available for the account/product.' : '',
+        ].filter(Boolean);
         const ordered = state.intel.products
             .map((product, index) => ({ product, index }))
             .sort((a, b) => ((a.product.position ?? a.index) - (b.product.position ?? b.index)));
         return h('div', null,
-            h('div', { class: 'panelh' }, h('span', { class: 'eyebrow' }, `${state.intel.products.length} products`),
+            h('div', { class: 'panelh' },
+                h('div', { class: 'panelhleft' },
+                    h('span', { class: 'eyebrow' }, `${state.intel.products.length} products`),
+                    renderProductMarketControls()),
                 h('div', { class: 'flowtools' },
+                    canInsight ? h('button', { class: 'btn', disabled: state.loadingInsights ? 'disabled' : null, onClick: () => hydrateInsights({ force: true }) }, state.loadingInsights ? 'Loading insights...' : (state.intel.products.some((product) => product.sidebarInsight) ? 'Reload insights' : 'Load insights')) : null,
                     canHydrate ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : (state.intel.products.some((product) => product.offers && product.offers.length) ? 'Reload offers' : 'Load offers')) : null,
                     h('button', { class: 'btn', onClick: exportProductsCsv }, 'Products CSV'))),
+            hintParts.length ? h('div', { class: 'producthint', text: hintParts.join(' ') }) : null,
+            state.loadingInsights ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.insightProgress || 'loading product insights...') : null,
             state.loadingOffers ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.offerProgress || 'loading live offers...') : null,
-            !state.loadingOffers && canHydrate && !state.intel.products.some((product) => product.offers && product.offers.length)
-                ? h('div', { class: 'rnote' }, 'Live offers are fetched on demand (one request per product) to stay under ChatGPT rate limits — nothing is requested until you click Load offers.')
-                : null,
             h('div', { class: 'pgrid' }, ordered.map((item) => renderProductCard(item.product))));
+    }
+
+    function renderProductInsight(product) {
+        const insight = product.sidebarInsight;
+        const sources = reviewSourcesForInsight(insight).slice(0, 5);
+        const chipSeen = new Set();
+        const chipSources = sources.filter((source) => {
+            const key = String(source.displayName || reviewSourceName(source.domain || source.title)).toLowerCase();
+            if (chipSeen.has(key)) return false;
+            chipSeen.add(key);
+            return true;
+        });
+        const counts = sourcedSentimentCounts(insight);
+        const total = sentimentTotal(counts);
+        const insightKey = productInsightKey(product);
+        const SENTIMENT_KEYS = ['positive', 'neutral', 'negative'];
+        const sentimentBar = total ? h('div', { class: 'sentwrap' },
+            h('div', { class: 'sentbar', role: 'img', 'aria-label': SENTIMENT_KEYS.map((key) => `${counts[key] || 0} ${key}`).join(', ') },
+                SENTIMENT_KEYS.map((key) => counts[key]
+                    ? h('i', { class: `sent-${key}`, style: { flexGrow: String(counts[key]) }, title: `${counts[key]} ${key}` })
+                    : null)),
+            h('div', { class: 'sentlegend' },
+                SENTIMENT_KEYS.map((key) => counts[key]
+                    ? h('span', { class: 'sentitem' }, h('i', { class: `sentdot sent-${key}` }), h('b', { text: String(counts[key]) }), ` ${key}`)
+                    : null),
+                h('span', { class: 'senttotal', text: `${total} source${total === 1 ? '' : 's'}` }))) : null;
+        const details = h('details', {
+            class: 'insightcard',
+            open: state.openInsights[insightKey] ? 'open' : null,
+            onToggle: (event) => { state.openInsights[insightKey] = event.currentTarget.open; },
+        },
+        h('summary', null,
+            h('div', { class: 'insighttop' },
+                h('span', { class: 'insightlabel', text: 'Research insight' }),
+                h('span', { class: 'insightaction', 'aria-hidden': 'true' })),
+            h('div', { class: 'insightchips' },
+                chipSources.length ? chipSources.map(renderInsightSourceChip) : h('span', { class: 'insightchip muted', text: 'No review source captured' }))),
+        h('div', { class: 'insightbody' },
+            insight.rationale ? h('div', null, h('div', { class: 'insighttitle', text: 'What to know' }), h('div', { class: 'insighttext', text: insight.rationale })) : null,
+            insight.reviewSummary ? h('div', null, h('div', { class: 'insighttitle', text: 'Review summary' }), h('div', { class: 'insighttext', text: insight.reviewSummary })) : null,
+            sentimentBar,
+            sources.length ? h('div', { class: 'reviewsources' },
+                h('div', { class: 'insighttitle', text: 'Review sources' }),
+                sources.map(renderReviewSource)) : null));
+        return details;
+    }
+
+    function renderInsightSourceChip(source) {
+        const display = source.displayName || reviewSourceName(source.domain || source.title);
+        const sentiment = String(source.sentiment || '').toLowerCase();
+        return h('span', { class: `insightchip${sentiment ? ` ${sentiment}` : ''}`, title: [display, source.theme || source.title, sentiment ? sentimentLabel(sentiment) : ''].filter(Boolean).join(' \u00b7 ') },
+            h('strong', { text: display }));
+    }
+
+    function renderReviewSource(source) {
+        const display = source.displayName || reviewSourceName(source.domain || source.title);
+        const displayLower = String(display).toLowerCase();
+        const theme = String(source.theme || '').trim();
+        const title = String(source.title || '').trim();
+        const secondaryParts = [];
+        if (theme && theme.toLowerCase() !== displayLower) secondaryParts.push(theme);
+        else if (title && title.toLowerCase() !== displayLower) secondaryParts.push(title);
+        if (source.rating != null && source.rating !== '') secondaryParts.push(`${source.rating}\u2605`);
+        if (source.domain && source.domain.toLowerCase() !== displayLower && reviewSourceName(source.domain).toLowerCase() !== displayLower) secondaryParts.push(source.domain);
+        const secondary = secondaryParts.join(' \u00b7 ');
+        const sentiment = String(source.sentiment || '').toLowerCase();
+        const props = { class: 'reviewrow', title: source.excerpt || source.snippet || source.url || '' };
+        if (source.url) Object.assign(props, { href: source.url, target: '_blank', rel: 'noopener' });
+        return h(source.url ? 'a' : 'div', props,
+            h('span', { class: 'reviewrowmain' },
+                h('span', { class: 'reviewname', text: display }),
+                secondary ? h('span', { class: 'reviewmeta', text: secondary }) : null),
+            sentiment ? h('span', { class: `senttag ${sentiment}` }, sentimentIcon(sentiment), sentimentLabel(sentiment)) : null);
+    }
+
+    function normalizeReviewSource(source) {
+        if (!source) return null;
+        const url = source.url || '';
+        const rawDomain = source.domain || compactUrlLabel(url) || '';
+        const domain = genericSourceLabel(rawDomain) ? '' : rawDomain;
+        const rawName = source.displayName || source.name || source.siteName || source.site_name || source.publisher || source.sourceName || source.source_name || '';
+        const name = genericSourceLabel(rawName) ? '' : String(rawName).trim();
+        const rawTitle = source.title || source.name || '';
+        const title = genericSourceLabel(rawTitle) ? '' : String(rawTitle).trim();
+        const displayName = reviewSourceDisplayName(name, title, domain);
+        if (!domain && !title && !name) return null;
+        return Object.assign({}, source, { domain, name, title, displayName: displayName || name || title || domain });
+    }
+
+    function reviewSourcesForInsight(insight) {
+        if (!insight) return [];
+        return ((insight.reviews && insight.reviews.length) ? insight.reviews : (insight.sources || []))
+            .map(normalizeReviewSource)
+            .filter(Boolean)
+            .filter(dedupeReviewSource());
+    }
+
+    function sourcedSentimentCounts(insight) {
+        const counts = { positive: 0, neutral: 0, negative: 0 };
+        reviewSourcesForInsight(insight).forEach((source) => {
+            const sentiment = String(source.sentiment || '').toLowerCase();
+            if (Object.prototype.hasOwnProperty.call(counts, sentiment)) counts[sentiment] += 1;
+        });
+        return counts;
+    }
+
+    function sentimentTotal(counts) {
+        return (counts && counts.positive || 0) + (counts && counts.neutral || 0) + (counts && counts.negative || 0);
+    }
+
+    function dedupeReviewSource() {
+        const seen = new Set();
+        return (source) => {
+            const key = `${source.domain || source.displayName}|${source.name || source.title || ''}|${source.sentiment || ''}`.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        };
+    }
+
+    function productInsightKey(product) {
+        return [
+            product.messageId || '',
+            product.position ?? '',
+            product.title || '',
+            product.price || '',
+        ].join('|');
+    }
+
+    function genericSourceLabel(value) {
+        return /^(source|sources?|review|reviews?|citation|citations?|unknown|\?)$/i.test(String(value || '').trim());
+    }
+
+    function reviewSourceDisplayName(name, title, domain) {
+        const preferred = [name, title].map((value) => String(value || '').trim()).find((value) => value && !looksLikeHostLabel(value));
+        return preferred || reviewSourceName(domain || title || name);
+    }
+
+    function looksLikeHostLabel(value) {
+        const text = String(value || '').trim().toLowerCase();
+        return /^https?:\/\//.test(text) || /^[a-z0-9-]+(\.[a-z0-9-]+)+\/?$/.test(text);
+    }
+
+    function reviewSourceName(domain) {
+        const host = String(domain || '').replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+        const parts = host.split('.').filter(Boolean);
+        const subdomainLabels = new Set(['m', 'mobile', 'en', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'br', 'uk', 'ca', 'au']);
+        const base = parts.length > 2 && subdomainLabels.has(parts[0]) ? parts[1] : (parts[0] || host);
+        const known = { amazon: 'Amazon', aniforte: 'AniForte', appleinsider: 'AppleInsider', birchtree: 'Birchtree', fressnapf: 'Fressnapf', gsmarena: 'GSMArena', jamiebalfour: 'Jamie Balfour', trustpilot: 'Trustpilot', trustedreviews: 'Trusted Reviews', ubuy: 'Ubuy', wikipedia: 'Wikipedia', zooplus: 'zooplus' };
+        return known[base] || base.replace(/[-_]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function sentimentIcon(sentiment) {
+        const icon = svgNode('svg', { class: 'senticon', viewBox: '0 0 24 24', width: '24', height: '24', color: 'currentColor', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+        if (sentiment === 'negative') {
+            icon.appendChild(svgNode('path', { d: 'M2 11.5C2 12.6046 2.89543 13.5 4 13.5C5.65685 13.5 7 12.1569 7 10.5V6.5C7 4.84315 5.65685 3.5 4 3.5C2.89543 3.5 2 4.39543 2 5.5V11.5Z' }));
+            icon.appendChild(svgNode('path', { d: 'M15.4787 16.1937L15.2124 15.3337C14.9942 14.6289 14.8851 14.2765 14.969 13.9982C15.0369 13.7731 15.1859 13.579 15.389 13.4513C15.64 13.2935 16.0197 13.2935 16.7791 13.2935H17.1831C19.7532 13.2935 21.0382 13.2935 21.6452 12.5327C21.7145 12.4458 21.7762 12.3533 21.8296 12.2563C22.2965 11.4079 21.7657 10.2649 20.704 7.9789C19.7297 5.88111 19.2425 4.83222 18.338 4.21485C18.2505 4.15508 18.1605 4.0987 18.0683 4.04586C17.116 3.5 15.9362 3.5 13.5764 3.5H13.0646C10.2057 3.5 8.77628 3.5 7.88814 4.36053C7 5.22106 7 6.60607 7 9.37607V10.3497C7 11.8054 7 12.5332 7.25834 13.1994C7.51668 13.8656 8.01135 14.4134 9.00069 15.5089L13.0921 20.0394C13.1947 20.1531 13.246 20.2099 13.2913 20.2493C13.7135 20.6167 14.3652 20.5754 14.7344 20.1577C14.774 20.1129 14.8172 20.0501 14.9036 19.9245C15.0388 19.728 15.1064 19.6297 15.1654 19.5323C15.6928 18.6609 15.8524 17.6256 15.6108 16.6429C15.5838 16.5331 15.5488 16.4199 15.4787 16.1937Z' }));
+            return icon;
+        }
+        if (sentiment === 'neutral') {
+            icon.appendChild(svgNode('path', { d: 'M7.6525 4.7864L7.47496 5.34293C7.32949 5.79895 7.25675 6.02697 7.31268 6.20705C7.35794 6.35273 7.45729 6.47831 7.59267 6.56093C7.76001 6.66306 8.01314 6.66306 8.51941 6.66306H8.78875C10.5021 6.66306 11.3588 6.66306 11.7634 7.15531C11.8097 7.21157 11.8508 7.27139 11.8864 7.33414C12.1977 7.88315 11.8438 8.62273 11.136 10.1019C10.4865 11.4593 10.1617 12.138 9.55868 12.5375C9.50031 12.5761 9.44032 12.6126 9.37886 12.6468C8.74403 13 7.95744 13 6.38427 13H6.04306C4.13715 13 3.18419 13 2.59209 12.4432C2 11.8864 2 10.9902 2 9.19784V8.56787C2 7.62594 2 7.15498 2.17223 6.72392C2.34445 6.29285 2.67424 5.93842 3.3338 5.22955L6.06141 2.29801C6.12982 2.22449 6.16403 2.18772 6.19418 2.16225C6.47569 1.92448 6.91015 1.95124 7.15627 2.22152C7.18264 2.25047 7.21145 2.29112 7.26908 2.37241C7.35922 2.49956 7.40429 2.56314 7.44357 2.62613C7.79522 3.19003 7.90162 3.85988 7.74053 4.4958C7.72254 4.56683 7.69918 4.64006 7.6525 4.7864Z' }));
+            icon.appendChild(svgNode('path', { d: 'M16.3475 19.2136L16.525 18.6571C16.6705 18.201 16.7433 17.973 16.6873 17.793C16.6421 17.6473 16.5427 17.5217 16.4073 17.4391C16.24 17.3369 15.9869 17.3369 15.4806 17.3369H15.2113C13.4979 17.3369 12.6412 17.3369 12.2366 16.8447C12.1903 16.7884 12.1492 16.7286 12.1136 16.6659C11.8023 16.1168 12.1562 15.3773 12.864 13.8981C13.5135 12.5407 13.8383 11.862 14.4413 11.4625C14.4997 11.4239 14.5597 11.3874 14.6211 11.3532C15.256 11 16.0426 11 17.6157 11H17.9569C19.8629 11 20.8158 11 21.4079 11.5568C22 12.1136 22 13.0098 22 14.8022V15.4321C22 16.3741 22 16.845 21.8278 17.2761C21.6555 17.7071 21.3258 18.0616 20.6662 18.7705L17.9386 21.702C17.8702 21.7755 17.836 21.8123 17.8058 21.8378C17.5243 22.0755 17.0898 22.0488 16.8437 21.7785C16.8174 21.7495 16.7885 21.7089 16.7309 21.6276C16.6408 21.5004 16.5957 21.4369 16.5564 21.3739C16.2048 20.81 16.0984 20.1401 16.2595 19.5042C16.2775 19.4332 16.3008 19.3599 16.3475 19.2136Z' }));
+            return icon;
+        }
+        icon.appendChild(svgNode('path', { d: 'M2 12.5C2 11.3954 2.89543 10.5 4 10.5C5.65685 10.5 7 11.8431 7 13.5V17.5C7 19.1569 5.65685 20.5 4 20.5C2.89543 20.5 2 19.6046 2 18.5V12.5Z' }));
+        icon.appendChild(svgNode('path', { d: 'M15.4787 7.80626L15.2124 8.66634C14.9942 9.37111 14.8851 9.72349 14.969 10.0018C15.0369 10.2269 15.1859 10.421 15.389 10.5487C15.64 10.7065 16.0197 10.7065 16.7791 10.7065H17.1831C19.7532 10.7065 21.0382 10.7065 21.6452 11.4673C21.7145 11.5542 21.7762 11.6467 21.8296 11.7437C22.2965 12.5921 21.7657 13.7351 20.704 16.0211C19.7297 18.1189 19.2425 19.1678 18.338 19.7852C18.2505 19.8449 18.1605 19.9013 18.0683 19.9541C17.116 20.5 15.9362 20.5 13.5764 20.5H13.0646C10.2057 20.5 8.77628 20.5 7.88814 19.6395C7 18.7789 7 17.3939 7 14.6239V13.6503C7 12.1946 7 11.4668 7.25834 10.8006C7.51668 10.1344 8.01135 9.58664 9.00069 8.49112L13.0921 3.96056C13.1947 3.84694 13.246 3.79012 13.2913 3.75075C13.7135 3.38328 14.3652 3.42464 14.7344 3.84235C14.774 3.8871 14.8172 3.94991 14.9036 4.07554C15.0388 4.27205 15.1064 4.37031 15.1654 4.46765C15.6928 5.33913 15.8524 6.37436 15.6108 7.35715C15.5838 7.46692 15.5488 7.5801 15.4787 7.80626Z' }));
+        return icon;
+    }
+
+    function sentimentLabel(sentiment) {
+        if (sentiment === 'positive') return 'Positive';
+        if (sentiment === 'negative') return 'Negative';
+        return 'Neutral';
     }
 
     function renderProductCard(product) {
@@ -1245,14 +1735,12 @@
         const rating = productRatingText(product);
         const firstOfferLink = offers.find((offer) => usableProductUrl(offer.url) || offer.shoppingUrl) || {};
         const chosenUrl = usableProductUrl(product.providerUrl) || usableProductUrl(firstOfferLink.url) || '';
-        const googleShoppingLink = product.googleShoppingCandidateUrl || '';
-        const productUrl = chosenUrl || googleShoppingLink || firstOfferLink.shoppingUrl || '';
+        const googleShoppingLink = marketShoppingUrl(product.googleShoppingCandidateUrl || '');
+        const productUrl = chosenUrl || googleShoppingLink || marketShoppingUrl(firstOfferLink.shoppingUrl || '');
         const sourceLabel = primaryMerchantLabel(product.merchants) || compactUrlLabel(chosenUrl) || (firstOfferLink.shoppingUrl ? 'Google Shopping' : '');
         const offerActionLabel = product.offerLoading ? 'Loading offers...' : (offers.length ? 'Refresh offers' : 'Load offers');
-        const countryLanguage = [product.googleGl, product.googleHl]
-            .filter(Boolean)
-            .map((value) => String(value).toUpperCase())
-            .join('/');
+        const insightActionLabel = product.insightLoading ? 'Loading insights...' : (product.sidebarInsight ? 'Refresh insights' : 'Load insights');
+        const countryLanguage = productLocaleLabel(product);
         const googleMeta = [
             ['GPCID', product.googleGpcid],
             ['Merchant ID', product.googleMerchantId],
@@ -1275,17 +1763,22 @@
                 : h('div', { class: 'small', text: sourceLabel })) : null,
             googleMeta.length ? h('div', { class: 'gmeta' }, googleMeta.map(([label, value]) => h('div', { class: 'gmrow', title: String(value) }, h('b', { text: `${label}: ` }), String(value)))) : null,
             googleShoppingLink ? h('a', { class: 'shoppinglink', href: googleShoppingLink, target: '_blank', rel: 'noopener', title: googleShoppingLink, 'aria-label': 'View on Google Shopping' }, googleShoppingIcon(), h('span', { text: 'View on Google Shopping' })) : null,
+            canLoadInsight(product) ? h('button', { class: 'btn offerbtn', type: 'button', disabled: (product.insightLoading || state.loadingInsights) ? 'disabled' : null, title: insightActionLabel, onClick: () => refreshProductInsight(product) }, refreshIcon(), h('span', { text: insightActionLabel })) : null,
+            product.insightLoading ? h('div', { class: 'loadingline', style: { margin: '4px 0 0' } }, h('span', { class: 'dotspin' }), 'loading product insights...') : null,
+            product.sidebarInsight ? renderProductInsight(product) : null,
+            !product.sidebarInsight && product.insightError ? h('div', { class: 'small', text: 'product insights unavailable' }) : null,
             product.lookupKey ? h('button', { class: 'btn offerbtn', type: 'button', disabled: (product.offerLoading || state.loadingOffers) ? 'disabled' : null, title: offerActionLabel, onClick: () => refreshProductOffers(product) }, refreshIcon(), h('span', { text: offerActionLabel })) : null,
             ...offers.map((offer) => {
                 const best = isBestOffer(offer);
-                const offerUrl = usableProductUrl(offer.url) || offer.shoppingUrl || '';
-                const row = h('div', { class: `offer${best ? ' best' : ''}`, title: [offer.details, offer.tag, offer.url || (offer.shoppingUrl ? `Google Shopping fallback: ${offer.shoppingUrl}` : '')].filter(Boolean).join(' · ') },
+                const shoppingFallback = marketShoppingUrl(offer.shoppingUrl || '');
+                const offerUrl = usableProductUrl(offer.url) || shoppingFallback;
+                const row = h('div', { class: `offer${best ? ' best' : ''}`, title: [offer.details, offer.tag, offer.url || (shoppingFallback ? `Google Shopping fallback: ${shoppingFallback}` : '')].filter(Boolean).join(' · ') },
                     h('span', null, best ? h('span', { class: 'bestmark', text: '●' }) : null, offer.merchant || 'merchant'),
                     h('strong', { text: offer.total || offer.price || offer.base || '' }));
                 return offerUrl ? h('a', { class: 'offerlink', href: offerUrl, target: '_blank', rel: 'noopener', title: offer.url || `Google Shopping fallback: ${offerUrl}` }, row) : row;
             }),
             !offers.length && (state.loadingOffers || product.offerLoading) && product.lookupKey ? h('div', { class: 'loadingline', style: { margin: '4px 0 0' } }, h('span', { class: 'dotspin' }), 'loading live offers...') : null,
-            !offers.length && product.offerError ? h('div', { class: 'small', text: 'live offers unavailable' }) : null,
+            !offers.length && product.offerError ? h('div', { class: 'small', text: product.offerError }) : null,
             !offers.length && !state.loadingOffers && product.lookupKey && !product.offerError ? h('div', { class: 'small', text: state.fromCache ? 'saved cache - refresh offers to update' : 'on-demand: click Load offers on this card' }) : null);
     }
 
@@ -1304,10 +1797,77 @@
             'googleGl',
             'googleHl',
             'googleUule',
+            'googleLocaleSource',
             'googleShoppingCandidateUrl',
         ].forEach((key) => {
             if (source[key] != null && source[key] !== '') target[key] = source[key];
         });
+    }
+
+    function productLocaleLabel(product) {
+        if (!product) return 'unknown';
+        const exact = product.googleLocaleSource === 'metadata' || (!product.googleLocaleSource && product.googleUule);
+        if (!exact) return 'unknown';
+        const countryLanguage = [product.googleGl, product.googleHl]
+            .filter(Boolean)
+            .map((value) => String(value).toUpperCase())
+            .join('/');
+        return countryLanguage || (product.googleUule ? 'UULE captured' : 'unknown');
+    }
+
+    async function refreshProductInsight(product) {
+        if (!state.intel || !product || !canLoadInsight(product) || product.insightLoading) return;
+        product.insightLoading = true;
+        product.insightError = '';
+        setStatus(`loading insights: ${product.title || 'product'}...`);
+        renderProductState();
+        try {
+            const insight = await CORE().loadProductSidebarInsight(product, state.intel.id, state.token, state.productMarket);
+            product.sidebarInsight = insight;
+            if (!await persistCurrentSnapshot('product insights updated and saved')) setStatus('product insights updated');
+        } catch (error) {
+            product.insightError = error.message;
+            setStatus('product insights unavailable', true);
+        } finally {
+            product.insightLoading = false;
+            renderProductState();
+        }
+    }
+
+    async function hydrateInsights(options = {}) {
+        if (!state.intel || state.loadingInsights) return;
+        if (options.force) {
+            state.intel.products.forEach((product) => {
+                if (canLoadInsight(product)) {
+                    product.sidebarInsight = null;
+                    product.insightError = '';
+                    product.insightLoading = false;
+                }
+            });
+        }
+        state.loadingInsights = true;
+        state.insightProgress = 'starting product insight load...';
+        renderProductState();
+        setStatus('loading product insights...');
+        const targets = state.intel.products.filter((product) => canLoadInsight(product) && !product.sidebarInsight);
+        for (let i = 0; i < targets.length; i++) {
+            state.insightProgress = `loading insights ${i + 1}/${targets.length}: ${targets[i].title || 'product'}`;
+            setStatus(`loading insights ${i + 1}/${targets.length}...`);
+            targets[i].insightLoading = true;
+            renderProductState();
+            try {
+                targets[i].sidebarInsight = await CORE().loadProductSidebarInsight(targets[i], state.intel.id, state.token, state.productMarket);
+            } catch (error) {
+                targets[i].insightError = error.message;
+            } finally {
+                targets[i].insightLoading = false;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 350));
+        }
+        state.loadingInsights = false;
+        state.insightProgress = '';
+        if (!await persistCurrentSnapshot('product insights updated and saved')) setStatus('product insights updated');
+        renderProductState();
     }
 
     async function refreshProductOffers(product) {
@@ -1318,16 +1878,18 @@
         setStatus(`loading offers: ${product.title || 'product'}...`);
         renderOfferState();
         try {
-            const live = await CORE().loadProductOffers(product, state.token);
-            if (live && live.offers && live.offers.length) {
-                product.offers = live.offers;
+            const live = await CORE().loadProductOffers(product, state.token, state.productMarket);
+            if (live) {
                 if (live.providerUrl) product.providerUrl = live.providerUrl;
                 mergeGoogleProductFields(product, live);
                 if (live.rating != null && live.rating !== '') product.rating = live.rating;
                 if (live.reviews != null && live.reviews !== '') product.reviews = live.reviews;
+            }
+            if (live && live.offers && live.offers.length) {
+                product.offers = live.offers;
             } else {
                 product.offers = [];
-                product.offerError = 'No live offers found.';
+                product.offerError = 'Offers unavailable for this account/product.';
             }
             if (!await persistCurrentSnapshot('offers updated and saved')) setStatus('offers updated');
         } catch (error) {
@@ -1362,13 +1924,18 @@
             targets[i].offerLoading = true;
             renderOfferState();
             try {
-                const live = await CORE().loadProductOffers(targets[i], state.token);
-                if (live && live.offers && live.offers.length) {
-                    targets[i].offers = live.offers;
+                const live = await CORE().loadProductOffers(targets[i], state.token, state.productMarket);
+                if (live) {
                     if (live.providerUrl) targets[i].providerUrl = live.providerUrl;
                     mergeGoogleProductFields(targets[i], live);
                     if (live.rating != null && live.rating !== '') targets[i].rating = live.rating;
                     if (live.reviews != null && live.reviews !== '') targets[i].reviews = live.reviews;
+                }
+                if (live && live.offers && live.offers.length) {
+                    targets[i].offers = live.offers;
+                } else {
+                    targets[i].offers = [];
+                    targets[i].offerError = 'Offers unavailable for this account/product.';
                 }
             } catch (error) {
                 targets[i].offerError = error.message;
@@ -1912,32 +2479,44 @@
         const tagMap = new Map(tags.map((tag) => [tag.id, tag]));
         const rows = snapshots.flatMap((snapshot) => {
             const ctx = savedContext(snapshot, projectMap, tagMap);
-            return ((snapshot.intel && snapshot.intel.products) || []).map((product) => ({
-                ...ctx,
-                title: product.title,
-                price: product.price,
-                tag: product.tag,
-                merchants: product.merchants,
-                rating: product.rating,
-                reviews: product.reviews,
-                query: product.query,
-                providerUrl: product.providerUrl,
-                googleCatalogId: product.googleCatalogId,
-                googleProductId: product.googleProductId,
-                googleGpcid: product.googleGpcid,
-                googleHeadlineOfferDocid: product.googleHeadlineOfferDocid,
-                googleImageDocid: product.googleImageDocid,
-                googleMerchantId: product.googleMerchantId,
-                googleRds: product.googleRds,
-                googlePvt: product.googlePvt,
-                googleEi: product.googleEi,
-                googleQuery: product.googleQuery,
-                googleGl: product.googleGl,
-                googleHl: product.googleHl,
-                googleUule: product.googleUule,
-                googleShoppingCandidateUrl: product.googleShoppingCandidateUrl,
-                offers: (product.offers || []).length,
-            }));
+            return ((snapshot.intel && snapshot.intel.products) || []).map((product) => {
+                const sentiment = sourcedSentimentCounts(product.sidebarInsight);
+                const reviewSources = reviewSourcesForInsight(product.sidebarInsight);
+                return {
+                    ...ctx,
+                    title: product.title,
+                    price: product.price,
+                    tag: product.tag,
+                    merchants: product.merchants,
+                    rating: product.rating,
+                    reviews: product.reviews,
+                    query: product.query,
+                    providerUrl: product.providerUrl,
+                    googleCatalogId: product.googleCatalogId,
+                    googleProductId: product.googleProductId,
+                    googleGpcid: product.googleGpcid,
+                    googleHeadlineOfferDocid: product.googleHeadlineOfferDocid,
+                    googleImageDocid: product.googleImageDocid,
+                    googleMerchantId: product.googleMerchantId,
+                    googleRds: product.googleRds,
+                    googlePvt: product.googlePvt,
+                    googleEi: product.googleEi,
+                    googleQuery: product.googleQuery,
+                    googleGl: product.googleGl,
+                    googleHl: product.googleHl,
+                    googleUule: product.googleUule,
+                    googleLocaleSource: product.googleLocaleSource || 'missing',
+                    googleShoppingCandidateUrl: product.googleShoppingCandidateUrl,
+                    googleShoppingUrlWithMarket: marketShoppingUrl(product.googleShoppingCandidateUrl || ''),
+                    offers: (product.offers || []).length,
+                    rationale: product.sidebarInsight && product.sidebarInsight.rationale || '',
+                    reviewSummary: product.sidebarInsight && product.sidebarInsight.reviewSummary || '',
+                    sentimentPositive: sentiment.positive,
+                    sentimentNeutral: sentiment.neutral,
+                    sentimentNegative: sentiment.negative,
+                    sidebarSourceCount: reviewSources.length,
+                };
+            });
         });
         download(`geo-aeo-saved-products-${new Date().toISOString().slice(0, 10)}.csv`, CORE().toCsv(rows), 'text/csv');
     }
@@ -2031,31 +2610,43 @@
 
     function exportProductsCsv() {
         if (!state.intel) return;
-        const rows = state.intel.products.map((product) => ({
-            title: product.title,
-            price: product.price,
-            tag: product.tag,
-            merchants: product.merchants,
-            rating: product.rating,
-            reviews: product.reviews,
-            query: product.query,
-            providerUrl: product.providerUrl,
-            googleCatalogId: product.googleCatalogId,
-            googleProductId: product.googleProductId,
-            googleGpcid: product.googleGpcid,
-            googleHeadlineOfferDocid: product.googleHeadlineOfferDocid,
-            googleImageDocid: product.googleImageDocid,
-            googleMerchantId: product.googleMerchantId,
-            googleRds: product.googleRds,
-            googlePvt: product.googlePvt,
-            googleEi: product.googleEi,
-            googleQuery: product.googleQuery,
-            googleGl: product.googleGl,
-            googleHl: product.googleHl,
-            googleUule: product.googleUule,
-            googleShoppingCandidateUrl: product.googleShoppingCandidateUrl,
-            offers: (product.offers || []).length,
-        }));
+        const rows = state.intel.products.map((product) => {
+            const sentiment = sourcedSentimentCounts(product.sidebarInsight);
+            const reviewSources = reviewSourcesForInsight(product.sidebarInsight);
+            return {
+                title: product.title,
+                price: product.price,
+                tag: product.tag,
+                merchants: product.merchants,
+                rating: product.rating,
+                reviews: product.reviews,
+                query: product.query,
+                providerUrl: product.providerUrl,
+                googleCatalogId: product.googleCatalogId,
+                googleProductId: product.googleProductId,
+                googleGpcid: product.googleGpcid,
+                googleHeadlineOfferDocid: product.googleHeadlineOfferDocid,
+                googleImageDocid: product.googleImageDocid,
+                googleMerchantId: product.googleMerchantId,
+                googleRds: product.googleRds,
+                googlePvt: product.googlePvt,
+                googleEi: product.googleEi,
+                googleQuery: product.googleQuery,
+                googleGl: product.googleGl,
+                googleHl: product.googleHl,
+                googleUule: product.googleUule,
+                googleLocaleSource: product.googleLocaleSource || 'missing',
+                googleShoppingCandidateUrl: product.googleShoppingCandidateUrl,
+                googleShoppingUrlWithMarket: marketShoppingUrl(product.googleShoppingCandidateUrl || ''),
+                offers: (product.offers || []).length,
+                rationale: product.sidebarInsight && product.sidebarInsight.rationale || '',
+                reviewSummary: product.sidebarInsight && product.sidebarInsight.reviewSummary || '',
+                sentimentPositive: sentiment.positive,
+                sentimentNeutral: sentiment.neutral,
+                sentimentNegative: sentiment.negative,
+                sidebarSourceCount: reviewSources.length,
+            };
+        });
         download(`${state.intel.id}-products.csv`, CORE().toCsv(rows), 'text/csv');
     }
 

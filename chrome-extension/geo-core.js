@@ -5,6 +5,7 @@
     const SNAPSHOT_KEY = 'cgptGeoResearchSnapshots';
     const PROJECTS_KEY = 'cgptGeoResearchProjects';
     const TAGS_KEY = 'cgptGeoResearchTags';
+    const SETTINGS_KEY = 'cgptGeoResearchSettings';
     const QUERY_JUNK = new Set(['deprecated', 'none', 'null', 'n/a', 'undefined']);
     const UNKNOWN_PIPELINE = 'Unknown';
 
@@ -220,6 +221,17 @@
         }
     }
 
+    function encodeBase64Json(value) {
+        try {
+            const json = JSON.stringify(value);
+            return typeof btoa === 'function'
+                ? btoa(unescape(encodeURIComponent(json)))
+                : '';
+        } catch (_) {
+            return '';
+        }
+    }
+
     function parseMaybeJsonObject(value) {
         if (!value) return null;
         if (typeof value === 'object') return value;
@@ -233,8 +245,107 @@
         }
     }
 
+    function normalizeProductMarketOverride(market) {
+        const gl = String(market && market.gl || '').trim().toLowerCase();
+        const hl = String(market && market.hl || '').trim().toLowerCase().split(/[-_]/)[0];
+        if (!/^[a-z]{2}$/.test(gl) || !/^[a-z]{2,3}$/.test(hl)) return null;
+        return { gl, hl, source: 'user' };
+    }
+
+    function marketHeaderLocale(market) {
+        if (!market) return 'en-US';
+        return `${market.hl}-${market.gl.toUpperCase()}`;
+    }
+
+    function marketAcceptLanguage(market) {
+        if (!market) return 'en-US,en;q=0.9';
+        const primary = marketHeaderLocale(market);
+        return `${primary},${market.hl};q=0.9,en;q=0.7`;
+    }
+
+    function patchGoogleMarketFields(value, market) {
+        if (!market || !value || typeof value !== 'object') return value;
+        if (Array.isArray(value)) {
+            value.forEach((item) => patchGoogleMarketFields(item, market));
+            return value;
+        }
+
+        const looksGoogleProduct = Boolean(
+            value.type === 'chat_gpt_google_shopping_product'
+            || value.catalogid
+            || value.catalog_id
+            || value.headlineOfferDocid
+            || value.headline_offer_docid
+            || value.rds
+            || value.uule
+            || value.gl
+            || value.hl
+        );
+        if (looksGoogleProduct) {
+            value.gl = market.gl;
+            value.hl = market.hl;
+        }
+
+        if (value.id_to_token_map && typeof value.id_to_token_map === 'object') {
+            Object.keys(value.id_to_token_map).forEach((id) => {
+                const decoded = decodeBase64Json(value.id_to_token_map[id]);
+                if (!decoded) return;
+                patchGoogleMarketFields(decoded, market);
+                const encoded = encodeBase64Json(decoded);
+                if (encoded) value.id_to_token_map[id] = encoded;
+            });
+        }
+
+        Object.keys(value).forEach((key) => {
+            if (key === 'id_to_token_map') return;
+            patchGoogleMarketFields(value[key], market);
+        });
+        return value;
+    }
+
+    function productLookupKeyWithMarket(lookupKey, marketOverride) {
+        const market = normalizeProductMarketOverride(marketOverride);
+        if (!lookupKey || !market) return lookupKey || null;
+        const copy = JSON.parse(JSON.stringify(lookupKey));
+        const data = parseMaybeJsonObject(copy.data);
+        if (data) {
+            data.gl = market.gl;
+            data.hl = market.hl;
+            data.market_override_source = 'user';
+            patchGoogleMarketFields(data, market);
+            copy.data = JSON.stringify(data);
+        }
+        return copy;
+    }
+
     function looksLikeGoogleCatalogId(value) {
         return /^\d{8,}$/.test(String(value || '').trim());
+    }
+
+    // Appends the requested market (gl/hl) to a Google search/shopping URL.
+    // Values already present in the URL (captured from ChatGPT metadata) are
+    // kept as-is so the captured locale stays honest; the requested market only
+    // fills the gaps. String concatenation (not URL/URLSearchParams) preserves
+    // the unescaped `prds=catalogid:...` formatting Google expects.
+    function applyMarketToGoogleShoppingUrl(url, marketOverride) {
+        const target = String(url || '');
+        if (!target) return '';
+        const market = normalizeProductMarketOverride(marketOverride);
+        if (!market) return target;
+        let parsed;
+        try {
+            parsed = new URL(target);
+        } catch (_) {
+            return target;
+        }
+        const isGoogleSearch = /(^|\.)google\.[a-z.]{2,6}$/.test(parsed.hostname) && /^\/search/.test(parsed.pathname);
+        if (!isGoogleSearch) return target;
+        const additions = [];
+        if (!/[?&]gl=/.test(target)) additions.push(`gl=${encodeURIComponent(market.gl)}`);
+        if (!/[?&]hl=/.test(target)) additions.push(`hl=${encodeURIComponent(market.hl)}`);
+        if (!additions.length) return target;
+        const separator = target.includes('?') ? '&' : '?';
+        return target + separator + additions.join('&');
     }
 
     function buildGoogleShoppingCandidateUrl({
@@ -247,8 +358,8 @@
         query = '',
         pvt = 'hg',
         uule = null,
-        gl = 'de',
-        hl = 'en',
+        gl = null,
+        hl = null,
         overlay = true,
     }) {
         if (!catalogId) return null;
@@ -264,8 +375,8 @@
         if (overlay) params.set('ibp', 'oshop');
         params.set('udm', '28');
         params.set('q', String(query || '').replace(/\+/g, ' ').trim());
-        params.set('hl', hl || 'en');
-        params.set('gl', gl || 'de');
+        if (hl) params.set('hl', hl);
+        if (gl) params.set('gl', gl);
         if (uule) params.set('uule', uule);
         params.set('prds', prdsParts.join(','));
 
@@ -287,9 +398,10 @@
         const query = raw.query || '';
         const pvt = raw.pvt || 'hg';
         const uule = raw.uule || null;
-        const gl = raw.gl || 'de';
-        const hl = raw.hl || 'en';
+        const gl = raw.gl || null;
+        const hl = raw.hl || null;
         const ei = raw.ei || null;
+        const localeSource = (gl || hl || uule) ? 'metadata' : 'missing';
         const googleShoppingCandidateUrl = buildGoogleShoppingCandidateUrl({
             catalogId,
             headlineOfferDocid,
@@ -318,6 +430,7 @@
             uule,
             gl,
             hl,
+            localeSource,
             ei,
             googleShoppingCandidateUrl,
         };
@@ -440,7 +553,7 @@
         });
     }
 
-    function addProduct(products, product, index, origin) {
+    function addProduct(products, product, index, origin, messageId) {
         if (!product) return;
         const firstValue = (...values) => values.find((value) => value !== undefined && value !== null && value !== '');
         let providerUrl = '';
@@ -494,12 +607,14 @@
             googleGl: googleProduct && googleProduct.gl || null,
             googleHl: googleProduct && googleProduct.hl || null,
             googleUule: googleProduct && googleProduct.uule || null,
+            googleLocaleSource: googleProduct && googleProduct.localeSource || 'missing',
             googleShoppingCandidateUrl: googleProduct && googleProduct.googleShoppingCandidateUrl || null,
             query: generatedQuery,
             showcased: Boolean(showcase),
             position: index || 0,
             offers: mapOffers(product.offers),
             lookupKey: product.product_lookup_key || null,
+            messageId: messageId || product.message_id || product.messageId || '',
             origin: origin || 'conversation',
         });
     }
@@ -731,7 +846,7 @@
                 });
                 [reference.items, reference.refs, reference.sources, reference.fallback_items].forEach((bucket) => collectRefItems(bucket, reference.type));
                 if (reference.type === 'products' && Array.isArray(reference.products)) {
-                    reference.products.forEach((product, index) => addProduct(products, product, index, 'conversation'));
+                    reference.products.forEach((product, index) => addProduct(products, product, index, 'conversation', message.id || ''));
                 }
             });
 
@@ -1275,6 +1390,18 @@
         return { snapshots, projects, tags };
     }
 
+    async function loadSettings() {
+        const settings = await storageGet(SETTINGS_KEY, {});
+        return settings && typeof settings === 'object' ? settings : {};
+    }
+
+    async function saveSettings(updates = {}) {
+        const current = await loadSettings();
+        const next = { ...current, ...updates };
+        await storageSet({ [SETTINGS_KEY]: next });
+        return next;
+    }
+
     async function importLibrary(payload) {
         if (!payload || typeof payload !== 'object') throw new Error('Invalid import file.');
         const data = payload.data && typeof payload.data === 'object' ? payload.data : payload;
@@ -1316,6 +1443,357 @@
         });
     }
 
+    function parseJsonPointer(path) {
+        return String(path || '').split('/').slice(1).map((part) => part.replace(/~1/g, '/').replace(/~0/g, '~'));
+    }
+
+    function containerForPatch(root, pathParts) {
+        let node = root;
+        for (let i = 0; i < pathParts.length - 1; i++) {
+            const key = pathParts[i];
+            const nextKey = pathParts[i + 1];
+            if (node[key] == null) node[key] = /^\d+$/.test(nextKey) ? [] : {};
+            node = node[key];
+        }
+        return { node, key: pathParts[pathParts.length - 1] };
+    }
+
+    function applySidebarPatch(root, op) {
+        if (!op || !op.p) return;
+        const parts = parseJsonPointer(op.p);
+        if (!parts.length) return;
+        const { node, key } = containerForPatch(root, parts);
+        if (!node) return;
+        const action = op.o || 'replace';
+        if (action === 'remove') {
+            if (Array.isArray(node)) node.splice(Number(key), 1);
+            else delete node[key];
+            return;
+        }
+        if (action === 'append') {
+            if (Array.isArray(node[key])) {
+                if (Array.isArray(op.v)) node[key].push(...op.v);
+                else node[key].push(op.v);
+            } else if (typeof node[key] === 'string') {
+                node[key] += String(op.v == null ? '' : op.v);
+            } else if (node[key] && typeof node[key] === 'object' && op.v && typeof op.v === 'object' && !Array.isArray(op.v)) {
+                Object.assign(node[key], op.v);
+            } else if (Array.isArray(node)) {
+                node.push(op.v);
+            } else if (typeof node[key] === 'undefined') {
+                node[key] = op.v;
+            }
+            return;
+        }
+        if (Array.isArray(node) && key === '-') node.push(op.v);
+        else node[key] = op.v;
+    }
+
+    function cleanSidebarText(value) {
+        return String(value || '')
+            .replace(/[\ue000-\uf8ff]/g, '')
+            .replace(/\bturn\d+(search|product)\d+\b/g, '')
+            .replace(/\bproduct_(rationale|reviews?|review)\b/gi, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function comparableSidebarText(value) {
+        return cleanSidebarText(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    }
+
+    function sidebarSentiment(value) {
+        const text = String(value || '').toLowerCase();
+        if (/\bnegative|thumbs? down|con\b/.test(text)) return 'negative';
+        if (/\bpositive|thumbs? up|pro\b/.test(text)) return 'positive';
+        if (/\bneutral|mixed\b/.test(text)) return 'neutral';
+        return '';
+    }
+
+    function addSidebarSource(sources, item, fallbackType) {
+        if (!item || typeof item !== 'object') return;
+        const url = item.url || item.safe_url || item.href || item.link || '';
+        const domain = cleanDomain(item.domain || url || item.attribution || '');
+        const name = cleanSidebarText(item.name || item.site_name || item.siteName || item.publisher || item.source_name || item.sourceName || '');
+        const title = cleanSidebarText(item.title || item.alt || '');
+        const snippet = cleanSidebarText(item.snippet || item.text || item.prompt_text || item.summary || '');
+        const genericName = /^(source|sources?|review|reviews?|citation|citations?|unknown)$/i.test(name);
+        const genericTitle = /^(source|sources?|review|reviews?|citation|citations?|unknown)$/i.test(title);
+        if (!url && !domain && !name && !title && !snippet) return;
+        const sentiment = sidebarSentiment(item.sentiment || item.review_sentiment || item.label || item.prompt_text || item.alt || snippet);
+        sources.push({
+            name: genericName ? '' : name,
+            title: genericTitle ? '' : title,
+            url,
+            domain,
+            snippet: snippet.slice(0, 280),
+            sentiment,
+            type: item.type || fallbackType || '',
+        });
+    }
+
+    function collectSidebarSourcesFromReference(sources, reference, fallbackType) {
+        if (!reference || typeof reference !== 'object') return;
+        addSidebarSource(sources, reference.grouped_citation, fallbackType || reference.type);
+        (reference.citations || []).forEach((item) => addSidebarSource(sources, item, fallbackType || reference.type));
+        const grouped = reference.grouped_citation || {};
+        (grouped.supporting_websites || []).forEach((item) => addSidebarSource(sources, item, fallbackType || reference.type));
+        (reference.refs || []).forEach((item) => addSidebarSource(sources, item, fallbackType || reference.type));
+        (reference.items || []).forEach((item) => addSidebarSource(sources, item, fallbackType || reference.type));
+        (reference.sources || []).forEach((item) => addSidebarSource(sources, item, fallbackType || reference.type));
+    }
+
+    function sidebarSourceKey(source) {
+        return source.url || `${source.domain}|${source.title}|${source.snippet}`;
+    }
+
+    function mergeSidebarSources(sources) {
+        const map = new Map();
+        sources.forEach((source) => {
+            const key = sidebarSourceKey(source);
+            if (!key) return;
+            const existing = map.get(key);
+            if (!existing) {
+                map.set(key, Object.assign({}, source));
+                return;
+            }
+            ['name', 'title', 'domain', 'url', 'snippet', 'sentiment', 'type'].forEach((field) => {
+                if (!existing[field] && source[field]) existing[field] = source[field];
+            });
+        });
+        return Array.from(map.values());
+    }
+
+    // Maps citation refs like "turn0search3" to URLs. Primary source is the
+    // explicit cite_map on each content_reference:
+    //   content_references[n].cite_map[turn0search3] = { cite, title, url, snippet, ... }
+    // search_result_groups entries (ref_id as string or {turn_index, ref_type,
+    // ref_index}) are the fallback for payloads without a cite_map.
+    function buildSidebarCiteMap(metadata) {
+        const map = new Map();
+        const add = (key, url) => {
+            const cleanKey = String(key || '').trim();
+            if (cleanKey && url && !map.has(cleanKey)) map.set(cleanKey, url);
+        };
+        ((metadata && metadata.content_references) || []).forEach((reference) => {
+            const citeMap = reference && reference.cite_map;
+            if (!citeMap || typeof citeMap !== 'object' || Array.isArray(citeMap)) return;
+            Object.keys(citeMap).forEach((key) => {
+                const entry = citeMap[key];
+                if (typeof entry === 'string') { add(key, entry); return; }
+                if (!entry || typeof entry !== 'object') return;
+                const url = entry.url || entry.safe_url || '';
+                add(key, url);
+                if (entry.cite && entry.cite !== key) add(entry.cite, url);
+            });
+        });
+        ((metadata && metadata.search_result_groups) || []).forEach((group) => {
+            ((group && group.entries) || []).forEach((entry) => {
+                if (!entry || typeof entry !== 'object') return;
+                const url = entry.url || entry.safe_url || '';
+                if (!url) return;
+                const refId = entry.ref_id;
+                if (typeof refId === 'string') add(refId.trim(), url);
+                else if (refId && typeof refId === 'object') {
+                    add(`turn${refId.turn_index ?? 0}${refId.ref_type || 'search'}${refId.ref_index ?? 0}`, url);
+                }
+            });
+        });
+        return map;
+    }
+
+    function sidebarNameKey(value) {
+        return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    }
+
+    function sidebarDomainBaseKey(domain) {
+        const host = String(domain || '').replace(/^www\./, '');
+        const parts = host.split('.').filter(Boolean);
+        const subdomainLabels = new Set(['m', 'mobile', 'shop', 'store', 'en', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'br', 'uk', 'ca', 'au']);
+        const base = parts.length > 2 && subdomainLabels.has(parts[0]) ? parts[1] : (parts[0] || '');
+        return sidebarNameKey(base);
+    }
+
+    // Best-effort URL recovery for reviews without cite_url: resolve the cite ref,
+    // then fall back to matching the review's source name ("Reddit", "Toro Customer
+    // Reviews") against the domains of collected citation sources.
+    function resolveReviewUrls(reviews, citeMap, sources) {
+        reviews.forEach((review) => {
+            if (review.url) {
+                if (!review.domain) review.domain = cleanDomain(review.url);
+                return;
+            }
+            if (review.cite && citeMap.has(review.cite)) {
+                review.url = citeMap.get(review.cite);
+                review.domain = review.domain || cleanDomain(review.url);
+                return;
+            }
+            const nameKey = sidebarNameKey(review.name);
+            if (nameKey.length < 3) return;
+            const match = sources.find((source) => {
+                const url = source.url || '';
+                const domain = source.domain || cleanDomain(url);
+                if (!url && !domain) return false;
+                const base = sidebarDomainBaseKey(domain);
+                if (base.length < 3) return false;
+                if (base === nameKey) return true;
+                if (base.length < 4) return false;
+                return nameKey.startsWith(base) || base.startsWith(nameKey);
+            });
+            if (match) {
+                review.url = match.url || review.url || '';
+                review.domain = review.domain || match.domain || cleanDomain(match.url) || '';
+            }
+        });
+    }
+
+    function hasSidebarSourceIdentity(source) {
+        if (!source) return false;
+        const title = cleanSidebarText(source.title || '');
+        const name = cleanSidebarText(source.name || '');
+        if (name && !/^(source|sources?|review|reviews?|citation|citations?|unknown|\?)$/i.test(name)) return true;
+        return Boolean(source.url || source.domain || (title && !/^(source|sources?|review|reviews?|citation|citations?|unknown|\?)$/i.test(title)));
+    }
+
+    function normalizeSidebarInsight(raw) {
+        const assistant = raw.assistant || {};
+        const metadata = assistant.metadata || {};
+        const refs = metadata.content_references || [];
+        const sources = [];
+        let rationale = '';
+        let reviewSummary = '';
+        const reviews = [];
+
+        refs.forEach((reference) => {
+            if (!reference || typeof reference !== 'object') return;
+            const type = String(reference.type || '');
+            if (!rationale && /product_rationale/i.test(type)) rationale = cleanSidebarText(reference.rationale || reference.summary || reference.matched_text);
+            if (!reviewSummary && /review/i.test(type)) reviewSummary = cleanSidebarText(reference.review_summary || reference.reviews_summary || reference.summary || reference.text || reference.prompt_text);
+            collectSidebarSourcesFromReference(sources, reference, type);
+            // Structured review entries (product_rationale_and_reviews payloads):
+            // { source: "Amazon", theme: "...", summary: "...", sentiment: "positive", cite_url, cite, rating, num_reviews }
+            const structuredReviews = Array.isArray(reference.reviews)
+                ? reference.reviews.filter((item) => item && typeof item === 'object')
+                : [];
+            if (structuredReviews.length) {
+                structuredReviews.forEach((item) => {
+                    const url = item.cite_url || item.url || '';
+                    const name = cleanSidebarText(item.source || item.name || item.publisher || '');
+                    const theme = cleanSidebarText(item.theme || '');
+                    if (!name && !theme && !url) return;
+                    reviews.push({
+                        name,
+                        title: theme || cleanSidebarText(item.title || ''),
+                        theme,
+                        domain: cleanDomain(url),
+                        url,
+                        cite: typeof item.cite === 'string' ? item.cite.trim() : '',
+                        excerpt: cleanSidebarText(item.summary || item.text || '').slice(0, 280),
+                        sentiment: sidebarSentiment(item.sentiment) || sidebarSentiment(item.summary),
+                        rating: item.rating == null ? null : item.rating,
+                        numReviews: item.num_reviews == null ? null : item.num_reviews,
+                        structured: true,
+                    });
+                });
+            } else if (/review/i.test(type) || sidebarSentiment(reference.sentiment || reference.prompt_text || reference.alt || reference.matched_text)) {
+                reviews.push({
+                    name: reference.name || reference.site_name || reference.siteName || reference.publisher || reference.source_name || reference.sourceName || '',
+                    title: reference.title || reference.alt || '',
+                    domain: cleanDomain(reference.domain || reference.url || ''),
+                    url: reference.url || '',
+                    excerpt: cleanSidebarText(reference.prompt_text || reference.text || reference.summary || reference.matched_text).slice(0, 280),
+                    sentiment: sidebarSentiment(reference.sentiment || reference.prompt_text || reference.alt || reference.matched_text),
+                });
+            }
+        });
+
+        (metadata.search_result_groups || []).forEach((group) => {
+            (group.entries || []).forEach((entry) => addSidebarSource(sources, entry, 'search_result'));
+        });
+        (raw.toolSources || []).forEach((source) => addSidebarSource(sources, source, 'tool_result'));
+
+        const assistantText = cleanSidebarText((assistant.content && assistant.content.parts || []).join(' '));
+        if (!reviewSummary && /\breview|rating|customer|people are saying|owners\b/i.test(assistantText)) reviewSummary = assistantText;
+        if (reviewSummary && rationale && comparableSidebarText(reviewSummary) === comparableSidebarText(rationale)) reviewSummary = '';
+
+        const normalizedSources = mergeSidebarSources(sources);
+        normalizedSources.forEach((source) => { source.category = classifyDomain(source.domain); });
+        const normalizedReviews = dedupe(
+            reviews.filter((review) => review.name || review.excerpt || review.title || review.url),
+            (review) => review.url || `${review.name || ''}|${review.title || ''}|${review.excerpt || ''}`.toLowerCase());
+        const hasStructuredReviews = normalizedReviews.some((review) => review.structured);
+        if (!hasStructuredReviews) {
+            // Fallback only: synthesize review rows from sentiment-bearing sources when no
+            // structured review entries were present in the payload.
+            normalizedSources.forEach((source) => {
+                if (!source.sentiment) return;
+                normalizedReviews.push({
+                    name: source.name,
+                    title: source.title,
+                    domain: source.domain,
+                    url: source.url,
+                    excerpt: source.snippet,
+                    sentiment: source.sentiment,
+                });
+            });
+        }
+        const finalReviews = dedupe(normalizedReviews, (review) => review.url || `${review.name || ''}|${review.domain || ''}|${review.title || ''}|${review.excerpt || ''}`.toLowerCase());
+        resolveReviewUrls(finalReviews, buildSidebarCiteMap(metadata), normalizedSources);
+        const sentimentCounts = { positive: 0, neutral: 0, negative: 0 };
+        finalReviews.filter(hasSidebarSourceIdentity).forEach((review) => {
+            const sentiment = sidebarSentiment(review.sentiment);
+            if (sentiment) sentimentCounts[sentiment] += 1;
+        });
+        const sentimentTotal = sentimentCounts.positive + sentimentCounts.neutral + sentimentCounts.negative;
+        return {
+            rationale,
+            reviewSummary,
+            sources: normalizedSources,
+            reviews: finalReviews,
+            sentimentCounts,
+            sentimentShare: sentimentTotal ? {
+                positive: Math.round(sentimentCounts.positive / sentimentTotal * 100),
+                neutral: Math.round(sentimentCounts.neutral / sentimentTotal * 100),
+                negative: Math.round(sentimentCounts.negative / sentimentTotal * 100),
+            } : { positive: 0, neutral: 0, negative: 0 },
+            assistantText,
+            loadedAt: new Date().toISOString(),
+        };
+    }
+
+    function parseSidebarConversation(text) {
+        const root = { data: null };
+        const raw = { assistant: null, toolSources: [] };
+        String(text || '').split('\n').forEach((line) => {
+            if (!line.startsWith('data:')) return;
+            const payloadText = line.slice(line.indexOf(':') + 1).trim();
+            if (!payloadText || payloadText === '[DONE]') return;
+            let payload;
+            try {
+                payload = JSON.parse(payloadText);
+            } catch (_) {
+                return;
+            }
+            const message = payload && payload.v && payload.v.type === 'message' ? payload.v.data : null;
+            if (message && message.author && message.author.role === 'tool' && message.content && message.content.content_type === 'sonic_webpage') {
+                raw.toolSources.push(message.content);
+            }
+            if (message && message.author && message.author.role === 'assistant') {
+                root.data = message;
+                raw.assistant = message;
+            }
+            const ops = Array.isArray(payload.v) ? payload.v : (payload.o === 'patch' && Array.isArray(payload.v) ? payload.v : []);
+            if (ops.length) {
+                if (!root.data) root.data = { content: { parts: [''] }, metadata: { content_references: [] } };
+                ops.forEach((op) => applySidebarPatch(root, op));
+                raw.assistant = root.data;
+            }
+        });
+        const insight = normalizeSidebarInsight(raw);
+        if (!insight.rationale && !insight.reviewSummary && !insight.sources.length && !insight.reviews.length) return null;
+        return insight;
+    }
+
     function parseProductUpdate(text) {
         let product = null;
         text.split('\n').forEach((line) => {
@@ -1335,24 +1813,91 @@
         return mapped[0] || null;
     }
 
-    async function loadProductOffers(product, token) {
+    function sidebarRequestBodies(product, conversationId, marketOverride) {
+        const lookupKey = productLookupKeyWithMarket(product.lookupKey || product.product_lookup_key || null, marketOverride);
+        const name = product.title || product.query || '';
+        const messageId = product.messageId || '';
+        const generic = {
+            conversation_id: conversationId,
+            message_id: messageId,
+            supported_encodings: ['v1'],
+            category: 'generic_entity',
+            generic_entity_params: {
+                name,
+                category: 'product_rationale_and_reviews',
+                extra_params: lookupKey ? { product_lookup_key: lookupKey } : {},
+            },
+        };
+        const productBody = {
+            conversation_id: conversationId,
+            message_id: messageId,
+            supported_encodings: ['v1'],
+            category: 'product',
+            product_params: {
+                product_query: product.query || product.title || name,
+                product_lookup_key: lookupKey,
+            },
+        };
+        return [generic, productBody];
+    }
+
+    async function loadProductSidebarInsight(product, conversationId, token, marketOverride) {
+        if (!product || !product.lookupKey) throw new Error('This product has no lookup key for sidebar insights.');
+        if (!conversationId) throw new Error('No conversation id for sidebar insights.');
+        if (!product.messageId) throw new Error('This product has no source message id for sidebar insights.');
+        const authToken = token || await getSessionToken();
+        const market = normalizeProductMarketOverride(marketOverride);
+        const doFetch = (bearer, body) => fetch('/backend-api/sidebar/conversation', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                accept: 'text/event-stream',
+                'accept-language': marketAcceptLanguage(market),
+                authorization: `Bearer ${bearer}`,
+                'content-type': 'application/json',
+                'oai-language': marketHeaderLocale(market),
+                'oai-device-id': generateDeviceId(),
+                'x-openai-target-path': '/backend-api/sidebar/conversation',
+                'x-openai-target-route': '/sidebar/conversation',
+            },
+            body: JSON.stringify(body),
+        });
+        let lastError = null;
+        for (const body of sidebarRequestBodies(product, conversationId, market)) {
+            let response = await doFetch(authToken, body);
+            if ((response.status === 401 || response.status === 403) && token) response = await doFetch(await getSessionToken(), body);
+            if (!response.ok) {
+                lastError = new Error(`Sidebar API returned HTTP ${response.status}`);
+                continue;
+            }
+            const insight = parseSidebarConversation(await response.text());
+            if (insight) return insight;
+            lastError = new Error('No sidebar insight found.');
+        }
+        throw lastError || new Error('No sidebar insight found.');
+    }
+
+    async function loadProductOffers(product, token, marketOverride) {
         if (!product || !product.lookupKey) {
             throw new Error('This product has no lookup key for live offers.');
         }
         const authToken = token || await getSessionToken();
+        const market = normalizeProductMarketOverride(marketOverride);
+        const lookupKey = productLookupKeyWithMarket(product.lookupKey, market);
         const doFetch = (bearer) => fetch('/backend-api/search/product_update', {
             method: 'POST',
             credentials: 'include',
             headers: {
                 accept: 'text/event-stream',
+                'accept-language': marketAcceptLanguage(market),
                 authorization: `Bearer ${bearer}`,
                 'content-type': 'application/json',
-                'oai-language': 'en-US',
+                'oai-language': marketHeaderLocale(market),
                 'oai-device-id': generateDeviceId(),
                 'x-openai-target-path': '/backend-api/search/product_update',
                 'x-openai-target-route': '/search/product_update',
             },
-            body: JSON.stringify({ product_query: product.query || product.title, product_lookup_key: product.lookupKey }),
+            body: JSON.stringify({ product_query: product.query || product.title, product_lookup_key: lookupKey }),
         });
         let response = await doFetch(authToken);
         if ((response.status === 401 || response.status === 403) && token) {
@@ -1374,6 +1919,7 @@
         scanConversationById,
         classifyQuery,
         classifyDomain,
+        parseSidebarConversation,
         extractConversationIntel,
         loadSnapshots,
         saveSnapshot,
@@ -1387,10 +1933,14 @@
         createTag,
         updateTag,
         deleteTag,
+        loadSettings,
+        saveSettings,
         loadLibrary,
         importLibrary,
         loadProductOffers,
+        loadProductSidebarInsight,
         toCsv,
         cleanDomain,
+        applyMarketToGoogleShoppingUrl,
     };
 })();
