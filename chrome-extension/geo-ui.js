@@ -616,14 +616,18 @@
         const box = h('div', { class: 'flowbox' }, flow);
         const pipeKeys = orderedPipelineKeys();
         const hasProducts = state.intel.products.length > 0;
+        const hasInsights = state.intel.products.some((product) => product.sidebarInsight);
+        const canInsight = state.intel.products.some(canLoadInsight);
         return h('div', null,
             h('div', { class: 'flowbar' },
                 h('div', { class: 'flowlegend' },
                     pipeKeys.map((key) => h('span', { class: 'lg' }, h('i', { style: { background: pipelineColor(key) } }), key)),
                     hasProducts ? h('span', { class: 'lg' }, h('i', { style: { background: '#6741D9' } }), 'product query') : null,
                     h('span', { class: 'lg' }, h('i', { style: { background: 'transparent', border: '2px solid #17191f', width: '10px', height: '10px' } }), 'cited'),
-                    hasProducts ? h('span', { class: 'lg' }, h('i', { style: { background: '#0CA678' } }), 'best price') : null),
+                    hasProducts ? h('span', { class: 'lg' }, h('i', { style: { background: '#0CA678' } }), 'best price') : null,
+                    hasInsights ? h('span', { class: 'lg' }, h('i', { style: { background: '#16a34a', borderRadius: '50%', width: '9px', height: '9px' } }), 'review source (color = sentiment)') : null),
                 h('div', { class: 'flowtools' },
+                    canInsight ? h('button', { class: 'btn', disabled: state.loadingInsights ? 'disabled' : null, onClick: () => hydrateInsights({ force: true }) }, state.loadingInsights ? 'Loading insights...' : (hasInsights ? 'Reload insights' : 'Load insights')) : null,
                     state.intel.products.some((product) => product.lookupKey) ? h('button', { class: 'btn', disabled: state.loadingOffers ? 'disabled' : null, onClick: () => hydrateOffers({ force: true }) }, state.loadingOffers ? 'Loading offers...' : (state.intel.products.some((product) => product.offers && product.offers.length) ? 'Reload offers' : 'Load offers')) : null,
                     h('details', { class: 'exportmenu' },
                         h('summary', { class: 'btn' }, 'Export', chevronIcon()),
@@ -632,6 +636,7 @@
                             h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); copyFlowPng(flow); } }, 'Copy PNG'),
                             h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); download(`${state.intel.id}-flow.svg`, serializeSvg(flow), 'image/svg+xml'); } }, 'Save SVG'),
                             h('button', { class: 'exportitem', onClick: (event) => { closeExportMenu(event); saveFlowPng(flow); } }, 'Save PNG'))))),
+            state.loadingInsights ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.insightProgress || 'loading product insights...') : null,
             state.loadingOffers ? h('div', { class: 'loadingline' }, h('span', { class: 'dotspin' }), state.offerProgress || 'loading live offers...') : null,
             box);
     }
@@ -836,16 +841,18 @@
             const items = qGroups[qkey].map((product) => {
                 const offers = product.offers || [];
                 const pf = fitStack(product.title, product.price || '', false, lpW, 4);
+                const insightSources = reviewSourcesForInsight(product.sidebarInsight).slice(0, 8);
+                const insightH = insightSources.length ? 16 : 0;
                 const measuredOffers = offers.map((offer) => {
                     const best = Boolean(offer.tag && /best/i.test(offer.tag));
                     return { offer, best, f: fitStack(offer.merchant || '-', offer.total || offer.price || '', best, loW, 3) };
                 });
-                let blockH = measuredOffers.length ? 0 : pf.h;
+                let blockH = measuredOffers.length ? 0 : pf.h + insightH;
                 measuredOffers.forEach((item, index) => {
                     blockH += item.f.h;
                     if (index < measuredOffers.length - 1) blockH += GAP;
                 });
-                return { product, pf, measuredOffers, groupH: Math.max(blockH, pf.h), blockH, offers: offers.length };
+                return { product, pf, measuredOffers, insightSources, insightH, groupH: Math.max(blockH, pf.h + insightH), blockH, offers: offers.length };
             });
             let clusterH = 0;
             items.forEach((item, index) => {
@@ -859,10 +866,10 @@
                 const pmid = cy + item.groupH / 2;
                 let oy = cy + (item.groupH - item.blockH) / 2;
                 item.measuredOffers.forEach((offer) => {
-                    offL.push({ o: offer.offer, y: oy, h: offer.f.h, w: offer.f.w, lines: offer.f.lines, pmid, pw: item.pf.w, best: offer.best });
+                    offL.push({ o: offer.offer, y: oy, h: offer.f.h, w: offer.f.w, lines: offer.f.lines, pmid, pw: item.pf.w, best: offer.best, pInsightH: item.insightH });
                     oy += offer.f.h + GAP;
                 });
-                prodL.push({ p: item.product, yMid: pmid, h: item.pf.h, w: item.pf.w, lines: item.pf.lines, offers: item.offers, err: item.product.offerError, qmid: start + groupH / 2, qRight: xLQ + qf.w });
+                prodL.push({ p: item.product, yMid: pmid, h: item.pf.h, w: item.pf.w, lines: item.pf.lines, offers: item.offers, err: item.product.offerError, qmid: start + groupH / 2, qRight: xLQ + qf.w, insightSources: item.insightSources, insightH: item.insightH });
                 cy += item.groupH + GAP;
             });
             pqL.push({ label, qf, yMid: start + groupH / 2, n: items.length });
@@ -985,14 +992,56 @@
             });
             prodL.forEach((product) => {
                 const y = loTop + product.yMid;
-                edge(product.qRight, loTop + product.qmid, xLP, y, '#CBD2D9', 1.2, 0.5);
-                node(xLP, y - product.h / 2, product.w, product.h, product.lines, { fill: '#fff', stroke: '#E7E9ED', tc: '#17191f', meta: product.p.price || '', rc: '#17191f', href: product.p.providerUrl || '', title: `${product.p.title}${product.p.price ? ` · ${product.p.price}` : ''}${product.p.merchants ? ` · ${product.p.merchants}` : ''}` });
-                if (!product.offers) refreshGlyph(xLO, y, product.p, product.p.offerLoading ? 'loading offers...' : (product.err ? 'offers unavailable' : '- no offers -'));
+                const insightH = product.insightH || 0;
+                const boxCenter = y - insightH / 2;
+                const boxTop = boxCenter - product.h / 2;
+                const shoppingHref = marketShoppingUrl(product.p.googleShoppingCandidateUrl || '');
+                const productHref = usableProductUrl(product.p.providerUrl) || shoppingHref;
+                const insightCounts = { positive: 0, neutral: 0, negative: 0 };
+                (product.insightSources || []).forEach((source) => {
+                    const key = String(source.sentiment || '').toLowerCase();
+                    if (Object.prototype.hasOwnProperty.call(insightCounts, key)) insightCounts[key] += 1;
+                });
+                const insightSummary = (product.insightSources || []).length
+                    ? ['positive', 'neutral', 'negative'].filter((key) => insightCounts[key]).map((key) => `${insightCounts[key]} ${key}`).join(' · ')
+                    : '';
+                edge(product.qRight, loTop + product.qmid, xLP, boxCenter, '#CBD2D9', 1.2, 0.5);
+                node(xLP, boxTop, product.w, product.h, product.lines, {
+                    fill: '#fff', stroke: '#E7E9ED', tc: '#17191f',
+                    meta: product.p.price || '', rc: '#17191f',
+                    href: productHref,
+                    title: `${product.p.title}${product.p.price ? ` · ${product.p.price}` : ''}${product.p.merchants ? ` · ${product.p.merchants}` : ''}${insightSummary ? `\nreviews: ${insightSummary}` : ''}${shoppingHref && productHref === shoppingHref ? `\nGoogle Shopping: ${shoppingHref}` : ''}`,
+                });
+                if ((product.insightSources || []).length) {
+                    const dotY = boxTop + product.h + 9;
+                    let dx = xLP + 4;
+                    product.insightSources.forEach((source) => {
+                        const sentiment = String(source.sentiment || '').toLowerCase();
+                        const color = sentiment === 'positive' ? '#16a34a' : (sentiment === 'negative' ? '#dc2626' : '#b8bec6');
+                        const display = source.displayName || source.name || source.domain || 'source';
+                        const circle = svgNode('circle', { cx: dx + 3.6, cy: dotY, r: 3.6, fill: color });
+                        const holder = svgNode('g', { cursor: source.url ? 'pointer' : 'default' });
+                        holder.appendChild(circle);
+                        const tip = svgNode('title', {});
+                        tip.textContent = `${display}${source.theme || source.title ? ` · ${source.theme || source.title}` : ''}${sentiment ? ` · ${sentiment}` : ''}`;
+                        holder.appendChild(tip);
+                        if (source.url) {
+                            const anchor = svgNode('a', { href: source.url, target: '_blank', rel: 'noopener' });
+                            anchor.appendChild(holder);
+                            nodeGroup.appendChild(anchor);
+                        } else {
+                            nodeGroup.appendChild(holder);
+                        }
+                        dx += 11.5;
+                    });
+                    nodeGroup.appendChild(svgText(dx + 4, dotY + 3.5, insightSummary, 9.5, '#9aa0a6', 400));
+                }
+                if (!product.offers) refreshGlyph(xLO, boxCenter, product.p, product.p.offerLoading ? 'loading offers...' : (product.err ? 'offers unavailable' : '- no offers -'));
             });
             offL.forEach((offer) => {
                 const y = loTop + offer.y + offer.h / 2;
                 const best = offer.best;
-                edge(xLP + offer.pw, loTop + offer.pmid, xLO, y, best ? '#0CA678' : '#CBD2D9', best ? 1.6 : 1, 0.5);
+                edge(xLP + offer.pw, loTop + offer.pmid - (offer.pInsightH || 0) / 2, xLO, y, best ? '#0CA678' : '#CBD2D9', best ? 1.6 : 1, 0.5);
                 const offerHref = offer.o.url || marketShoppingUrl(offer.o.shoppingUrl || '');
                 node(xLO, loTop + offer.y, offer.w, offer.h, offer.lines, { dot: best ? '#0CA678' : null, stroke: best ? '#0CA678' : '#E7E9ED', sw: best ? 1.6 : 1, tc: best ? '#0CA678' : '#42464d', bold: best, meta: offer.o.total || offer.o.price || '', rc: best ? '#0CA678' : '#69717d', href: offerHref, title: `${offer.o.merchant || ''} · ${offer.o.total || offer.o.price || ''}${offer.o.details ? ` · ${offer.o.details}` : ''}${offerHref ? ` · ${offer.o.url ? offerHref : `Google Shopping fallback: ${offerHref}`}` : ''}` });
             });
